@@ -1,0 +1,26 @@
+Based on:
+* how I use AI [I generally use it for learning purpose, when I need to do some research in the field of Technology, Occult Sciences, Laws of India mostly related to taxation and employment. I use AI to brainstorm on a subject like two human beings discussing or counter replying to each other and coming to a fruitful conclusion]
+* the prompts I ask [I use simple and comprehensive prompts with maximum elaboration and clear expectations making AI as the subject matter specialist of that field]
+* my work, goals, mindset, and personality [I am a 15 years experienced professional in IT industry in Java development. I last worked as Technical Manager where I was responsible to train a huge team on technical, behavioral and professional front. Also, I was responsible to elevate the client project on technical as well as processes front and provide it a professional image. I love development tasks, excellent in troubleshooting and debugging, open for any challenge, and at the same time I enjoy mentoring my team and train them on different aspects of their jobs. I like to create a happy and positive environment wherever I work so that everyone around is happy and not afraid of my title as "Manager". I work with complete honesty, dedication, ownership and diligence. I don't like workplace politics and any kind of favoritism and never allow it in my team. I always take a stand against any wrong activity and believe in handling situations first by conversations. Wherever I work, I always put my best in that as if it is my own personal work. For me, transparency with my team matters a lot and I expect the same from my team as well from the management. Some called me "Iron Lady", some appreciated me by calling "Best Manager" of their career, some found me as a developer who does coding with absolute 0 defects and some called me a "Troubleshooter"! ]
+* my strengths, weaknesses, curiosity, and communication style [I have an optimistic approach towards life as well as in my profession too. I keep trying until a thing is done and this is my funda to win every challenge. I am very strong in my field of Java development and I have a great sense and skill of dealing with team members, client and management. I am very straightforward and vocal too, but always talk logical and sense. This is a quality which is not taken positive at workplace and either people dislike or start hating for no reason as diplomacy is rewarded over honesty at most of the workplaces. I keep strong communication in all the matters, clear emails and agendas in meetings so that there is no chance of misunderstanding. I don't wait for reminders or I don't like reminders at all. Once I take a task then it becomes my responsibility and I don't want reminders from anyone to complete it. I am responsible to provide update on it from my end without reminders which I always do. I am highly professional and logical person, have a very sharp memory and strong attitude for work ethics. I am often called for help when everyone else give-up!]
+
+Create a deeply personalized “AI Personality Profile” for me.
+
+Make it accurate, modern, cinematic, internet-native, realistic but fun.
+
+Include:
+1. My AI working style
+2. My strengths & weaknesses
+3. What type of AI user I am
+4. Best future career paths for me
+5. My learning & decision-making style
+6. What makes me different from most AI users
+7. What I need to improve to become elite with AI
+8. A fun AI title for me
+9. A short cinematic AI character description
+
+Then, generate a hyper-realistic cinematic AI portrait of me based on everything above.
+
+The image should capture: startup founder / AI engineer energy, futuristic workspace & AI screens, coding + research vibe, dark cinematic lighting, modern Gen-Z builder aesthetic, realistic details with subtle cyberpunk accents.
+
+IMPORTANT: don’t just write the image prompt — generate the actual image directly in chat. Make it professional, futuristic, cinematic, and LinkedIn-shareable.
