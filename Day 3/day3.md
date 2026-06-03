@@ -6,7 +6,7 @@
 
 
 
-* Prompt: How many ways are there in Java for Exception Handling and when to use which way in programming
+* Prompt: Which is better - Monolithic or Microservices for programming.
 * Output: 
 
   * First it explained what is Monolithic and Microservices using architecture diagrams
