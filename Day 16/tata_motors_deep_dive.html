@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tata Motors (TMPV) – Deep Dive Fundamental Research</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; font-size: 14px; }
+  
+  /* Header */
+  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%); color: #fff; padding: 28px 32px 20px; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+  .company-name { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }
+  .company-meta { font-size: 12px; color: #a0b4c8; margin-top: 4px; }
+  .price-box { text-align: right; }
+  .cmp { font-size: 32px; font-weight: 700; color: #4fc3f7; }
+  .cmp-sub { font-size: 12px; color: #a0b4c8; margin-top: 2px; }
+  .badges { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-sector { background: rgba(79,195,247,0.2); color: #4fc3f7; border: 1px solid #4fc3f7; }
+  .badge-largecap { background: rgba(129,199,132,0.2); color: #81c784; border: 1px solid #81c784; }
+  .badge-demerger { background: rgba(255,183,77,0.2); color: #ffb74d; border: 1px solid #ffb74d; }
+
+  /* Tabs */
+  .tabs-container { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
+  .tabs { display: flex; overflow-x: auto; padding: 0 16px; gap: 0; border-bottom: 2px solid #e8eaf0; }
+  .tab { padding: 14px 18px; cursor: pointer; font-size: 13px; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all 0.2s; }
+  .tab:hover { color: #1a1a2e; }
+  .tab.active { color: #0f3460; border-bottom-color: #0f3460; }
+
+  /* Content */
+  .content { display: none; padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .content.active { display: block; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 20px; margin-bottom: 20px; }
+  .card-title { font-size: 14px; font-weight: 700; color: #0f3460; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e8eaf0; padding-bottom: 10px; }
+  
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .kpi { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.07); border-left: 4px solid #0f3460; }
+  .kpi-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-top: 4px; }
+  .kpi-sub { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+  .kpi.green { border-left-color: #22c55e; }
+  .kpi.red { border-left-color: #ef4444; }
+  .kpi.amber { border-left-color: #f59e0b; }
+  .kpi.blue { border-left-color: #3b82f6; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f1f5f9; color: #374151; font-weight: 700; padding: 10px 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  /* Verdict Badges */
+  .verdict { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .v-expensive { background: #fef3c7; color: #b45309; }
+  .v-fair { background: #d1fae5; color: #065f46; }
+  .v-cheap { background: #dbeafe; color: #1e40af; }
+  .v-healthy { background: #d1fae5; color: #065f46; }
+  .v-watch { background: #fef3c7; color: #92400e; }
+  .v-risk { background: #fee2e2; color: #991b1b; }
+  .v-good { background: #d1fae5; color: #065f46; }
+  .v-moderate { background: #fef3c7; color: #92400e; }
+  .v-weak { background: #fee2e2; color: #991b1b; }
+  .v-strong { background: #d1fae5; color: #065f46; }
+  .v-concern { background: #fee2e2; color: #991b1b; }
+
+  /* Charts */
+  .chart-container { position: relative; height: 200px; margin-top: 12px; }
+  .bar-chart { display: flex; align-items: flex-end; height: 160px; gap: 8px; padding: 0 8px; }
+  .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: opacity 0.2s; cursor: default; position: relative; }
+  .bar:hover { opacity: 0.8; }
+  .bar-label { font-size: 10px; color: #6b7280; margin-top: 4px; text-align: center; }
+  .bar-val { font-size: 9px; color: #374151; font-weight: 600; margin-bottom: 2px; }
+  .chart-legend { display: flex; gap: 16px; margin-top: 8px; justify-content: center; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6b7280; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Sparkline */
+  .sparkline { width: 100%; height: 60px; }
+
+  /* Two-col layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  
+  /* Peer Table */
+  .peer-better { color: #16a34a; font-weight: 700; }
+  .peer-worse { color: #dc2626; }
+
+  /* Strengths / Watchpoints */
+  .insight-list { list-style: none; padding: 0; }
+  .insight-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #f0f2f5; }
+  .insight-item:last-child { border-bottom: none; }
+  .insight-icon { font-size: 18px; flex-shrink: 0; }
+  .insight-text { font-size: 13px; line-height: 1.6; color: #374151; }
+  .insight-text strong { color: #1a1a2e; }
+
+  /* Quality Score */
+  .quality-box { background: linear-gradient(135deg, #1a1a2e, #0f3460); color: #fff; border-radius: 12px; padding: 24px; text-align: center; }
+  .quality-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #a0b4c8; }
+  .quality-score { font-size: 48px; font-weight: 800; color: #ffb74d; margin: 8px 0; }
+  .quality-desc { font-size: 14px; color: #d1d5db; }
+
+  /* Ownership bar */
+  .ownership-bar { height: 32px; border-radius: 8px; overflow: hidden; display: flex; margin: 10px 0; }
+  .own-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; transition: flex 0.3s; }
+  .own-promoter { background: #0f3460; }
+  .own-fii { background: #3b82f6; }
+  .own-dii { background: #22c55e; }
+  .own-retail { background: #94a3b8; }
+
+  /* Disclaimer */
+  .disclaimer { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 14px 16px; font-size: 12px; color: #78350f; line-height: 1.6; margin-top: 20px; }
+  
+  /* Important Note */
+  .important-note { background: #eff6ff; border: 1px solid #3b82f6; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #1e40af; margin-bottom: 20px; line-height: 1.6; }
+
+  /* Source tag */
+  .src { font-size: 10px; color: #9ca3af; margin-left: 4px; }
+
+  /* Section heading */
+  .sec-heading { font-size: 13px; font-weight: 700; color: #374151; margin: 16px 0 8px; }
+
+  /* Trend arrow */
+  .up { color: #16a34a; }
+  .dn { color: #dc2626; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="company-name">🚗 Tata Motors Passenger Vehicles Ltd</div>
+      <div class="company-meta">NSE: TMPV &nbsp;|&nbsp; BSE: 500570 &nbsp;|&nbsp; Nifty 50 Constituent &nbsp;|&nbsp; Parent: Tata Group</div>
+      <div class="badges">
+        <span class="badge badge-sector">Automobiles</span>
+        <span class="badge badge-largecap">Large Cap</span>
+        <span class="badge badge-demerger">Post-Demerger Entity (Oct 2025)</span>
+      </div>
+    </div>
+    <div class="price-box">
+      <div class="cmp">₹ ~395</div>
+      <div class="cmp-sub">CMP (approx, June 2026) <span class="src">— Kotak Neo / Dhan</span></div>
+      <div style="margin-top:6px; font-size:12px; color:#a0b4c8;">52W: ₹294 – ₹448 &nbsp;|&nbsp; Mkt Cap ≈ ₹1.44L Cr</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-container">
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('snapshot')">📊 Snapshot</div>
+    <div class="tab" onclick="showTab('valuation')">💰 Valuation</div>
+    <div class="tab" onclick="showTab('growth')">📈 Growth</div>
+    <div class="tab" onclick="showTab('health')">🏥 Health</div>
+    <div class="tab" onclick="showTab('returns')">🔄 Returns</div>
+    <div class="tab" onclick="showTab('peers')">⚖️ Peers</div>
+    <div class="tab" onclick="showTab('ownership')">🏛️ Ownership</div>
+    <div class="tab" onclick="showTab('view')">🔍 View</div>
+  </div>
+</div>
+
+<!-- =================== SNAPSHOT =================== -->
+<div id="tab-snapshot" class="content active">
+
+  <div class="important-note">
+    ⚠️ <strong>Demerger Note:</strong> Tata Motors completed its demerger in October 2025. The original NSE:TATAMOTORS is now <strong>NSE:TMPV</strong> (Tata Motors Passenger Vehicles Ltd — includes JLR, domestic PV, EV), and a new entity <strong>NSE:TMCV</strong> (Tata Motors Commercial Vehicles Ltd) was listed separately. This analysis focuses primarily on <strong>TMPV</strong>, which holds the heritage listing and includes JLR.
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi blue">
+      <div class="kpi-label">CMP</div>
+      <div class="kpi-value">₹~395</div>
+      <div class="kpi-sub">Jun 2026 approx</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Market Cap</div>
+      <div class="kpi-value">~₹1.44L Cr</div>
+      <div class="kpi-sub">Large Cap</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">~35–37x</div>
+      <div class="kpi-sub">vs Sector ~22x</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">P/B Ratio</div>
+      <div class="kpi-value">~1.3x</div>
+      <div class="kpi-sub">Book ≈ ₹315/sh</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">52W High</div>
+      <div class="kpi-value">₹448</div>
+      <div class="kpi-sub">NSE (TMPV)</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">52W Low</div>
+      <div class="kpi-value">₹294</div>
+      <div class="kpi-sub">NSE (TMPV)</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Face Value</div>
+      <div class="kpi-value">₹2</div>
+      <div class="kpi-sub">Per share</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Dividend</div>
+      <div class="kpi-value">₹3/sh</div>
+      <div class="kpi-sub">FY26 final; yield ~0.75%</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Company Overview</div>
+    <p style="font-size:13px; line-height:1.8; color:#374151;">
+      <strong>Tata Motors Passenger Vehicles Ltd (TMPV)</strong> is the passenger mobility arm of the Tata Group, emerging as a standalone listed entity after the strategic demerger of Tata Motors Group in <strong>October 2025</strong>. It houses three major businesses: (1) <strong>Jaguar Land Rover (JLR)</strong> — the UK-based premium & luxury auto brand contributing ~87% of TMPV's consolidated revenue, (2) <strong>Tata Passenger Vehicles</strong> — domestic ICE cars & SUVs (Nexon, Harrier, Punch, Safari), and (3) <strong>Tata Passenger Electric Mobility (TPEM)</strong> — India's EV market leader with 70%+ share.
+    </p>
+    <br>
+    <p style="font-size:13px; line-height:1.8; color:#374151;">
+      FY25 (pre-demerger consolidated) delivered record revenues of <strong>₹4.39L Cr</strong>, highest-ever PBT(bei) of ₹34.3K Cr, and net profit of ₹28.1K Cr. FY26 has been materially harder: JLR faced US tariff shocks (27.5% tariff on UK cars), a cyber incident in Q2, planned legacy Jaguar wind-down, and China headwinds — pushing FY26 revenues to ₹3.36L Cr (down ~8.3% YoY) and EBIT margins to 1.1%.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Revenue & Profit — Annual Trend (TMPV Consolidated)</div>
+    <!-- Revenue Bar Chart -->
+    <div style="overflow-x:auto;">
+      <div style="min-width:320px;">
+        <div class="bar-chart" style="height:140px; align-items:flex-end; display:flex; gap:12px; padding:0 8px;">
+          <!-- FY23 -->
+          <div class="bar-group" style="flex:1;">
+            <div class="bar-val">₹2.79L</div>
+            <div class="bar" style="height:70px; background:#3b82f6;"></div>
+            <div class="bar-label">FY23</div>
+          </div>
+          <!-- FY24 -->
+          <div class="bar-group" style="flex:1;">
+            <div class="bar-val">₹3.67L</div>
+            <div class="bar" style="height:100px; background:#3b82f6;"></div>
+            <div class="bar-label">FY24</div>
+          </div>
+          <!-- FY25 -->
+          <div class="bar-group" style="flex:1;">
+            <div class="bar-val">₹4.22L Cr</div>
+            <div class="bar" style="height:120px; background:#0f3460;"></div>
+            <div class="bar-label">FY25</div>
+          </div>
+          <!-- FY26 -->
+          <div class="bar-group" style="flex:1;">
+            <div class="bar-val">₹3.36L Cr</div>
+            <div class="bar" style="height:90px; background:#ef4444;"></div>
+            <div class="bar-label">FY26 ⬇️</div>
+          </div>
+        </div>
+        <div style="text-align:center; font-size:11px; color:#9ca3af; margin-top:4px;">Revenue (₹ Cr) — Sources: TMPV Q4 FY26 results, Screener</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; overflow-x:auto;">
+      <table>
+        <thead>
+          <tr><th>Year</th><th>Revenue (Cr)</th><th>PAT (Cr)</th><th>EBITDA%</th><th>JLR EBIT%</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>FY23</td><td>~₹2,79,000</td><td>~₹2,690 (loss turn)</td><td>~12.8%</td><td>~10.2%</td><td>Recovery from COVID</td></tr>
+          <tr><td>FY24</td><td>~₹3,67,000</td><td>~₹23,340</td><td>~14.0%</td><td>~8.5%</td><td>Record profits</td></tr>
+          <tr><td>FY25</td><td>~₹4,22,000</td><td>~₹28,149</td><td>~14.2%</td><td>~8.5%</td><td>Net cash positive</td></tr>
+          <tr><td>FY26</td><td>~₹3,35,600</td><td style="color:#dc2626;">₹82,645 (incl. exceptional)</td><td>~6.8%</td><td>0.7%</td><td>JLR tariffs + cyber</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px; color:#9ca3af; margin-top:6px;">Note: FY26 PAT includes ₹82,616 Cr exceptional gain from demerger accounting (non-cash). Underlying FY26 PBT (bei) = ₹2.5K Cr, substantially lower than FY25. Sources: TMPV Q4 FY26 press release, Business Standard.</div>
+  </div>
+</div>
+
+<!-- =================== VALUATION =================== -->
+<div id="tab-valuation" class="content">
+
+  <div class="kpi-grid">
+    <div class="kpi amber">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">~35x</div>
+      <div class="kpi-sub">vs Sector ~22x</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">P/B Ratio</div>
+      <div class="kpi-value">~1.3x</div>
+      <div class="kpi-sub">Reasonable</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">~8–10x</div>
+      <div class="kpi-sub">FY26 est.</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">Div. Yield</div>
+      <div class="kpi-value">~0.75%</div>
+      <div class="kpi-sub">₹3/sh FY26</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Valuation Verdict</div>
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>TMPV Current</th><th>Sector Avg</th><th>5Y Hist Avg</th><th>Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>P/E (TTM)</td>
+          <td>~35x</td>
+          <td>~22x</td>
+          <td>~17–20x (pre-demerger)</td>
+          <td><span class="verdict v-expensive">Expensive vs Sector</span></td>
+        </tr>
+        <tr>
+          <td>P/B</td>
+          <td>~1.3x</td>
+          <td>~2–3x</td>
+          <td>~1.5–2.5x</td>
+          <td><span class="verdict v-cheap">Attractive</span></td>
+        </tr>
+        <tr>
+          <td>EV/EBITDA</td>
+          <td>~8–10x</td>
+          <td>~12x</td>
+          <td>~8–12x</td>
+          <td><span class="verdict v-fair">Fair</span></td>
+        </tr>
+        <tr>
+          <td>P/Sales</td>
+          <td>~0.43x</td>
+          <td>~0.8–1.0x</td>
+          <td>~0.5–0.8x</td>
+          <td><span class="verdict v-cheap">Attractive</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px; font-size:12px; color:#6b7280; line-height:1.7;">
+      <strong>Context:</strong> The high P/E is partly a result of JLR's weakened earnings in FY26 (EBIT margin collapsed to 0.7% from 8.5% in FY25). On a normalised earnings basis (FY25 levels), the stock trades at far more reasonable multiples. The low P/B and P/Sales suggest the market is pricing in recovery, not distress. <strong>Key risk:</strong> JLR's new electric Jaguar launch and US/EU tariff environment are critical to earnings normalization.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">P/E History (Pre-Demerger TATAMOTORS)</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Year</th><th>P/E</th><th>Observation</th></tr></thead>
+        <tbody>
+          <tr><td>FY21</td><td>N/A (loss)</td><td>COVID year</td></tr>
+          <tr><td>FY22</td><td>N/A (loss)</td><td>Transitional</td></tr>
+          <tr><td>FY23</td><td>~66x</td><td>Earnings thin, recovery hope</td></tr>
+          <tr><td>FY24</td><td>~10–12x</td><td>Earnings normalised</td></tr>
+          <tr><td>FY25</td><td>~9–10x</td><td>Peak earnings cycle</td></tr>
+          <tr><td>FY26E (TMPV)</td><td>~35–45x</td><td>JLR profit cliff, normalising</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px; color:#9ca3af; margin-top:6px;">Sources: GuruFocus, Smart-Investing, Dhan. Historic range (10Y): 6.4x – 117x.</div>
+  </div>
+</div>
+
+<!-- =================== GROWTH =================== -->
+<div id="tab-growth" class="content">
+  <div class="card">
+    <div class="card-title">Revenue & Earnings Growth</div>
+    <table>
+      <thead><tr><th>Segment</th><th>FY23 Revenue</th><th>FY25 Revenue</th><th>2Y CAGR</th><th>FY26 Revenue</th><th>YoY Change</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>JLR</strong></td>
+          <td>£22.0bn (₹2.23L Cr)</td>
+          <td>£29.0bn (₹3.14L Cr)</td>
+          <td class="up">~14.9%</td>
+          <td>£22.9bn (₹2.48L Cr)</td>
+          <td class="dn">▼ 21% YoY</td>
+        </tr>
+        <tr>
+          <td><strong>Tata PV (Domestic)</strong></td>
+          <td>₹47,868 Cr</td>
+          <td>₹48,445 Cr</td>
+          <td class="up">~0.6%</td>
+          <td>₹58,500 Cr</td>
+          <td class="up">▲ 20.7% YoY</td>
+        </tr>
+        <tr>
+          <td><strong>Consolidated</strong></td>
+          <td>~₹2,79,000 Cr</td>
+          <td>~₹4,22,000 Cr</td>
+          <td class="up">~22.9%</td>
+          <td>₹3,35,600 Cr</td>
+          <td class="dn">▼ 8.3% YoY</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">JLR Performance Trend</div>
+      <table>
+        <thead><tr><th>Year</th><th>Revenue</th><th>EBITDA%</th><th>EBIT%</th><th>PAT</th></tr></thead>
+        <tbody>
+          <tr><td>FY23</td><td>£22.0bn</td><td>~11.4%</td><td>~4%</td><td class="dn">Loss ₹472 Cr</td></tr>
+          <tr><td>FY24</td><td>£29.0bn</td><td>~16%</td><td>~8.5%</td><td class="up">Profit ₹12K Cr+</td></tr>
+          <tr><td>FY25</td><td>£29.0bn</td><td>14.3%</td><td>8.5%</td><td class="up">₹19,010 Cr</td></tr>
+          <tr><td>FY26</td><td>£22.9bn</td><td>~7–8%</td><td>0.7%</td><td class="dn">Loss £(244)mn</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px; color:#9ca3af; margin-top:6px;">Source: TMPV Q4 FY26 results press release, Business Standard.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Domestic PV — EV Leadership</div>
+      <ul style="list-style:none; padding:0; font-size:13px; line-height:2;">
+        <li>✅ <strong>EV Market Share:</strong> ~70%+ in India <span class="src">— Indmoney, FY25</span></li>
+        <li>✅ <strong>FY26 Dom. PV Revenue:</strong> ₹58,500 Cr (+20.7%) <span class="src">— TMPV Q4 FY26</span></li>
+        <li>✅ <strong>EV Capacity Target:</strong> 15,000 units/month boost planned</li>
+        <li>⚠️ <strong>EV Profitability:</strong> Negative margins — heavy investment phase</li>
+        <li>✅ <strong>Key Models:</strong> Nexon, Punch, Harrier, Tiago EV, Sierra EV</li>
+        <li>⚠️ <strong>Dom. PV EBIT%:</strong> Only 1.4% in FY26 (+50bps)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key Growth Watch-Points for FY27+</div>
+    <table>
+      <thead><tr><th>Driver</th><th>Status</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>New Electric Jaguar launch (2026)</td>
+          <td>🟡 Underway — legacy ICE wind-down complete</td>
+          <td class="up">High upside if executes well</td>
+        </tr>
+        <tr>
+          <td>US Tariff Resolution</td>
+          <td>🟢 UK-US deal: 10% (from 27.5%), effective Jun 30, 2025</td>
+          <td class="up">Significant margin relief</td>
+        </tr>
+        <tr>
+          <td>EU-US Trade Deal</td>
+          <td>🟡 Announced — reduces EU tariff 27.5% → 15%</td>
+          <td class="up">Moderate relief</td>
+        </tr>
+        <tr>
+          <td>India EV Ecosystem</td>
+          <td>🟢 Infrastructure growing; Tata leads</td>
+          <td class="up">Volume growth visibility</td>
+        </tr>
+        <tr>
+          <td>China Market</td>
+          <td>🔴 Competitive pressure + luxury tax headwind</td>
+          <td class="dn">Drag on JLR</td>
+        </tr>
+        <tr>
+          <td>Domestic PV Price Hikes</td>
+          <td>🟡 1.5% hike from July 2026 to offset input costs</td>
+          <td class="up">Mild margin support</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- =================== HEALTH =================== -->
+<div id="tab-health" class="content">
+  <div class="kpi-grid">
+    <div class="kpi amber">
+      <div class="kpi-label">Debt/Equity</div>
+      <div class="kpi-value">~1.5–2.0x</div>
+      <div class="kpi-sub">Moderate-Leveraged</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Net Debt</div>
+      <div class="kpi-value">₹30,700 Cr</div>
+      <div class="kpi-sub">FY26 end (TMPV consol.)</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">Int. Coverage</div>
+      <div class="kpi-value">~2–3x</div>
+      <div class="kpi-sub">Watch zone FY26</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">Current Ratio</div>
+      <div class="kpi-value">~1.0–1.2x</div>
+      <div class="kpi-sub">Watch</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">JLR FCF FY26</div>
+      <div class="kpi-value">Negative</div>
+      <div class="kpi-sub">Production stoppages</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">JLR Liquidity</div>
+      <div class="kpi-value">£5.0bn</div>
+      <div class="kpi-sub">incl. £1.7bn undrawn RCF</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Balance Sheet Health Assessment</div>
+    <table>
+      <thead><tr><th>Metric</th><th>Value</th><th>Rule</th><th>Signal</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Debt/Equity</td>
+          <td>~1.5–2.0x (TMPV consolidated)</td>
+          <td>&gt;2 = Leveraged; 1–2 = Moderate</td>
+          <td><span class="verdict v-watch">Moderate–Leveraged</span></td>
+        </tr>
+        <tr>
+          <td>Net Debt (FY26)</td>
+          <td>₹30,700 Cr (turned negative vs FY25 net cash positive)</td>
+          <td>FY25 was net cash positive</td>
+          <td><span class="verdict v-watch">Deteriorated in FY26</span></td>
+        </tr>
+        <tr>
+          <td>JLR Cash Balance</td>
+          <td>£3.3bn as of Q1 FY26</td>
+          <td>Adequate buffer</td>
+          <td><span class="verdict v-healthy">Adequate</span></td>
+        </tr>
+        <tr>
+          <td>JLR FCF (FY26)</td>
+          <td>Negative (production stoppages, tariffs, cyber)</td>
+          <td>Negative = Concern</td>
+          <td><span class="verdict v-concern">Concern</span></td>
+        </tr>
+        <tr>
+          <td>Interest Coverage</td>
+          <td>~2–3x est. (FY26 EBIT compressed)</td>
+          <td>&gt;3 Healthy; 1.5–3 Watch</td>
+          <td><span class="verdict v-watch">Watch</span></td>
+        </tr>
+        <tr>
+          <td>CV Business (TMCV) ROCE</td>
+          <td>37.7% FY25 (standalone CV)</td>
+          <td>Strong capital efficiency in CV</td>
+          <td><span class="verdict v-healthy">Strong (CV)</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">FY26 Headwinds — What Hurt Balance Sheet</div>
+    <ul class="insight-list">
+      <li class="insight-item">
+        <span class="insight-icon">🔴</span>
+        <span class="insight-text"><strong>US Tariff Shock:</strong> 27.5% tariff on UK-produced vehicles from early FY26 materially impacted JLR margins and FCF. Partially resolved (UK-US deal: 10% effective Jun 30, 2025; EU: 15% via EU-US deal).</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">🔴</span>
+        <span class="insight-text"><strong>Cyber Incident (Q2 FY26):</strong> A cyber attack on JLR led to production stoppages, impacting Q2 revenues by £1bn+ and deepening FCF outflows.</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">🟡</span>
+        <span class="insight-text"><strong>Legacy Jaguar Wind-Down:</strong> Planned discontinuation of ICE Jaguar models ahead of all-electric relaunch. Created volume gap in FY26 — temporary, but earnings hit real.</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">🟡</span>
+        <span class="insight-text"><strong>China Headwinds:</strong> Luxury tax and intense local competition squeezed JLR's profitability in China, a historically high-margin market.</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- =================== RETURNS =================== -->
+<div id="tab-returns" class="content">
+  <div class="kpi-grid">
+    <div class="kpi green">
+      <div class="kpi-label">ROE (FY26 — incl. exceptional)</div>
+      <div class="kpi-value">~73–87%</div>
+      <div class="kpi-sub">Inflated by demerger gain</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">ROE (Underlying)</div>
+      <div class="kpi-value">~5–8%</div>
+      <div class="kpi-sub">Ex-exceptional FY26</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">ROCE (FY26)</div>
+      <div class="kpi-value">~5–8%</div>
+      <div class="kpi-sub">Below threshold</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">ROCE (FY25 peak)</div>
+      <div class="kpi-value">~18–22%</div>
+      <div class="kpi-sub">Strong cycle peak</td>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">CV ROCE (FY25)</div>
+      <div class="kpi-value">37.7%</div>
+      <div class="kpi-sub">Standalone CV biz</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ROE & ROCE — 5-Year Trend (Pre-Demerger Consolidated)</div>
+    <table>
+      <thead><tr><th>Year</th><th>ROE</th><th>ROCE</th><th>Signal</th></tr></thead>
+      <tbody>
+        <tr><td>FY21</td><td class="dn">Negative</td><td class="dn">Negative</td><td><span class="verdict v-weak">Weak</span></td></tr>
+        <tr><td>FY22</td><td class="dn">Negative</td><td class="dn">~2%</td><td><span class="verdict v-weak">Weak</span></td></tr>
+        <tr><td>FY23</td><td>~5%</td><td>~8%</td><td><span class="verdict v-moderate">Improving</span></td></tr>
+        <tr><td>FY24</td><td>~28–30%</td><td>~18%</td><td><span class="verdict v-good">Good</span></td></tr>
+        <tr><td>FY25</td><td>~30–35%</td><td>~20–22%</td><td><span class="verdict v-good">Good</span></td></tr>
+        <tr><td>FY26 (Underlying)</td><td>~5–8%</td><td>~5–8%</td><td><span class="verdict v-weak">Compressed</span></td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px; color:#9ca3af; margin-top:6px;">Sources: Screener, GuruFocus, Business Standard. FY26 underlying excludes ₹82,616 Cr exceptional gain from demerger.</div>
+    <div style="margin-top:10px; font-size:12px; color:#374151; line-height:1.7;">
+      ⚠️ <strong>Important context:</strong> The reported Screener ROE of 87.4% and ROCE of 111% for TMCV (the demerged CV entity) reflect the <em>post-demerger restatement accounting</em> distortion — these numbers are NOT representative of underlying operational returns and should not be used at face value for the consolidated picture.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key Return Metrics Interpretation</div>
+    <ul class="insight-list">
+      <li class="insight-item">
+        <span class="insight-icon">📊</span>
+        <span class="insight-text"><strong>FY24–FY25 ROE >28%:</strong> This was a genuine operational achievement driven by JLR's margin recovery, elimination of net debt, and operating leverage across all segments — a multi-year turnaround story.</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">📉</span>
+        <span class="insight-text"><strong>FY26 ROE compression:</strong> Due to one-time tariff shock, cyber incident at JLR, and legacy Jaguar wind-down — all largely transitory. Underlying EBIT from JLR returning in H2 FY26 (Q4 adjusted EBIT ~9.2%).</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">✅</span>
+        <span class="insight-text"><strong>TMCV (CV business):</strong> CV standalone ROCE of 37.7% in FY25 is exceptionally strong, demonstrating Tata's moat in the Indian commercial vehicle market.</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- =================== PEERS =================== -->
+<div id="tab-peers" class="content">
+  <div class="card">
+    <div class="card-title">Peer Comparison — Indian Auto Large Caps</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>NSE Symbol</th>
+            <th>Mkt Cap (Cr)</th>
+            <th>P/E</th>
+            <th>P/B</th>
+            <th>Revenue CAGR (3Y)</th>
+            <th>EBITDA%</th>
+            <th>ROE</th>
+            <th>D/E</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tata Motors PV</strong></td>
+            <td>TMPV</td>
+            <td>~₹1,44,000</td>
+            <td>~35x</td>
+            <td>~1.3x</td>
+            <td>~22% (FY23–25)</td>
+            <td>6.8% (FY26)</td>
+            <td class="dn">~5–8% (FY26)</td>
+            <td>~1.5x</td>
+            <td>JLR headwinds dominate</td>
+          </tr>
+          <tr>
+            <td>Maruti Suzuki</td>
+            <td>MARUTI</td>
+            <td>~₹4,10,000</td>
+            <td>~28x</td>
+            <td>~5.5x</td>
+            <td>~12–15%</td>
+            <td>~14–16%</td>
+            <td class="up">~18–20%</td>
+            <td>~0.0x</td>
+            <td>Debt-free, strong margins</td>
+          </tr>
+          <tr>
+            <td>M&M (Auto)</td>
+            <td>MM</td>
+            <td>~₹3,80,000</td>
+            <td>~32x</td>
+            <td>~6x</td>
+            <td>~18–22%</td>
+            <td>~15–17%</td>
+            <td class="up">~20%+</td>
+            <td>~0.1x</td>
+            <td>SUV momentum, EV pipeline</td>
+          </tr>
+          <tr>
+            <td>Bajaj Auto</td>
+            <td>BAJAJ-AUTO</td>
+            <td>~₹2,30,000</td>
+            <td>~26x</td>
+            <td>~10x</td>
+            <td>~12%</td>
+            <td>~19–21%</td>
+            <td class="up">~30%+</td>
+            <td>~0.0x</td>
+            <td>High margins, 2W/3W leader</td>
+          </tr>
+          <tr>
+            <td>Hero MotoCorp</td>
+            <td>HEROMOTOCO</td>
+            <td>~₹75,000</td>
+            <td>~22x</td>
+            <td>~5x</td>
+            <td>~8%</td>
+            <td>~12–14%</td>
+            <td class="up">~25%+</td>
+            <td>~0.0x</td>
+            <td>2W domestic leader</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px; color:#9ca3af; margin-top:6px;">Sources: Screener, NSE, Tickertape, Business Standard. Approximate values for comparison.</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Where TMPV Leads</div>
+      <ul class="insight-list">
+        <li class="insight-item"><span class="insight-icon">✅</span><span class="insight-text"><strong>Global Premium Exposure:</strong> JLR gives unmatched access to high-margin luxury segments not available to peers.</span></li>
+        <li class="insight-item"><span class="insight-icon">✅</span><span class="insight-text"><strong>India EV Leadership:</strong> ~70% domestic EV market share — a structural advantage as electrification accelerates.</span></li>
+        <li class="insight-item"><span class="insight-icon">✅</span><span class="insight-text"><strong>Revenue Scale:</strong> ₹3.4L+ Cr makes TMPV India's largest auto company by revenue.</span></li>
+        <li class="insight-item"><span class="insight-icon">✅</span><span class="insight-text"><strong>Valuation (P/B, P/S):</strong> Lower P/B and P/Sales vs peers, potentially offering mean-reversion upside.</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Where Peers Lead</div>
+      <ul class="insight-list">
+        <li class="insight-item"><span class="insight-icon">⚠️</span><span class="insight-text"><strong>Margins:</strong> Maruti (14–16%), M&M (15–17%), Bajaj (~20%) all have far superior EBITDA margins vs TMPV's 6.8%.</span></li>
+        <li class="insight-item"><span class="insight-icon">⚠️</span><span class="insight-text"><strong>ROE/ROCE:</strong> Peers maintain 18–30% ROE. TMPV's underlying FY26 ROE is compressed to ~5–8%.</span></li>
+        <li class="insight-item"><span class="insight-icon">⚠️</span><span class="insight-text"><strong>Balance Sheet:</strong> Maruti, Bajaj, M&M are largely debt-free. TMPV carries significant debt owing to JLR's capital intensity.</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- =================== OWNERSHIP =================== -->
+<div id="tab-ownership" class="content">
+  <div class="card">
+    <div class="card-title">Shareholding Pattern (TMPV — Recent)</div>
+    <div class="ownership-bar">
+      <div class="own-seg own-promoter" style="flex: 42.6;" title="Promoter 42.6%">Promoter 42.6%</div>
+      <div class="own-seg own-fii" style="flex: 21;" title="FII ~21%">FII ~21%</div>
+      <div class="own-seg own-dii" style="flex: 10.6;" title="MF/DII ~10.6%">DII 10.6%</div>
+      <div class="own-seg own-retail" style="flex: 25.8;" title="Public/Retail ~25.8%">Retail ~26%</div>
+    </div>
+    <div style="font-size:11px; color:#9ca3af; margin-top:6px;">Sources: Screener (TMCV shows MF 10.59%), Dhan (TMPV pattern). Approximate — refer latest NSE disclosures.</div>
+
+    <table style="margin-top:16px;">
+      <thead><tr><th>Category</th><th>Holding %</th><th>Signal</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Promoter (Tata Group)</td>
+          <td>~42.6%</td>
+          <td><span class="verdict v-healthy">Stable — No pledging flagged</span></td>
+        </tr>
+        <tr>
+          <td>FII</td>
+          <td>~21%</td>
+          <td><span class="verdict v-fair">Moderate institutional interest</span></td>
+        </tr>
+        <tr>
+          <td>Mutual Funds / DII</td>
+          <td>~10.6%</td>
+          <td><span class="verdict v-fair">Active DII participation</span></td>
+        </tr>
+        <tr>
+          <td>Retail / Public</td>
+          <td>~25.8%</td>
+          <td><span class="verdict v-fair">Broad retail ownership</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Management & Governance Notes</div>
+    <ul class="insight-list">
+      <li class="insight-item">
+        <span class="insight-icon">✅</span>
+        <span class="insight-text"><strong>Strong Board:</strong> N. Chandrasekaran (Chairman), Shailesh Chandra (CEO), PB Balaji (CFO) — all seasoned leaders with clear communication on JLR challenges.</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">✅</span>
+        <span class="insight-text"><strong>Tata Brand:</strong> Long-standing Tata Group governance culture — high standards on ESG, transparency, and corporate conduct.</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">✅</span>
+        <span class="insight-text"><strong>ESG:</strong> Sustainalytics "Low Risk" ESG rating. Net-zero target by 2045 (Project Aalingana). 300 MW renewable energy; water-positive facility certified.</span>
+      </li>
+      <li class="insight-item">
+        <span class="insight-icon">⚠️</span>
+        <span class="insight-text"><strong>JLR Cyber Incident (Q2 FY26):</strong> A notable governance/risk management concern — cyber resilience at JLR needs to be tracked.</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- =================== VIEW =================== -->
+<div id="tab-view" class="content">
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">💪 Strengths (5)</div>
+      <ul class="insight-list">
+        <li class="insight-item">
+          <span class="insight-icon">🌍</span>
+          <span class="insight-text"><strong>JLR's Luxury Franchise:</strong> Jaguar Land Rover is a globally recognised premium/luxury brand with strong pricing power and margin potential when volumes recover. FY24–FY25 proved the capability with 8.5% EBIT margins and net debt elimination.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">⚡</span>
+          <span class="insight-text"><strong>India EV Market Leader:</strong> ~70% domestic EV share with Nexon EV, Tiago EV, Punch EV, and upcoming Sierra EV. Structural advantage as India's EV penetration grows from ~3% toward 30%+ over the next decade.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">🏗️</span>
+          <span class="insight-text"><strong>Post-Demerger Focus:</strong> Splitting CV and PV creates management bandwidth to execute strategies independently — better capital allocation, targeted investor appeal, and cleaner earnings narratives.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">💰</span>
+          <span class="insight-text"><strong>Tariff Tailwind:</strong> UK-US trade deal reduces tariffs on JLR UK-produced vehicles from 27.5% to 10% effective June 30, 2025. EU-US deal further reduces EU-produced vehicle tariffs from 27.5% to 15%. Meaningful margin recovery catalyst for FY27.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">📊</span>
+          <span class="insight-text"><strong>Attractive Relative Valuation:</strong> P/B of ~1.3x and P/Sales of ~0.43x are well below sector peers, offering potential mean-reversion value if earnings normalise toward FY25 levels.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚠️ Watch-Points (5)</div>
+      <ul class="insight-list">
+        <li class="insight-item">
+          <span class="insight-icon">🔴</span>
+          <span class="insight-text"><strong>JLR Earnings Cliff in FY26:</strong> EBIT margin collapsed from 8.5% (FY25) to 0.7% (FY26). JLR swung to a £(244)mn loss after tax. FCF was materially negative. Recovery depends on new Jaguar EV ramp, tariff normalization, and China stabilisation.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">🔴</span>
+          <span class="insight-text"><strong>JLR Concentration Risk:</strong> ~87% of TMPV revenue and disproportionate profits come from JLR. Any continued JLR weakness (geopolitics, EV competition, China) has outsized consolidated impact.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">🟡</span>
+          <span class="insight-text"><strong>Domestic PV Margins Thin:</strong> Domestic PV EBIT margin is only 1.4% in FY26. EV operations remain loss-making (heavy investment phase). Profitability at scale needs to be demonstrated.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">🟡</span>
+          <span class="insight-text"><strong>Net Debt Reversal:</strong> TMPV returned to net debt (₹30,700 Cr) in FY26 after achieving net cash in FY25 — largely due to negative JLR FCF from production stoppages. Watch trajectory in FY27.</span>
+        </li>
+        <li class="insight-item">
+          <span class="insight-icon">🟡</span>
+          <span class="insight-text"><strong>Currency & Macro Risk:</strong> JLR revenues are in GBP/USD; costs are globally dispersed. GBP volatility, US trade policy, EU tariffs, and China macro are structural sensitivities that are hard to hedge fully.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔑 Key Metrics to Track Going Forward</div>
+    <table>
+      <thead><tr><th>Metric</th><th>What to Watch</th><th>Frequency</th></tr></thead>
+      <tbody>
+        <tr><td>JLR EBIT Margin</td><td>Recovery toward 5–8% guidance? FY27 target?</td><td>Quarterly</td></tr>
+        <tr><td>New Jaguar EV Volumes</td><td>Wholesale volumes ramp post FY26 launch</td><td>Quarterly</td></tr>
+        <tr><td>Net Debt (TMPV Consolidated)</td><td>Reverting toward net cash?</td><td>Quarterly</td></tr>
+        <tr><td>India EV Market Share</td><td>Sustaining 70%+ vs Hyundai/MG/BYD</td><td>Monthly sales data</td></tr>
+        <tr><td>JLR FCF</td><td>Back to positive in FY27?</td><td>Quarterly</td></tr>
+        <tr><td>US/EU Tariff Updates</td><td>Further reductions or escalations</td><td>As events unfold</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Quality Score -->
+  <div class="quality-box" style="margin-bottom: 20px;">
+    <div class="quality-label">Overall Fundamental Quality (FY26 Assessment)</div>
+    <div class="quality-score">MODERATE</div>
+    <div class="quality-desc">Strong brand assets (JLR + India EV leadership) and proven cycle earnings power (FY24–FY25) offset by significant FY26 earnings compression, elevated debt, thin domestic margins, and JLR concentration risk. Quality is cyclically depressed, not structurally broken — key to watch is FY27 recovery execution.</div>
+    <div style="margin-top:12px; font-size:11px; color: #9ca3af;">Data Confidence: <strong style="color:#ffd54f;">Moderate</strong> — post-demerger, limited TMPV-standalone history. JLR numbers well-documented. Live prices approximate.</div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    📋 <strong>Disclaimer:</strong> This is a fundamental research summary for <strong>educational purposes only</strong>. It is <strong>not investment advice</strong> and not a buy/sell/hold recommendation. All figures are sourced from publicly available data (TMPV press releases, Screener, Business Standard, Kotak Neo, Dhan, GuruFocus) and may be subject to revision. Verify all figures independently before making any financial decision. Past performance is not indicative of future results. <strong>The final decision is always yours.</strong>
+  </div>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  const idx = ['snapshot','valuation','growth','health','returns','peers','ownership','view'].indexOf(name);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>
+
+</body>
+</html>
