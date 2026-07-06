@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognitive Pattern Explorer</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface2: #f0ede6;
+    --text: #2c2c2a;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --border: rgba(44,44,42,0.12);
+    --border2: rgba(44,44,42,0.22);
+    --purple: #7f77dd;
+    --purple-light: #eeedfe;
+    --purple-dark: #3c3489;
+    --teal: #1d9e75;
+    --teal-light: #e1f5ee;
+    --coral: #d85a30;
+    --coral-light: #faece7;
+    --amber: #ba7517;
+    --amber-light: #faeeda;
+    --blue: #378add;
+    --blue-light: #e6f1fb;
+    --green: #639922;
+    --green-light: #eaf3de;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --transition: 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18;
+      --surface: #242422;
+      --surface2: #2e2e2b;
+      --text: #f0ede6;
+      --text2: #b4b2a9;
+      --text3: #888780;
+      --border: rgba(240,237,230,0.1);
+      --border2: rgba(240,237,230,0.2);
+      --purple-light: #26215c;
+      --teal-light: #04342c;
+      --coral-light: #4a1b0c;
+      --amber-light: #412402;
+      --blue-light: #042c53;
+      --green-light: #173404;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .screen {
+    display: none;
+    min-height: 100vh;
+    padding: 0;
+    animation: fadeIn 0.5s ease;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  @keyframes pulse { 0%,100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ambient {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(60px); animation: pulse 8s ease-in-out infinite;
+  }
+  .orb1 { width: 400px; height: 400px; background: rgba(127,119,221,0.12); top: -100px; right: -100px; animation-delay: 0s; }
+  .orb2 { width: 300px; height: 300px; background: rgba(29,158,117,0.1); bottom: -50px; left: -80px; animation-delay: 3s; }
+  .orb3 { width: 200px; height: 200px; background: rgba(216,90,48,0.08); top: 40%; left: 30%; animation-delay: 5s; }
+
+  .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; position: relative; z-index: 1; width: 100%; }
+
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--teal));
+    transition: width 0.6s ease; z-index: 100;
+  }
+  .chapter-indicator {
+    position: fixed; top: 12px; right: 16px; z-index: 100;
+    font-size: 12px; color: var(--text3); font-weight: 500;
+    background: var(--surface); padding: 4px 10px;
+    border-radius: 20px; border: 0.5px solid var(--border);
+  }
+
+  h1 { font-size: clamp(26px, 5vw, 40px); font-weight: 600; line-height: 1.2; margin-bottom: 0.75rem; }
+  h2 { font-size: clamp(20px, 3.5vw, 28px); font-weight: 600; line-height: 1.3; margin-bottom: 0.5rem; }
+  h3 { font-size: 17px; font-weight: 600; margin-bottom: 0.4rem; }
+  p { font-size: 15px; line-height: 1.7; color: var(--text2); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 50px;
+    font-size: 15px; font-weight: 500; cursor: pointer;
+    border: 1.5px solid var(--border2); background: var(--surface);
+    color: var(--text); transition: all 0.2s ease;
+  }
+  .btn:hover { background: var(--surface2); transform: translateY(-1px); }
+  .btn:active { transform: scale(0.98); }
+  .btn:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+  .btn-primary {
+    background: var(--purple); border-color: var(--purple);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
+
+  .card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .tag {
+    display: inline-block; font-size: 12px; font-weight: 500;
+    padding: 3px 10px; border-radius: 20px;
+  }
+
+  /* START SCREEN */
+  #screen-start {
+    align-items: center; justify-content: center; text-align: center;
+    padding: 2rem 1.5rem;
+  }
+  .start-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--purple-light); margin: 0 auto 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; animation: float 6s ease-in-out infinite;
+  }
+  .mode-selector {
+    display: flex; gap: 12px; justify-content: center;
+    margin: 1.5rem 0; flex-wrap: wrap;
+  }
+  .mode-btn {
+    padding: 10px 20px; border-radius: 50px; cursor: pointer;
+    border: 1.5px solid var(--border2); background: var(--surface);
+    color: var(--text2); font-size: 14px; font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .mode-btn.selected {
+    background: var(--purple-light); border-color: var(--purple);
+    color: var(--purple-dark);
+  }
+  .mode-btn:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+
+  /* SCENARIO CARDS */
+  .scenario-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem;
+    transition: all 0.2s ease; cursor: default;
+  }
+  .scenario-title { font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; }
+  .options-grid { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn {
+    display: block; width: 100%; text-align: left; padding: 12px 16px;
+    border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+    background: var(--surface2); color: var(--text);
+    font-size: 14px; line-height: 1.5; cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .option-btn:hover { border-color: var(--purple); background: var(--purple-light); }
+  .option-btn.selected { border-color: var(--purple); background: var(--purple-light); color: var(--purple-dark); }
+  .option-btn:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+  .option-btn.correct-reveal { border-color: var(--teal); background: var(--teal-light); }
+
+  /* DRAG CARDS */
+  .drag-zone {
+    min-height: 80px; border: 2px dashed var(--border2);
+    border-radius: var(--radius); padding: 1rem;
+    transition: all 0.2s ease; display: flex; flex-wrap: wrap; gap: 8px;
+    align-items: flex-start; align-content: flex-start;
+  }
+  .drag-zone.drag-over { border-color: var(--purple); background: var(--purple-light); }
+  .drag-zone-label { font-size: 12px; color: var(--text3); font-weight: 500; margin-bottom: 0.5rem; display: block; }
+  .draggable-card {
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border2); background: var(--surface);
+    color: var(--text); font-size: 13px; font-weight: 500;
+    cursor: grab; user-select: none; transition: all 0.15s ease;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: var(--shadow);
+  }
+  .draggable-card:hover { transform: translateY(-2px); border-color: var(--purple); }
+  .draggable-card.dragging { opacity: 0.4; cursor: grabbing; }
+  .draggable-card.touch-dragging { opacity: 0.8; position: fixed; pointer-events: none; z-index: 1000; cursor: grabbing; }
+  .drag-icon { font-size: 16px; opacity: 0.5; }
+
+  /* TIMELINE */
+  .timeline-track {
+    position: relative; padding: 1rem 0;
+  }
+  .timeline-slots {
+    display: flex; gap: 0; position: relative;
+  }
+  .timeline-slot {
+    flex: 1; min-height: 80px; border: 2px dashed var(--border2);
+    border-radius: 0; padding: 8px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; transition: all 0.2s ease;
+    position: relative;
+  }
+  .timeline-slot:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+  .timeline-slot:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .timeline-slot + .timeline-slot { border-left: none; }
+  .timeline-slot.drag-over { background: var(--purple-light); border-color: var(--purple); }
+  .timeline-slot-label { font-size: 10px; color: var(--text3); position: absolute; bottom: 4px; font-weight: 500; }
+  .timeline-pool { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+
+  /* RESULTS */
+  .result-bar-wrap { margin-bottom: 1rem; }
+  .result-bar-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .result-bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .result-bar-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+
+  .insight-card {
+    border-left: 4px solid var(--purple);
+    padding: 1rem 1.25rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--surface); margin-bottom: 1rem;
+  }
+  .insight-card.teal { border-color: var(--teal); }
+  .insight-card.coral { border-color: var(--coral); }
+  .insight-card.amber { border-color: var(--amber); }
+  .insight-card.blue { border-color: var(--blue); }
+
+  .journal-textarea {
+    width: 100%; min-height: 120px; padding: 1rem;
+    border-radius: var(--radius-sm); border: 1.5px solid var(--border2);
+    background: var(--surface2); color: var(--text);
+    font-size: 14px; line-height: 1.7; resize: vertical;
+    font-family: inherit;
+  }
+  .journal-textarea:focus { outline: 2px solid var(--purple); border-color: transparent; }
+
+  .chapter-header {
+    text-align: center; padding: 3rem 1.5rem 1.5rem;
+  }
+  .chapter-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px;
+    background: var(--purple-light); color: var(--purple-dark);
+    margin-bottom: 1rem;
+  }
+
+  .nav-row { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; gap: 1rem; flex-wrap: wrap; }
+  .nav-row .btn { flex: 0 0 auto; }
+
+  .dots { display: flex; gap: 6px; justify-content: center; margin: 1rem 0; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); transition: all 0.3s ease; }
+  .dot.active { background: var(--purple); transform: scale(1.3); }
+  .dot.done { background: var(--teal); }
+
+  .stress-note {
+    background: var(--teal-light); border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem; font-size: 13px; color: var(--text2);
+    margin-top: 1rem; border: 0.5px solid rgba(29,158,117,0.2);
+  }
+
+  .confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 500; }
+  .confetti-piece {
+    position: absolute; width: 8px; height: 8px; border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .container { padding: 1.25rem 1rem; }
+    .timeline-slot-label { display: none; }
+    .nav-row { flex-direction: column-reverse; align-items: stretch; }
+    .nav-row .btn { text-align: center; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+<div class="chapter-indicator" id="chapterIndicator" style="display:none"></div>
+
+<!-- SCREEN: START -->
+<div class="screen active" id="screen-start">
+  <div class="container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;">
+    <div class="start-icon">🧠</div>
+    <h1>Cognitive Pattern Explorer</h1>
+    <p style="max-width:480px;margin:0.75rem auto 0;">A calm, reflective journey to understand how you think, decide, and process the world around you. No right or wrong answers — only patterns.</p>
+
+    <div style="margin:2rem 0 1rem;">
+      <p style="font-size:13px;color:var(--text3);margin-bottom:0.75rem;font-weight:500;">Choose your experience mode</p>
+      <div class="mode-selector">
+        <button class="mode-btn selected" data-mode="calm" onclick="selectMode(this,'calm')" aria-pressed="true">🌿 Calm Mode</button>
+        <button class="mode-btn" data-mode="stress" onclick="selectMode(this,'stress')" aria-pressed="false">⚡ Quick Mode</button>
+      </div>
+    </div>
+
+    <div id="modeDesc" class="stress-note" style="max-width:400px;display:block;">
+      Calm Mode gives you space to reflect deeply on each scenario, with gentle pacing.
+    </div>
+
+    <div style="margin-top:2rem;display:flex;flex-direction:column;gap:0.5rem;align-items:center;">
+      <button class="btn btn-primary" onclick="startJourney()" style="font-size:16px;padding:14px 36px;">
+        Begin your exploration →
+      </button>
+      <p style="font-size:12px;color:var(--text3);margin-top:0.5rem;">4 chapters · ~10 minutes · educational only</p>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: CHAPTER 1 -->
+<div class="screen" id="screen-ch1">
+  <div class="chapter-header">
+    <span class="chapter-badge">Chapter 1</span>
+    <h2>Discover Your Thinking Style</h2>
+    <p>Read each scenario and choose the response that feels most natural to you. There are no wrong answers.</p>
+    <div class="dots" id="ch1Dots"></div>
+  </div>
+  <div class="container" id="ch1Container"></div>
+  <div class="container">
+    <div class="nav-row">
+      <button class="btn" onclick="showScreen('screen-start')" style="color:var(--text3)">← Back</button>
+      <button class="btn btn-primary" id="ch1Next" onclick="nextChapter1()" disabled>Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: CHAPTER 2 -->
+<div class="screen" id="screen-ch2">
+  <div class="chapter-header">
+    <span class="chapter-badge">Chapter 2</span>
+    <h2>Choose Your Priorities</h2>
+    <p>Drag the cards below into the priority zones to reveal what drives your decision-making.</p>
+  </div>
+  <div class="container" id="ch2Container"></div>
+  <div class="container">
+    <div class="nav-row">
+      <button class="btn" onclick="showScreen('screen-ch1')" style="color:var(--text3)">← Back</button>
+      <button class="btn btn-primary" id="ch2Next" onclick="nextChapter2()" disabled>Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: CHAPTER 3 -->
+<div class="screen" id="screen-ch3">
+  <div class="chapter-header">
+    <span class="chapter-badge">Chapter 3</span>
+    <h2>Map Your Thinking Timeline</h2>
+    <p>When you face an important decision, how do you move through the process? Drag the steps into the order that feels most like you.</p>
+  </div>
+  <div class="container" id="ch3Container"></div>
+  <div class="container">
+    <div class="nav-row">
+      <button class="btn" onclick="showScreen('screen-ch2')" style="color:var(--text3)">← Back</button>
+      <button class="btn btn-primary" id="ch3Next" onclick="nextChapter3()" disabled>See Your Reflection →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: RESULTS -->
+<div class="screen" id="screen-results">
+  <div class="chapter-header">
+    <span class="chapter-badge" style="background:var(--teal-light);color:var(--teal);">Your Reflection</span>
+    <h2>Your Cognitive Pattern</h2>
+    <p id="resultsSummary">Based on your responses across all three chapters...</p>
+  </div>
+  <div class="container" id="resultsContainer"></div>
+  <div class="container">
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h3 style="margin-bottom:0.75rem;">📝 Personal reflection journal</h3>
+      <p style="margin-bottom:1rem;font-size:13px;">What resonates with you from these insights? Any surprises?</p>
+      <textarea class="journal-textarea" id="journalEntry" placeholder="Write freely... this is just for you. What patterns do you recognise in your daily life?"></textarea>
+    </div>
+    <div class="nav-row" style="justify-content:center;">
+      <button class="btn" onclick="restartApp()">🔄 Explore again</button>
+      <button class="btn btn-primary" onclick="saveJournal()">💾 Save reflection</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TYPES = {
+  analytical: { label: 'Analytical Thinker', color: 'var(--blue)', light: 'var(--blue-light)', icon: '🔬', accent: 'blue' },
+  emotional: { label: 'Emotional Intuitive', color: 'var(--coral)', light: 'var(--coral-light)', icon: '💛', accent: 'coral' },
+  overthinking: { label: 'Overthinking Loop', color: 'var(--amber)', light: 'var(--amber-light)', icon: '🌀', accent: 'amber' },
+  action: { label: 'Action-First Decider', color: 'var(--teal)', light: 'var(--teal-light)', icon: '⚡', accent: 'teal' },
+  balanced: { label: 'Balanced Reflective', color: 'var(--purple)', light: 'var(--purple-light)', icon: '⚖️', accent: '' }
+};
+
+const SCENARIOS = [
+  {
+    id: 's1',
+    text: 'A friend invites you to a trip that sounds exciting but involves unfamiliar territory. Your first thought is…',
+    options: [
+      { text: 'Research the destination thoroughly — costs, logistics, safety, reviews.', type: 'analytical' },
+      { text: 'Feel a rush of excitement and think about the memories you\'d make.', type: 'emotional' },
+      { text: 'Start imagining all the things that could go wrong and spiral a little.', type: 'overthinking' },
+      { text: 'Say yes immediately and figure out the details as you go.', type: 'action' },
+      { text: 'Weigh pros and cons while also checking in with your gut feeling.', type: 'balanced' }
+    ]
+  },
+  {
+    id: 's2',
+    text: 'You receive critical feedback on a project you worked hard on. You tend to…',
+    options: [
+      { text: 'Separate the feedback from your feelings and assess what\'s factually valid.', type: 'analytical' },
+      { text: 'Feel it deeply at first, then gradually process the emotion before revisiting the feedback.', type: 'emotional' },
+      { text: 'Replay the feedback in your head repeatedly, questioning yourself at length.', type: 'overthinking' },
+      { text: 'Quickly decide what to change and start revising right away.', type: 'action' },
+      { text: 'Acknowledge how it made you feel and then thoughtfully sift through the valid points.', type: 'balanced' }
+    ]
+  },
+  {
+    id: 's3',
+    text: 'You have two hours of unscheduled free time. What typically happens?',
+    options: [
+      { text: 'Organise a task list or do something productive you\'ve been meaning to tackle.', type: 'analytical' },
+      { text: 'Go with whatever mood you\'re in — connect with someone or lose yourself in music.', type: 'emotional' },
+      { text: 'Spend a while trying to decide what to do, feeling slightly uncomfortable with the openness.', type: 'overthinking' },
+      { text: 'Jump into something immediately — a walk, a task, a project.', type: 'action' },
+      { text: 'Alternate between resting and doing something light but enjoyable.', type: 'balanced' }
+    ]
+  },
+  {
+    id: 's4',
+    text: 'When someone you care about is going through a hard time, you instinctively…',
+    options: [
+      { text: 'Start thinking of practical solutions or resources that might help them.', type: 'analytical' },
+      { text: 'Feel their emotion with them and prioritise just being present.', type: 'emotional' },
+      { text: 'Worry about saying the wrong thing and end up overthinking your response.', type: 'overthinking' },
+      { text: 'Take immediate action — call, visit, or send something supportive right away.', type: 'action' },
+      { text: 'Listen deeply, then gently offer a mix of emotional support and gentle perspective.', type: 'balanced' }
+    ]
+  },
+  {
+    id: 's5',
+    text: 'A big change is coming at work or in your personal life. Before it arrives you…',
+    options: [
+      { text: 'Prepare contingency plans and gather as much information as possible.', type: 'analytical' },
+      { text: 'Focus on how excited (or anxious) you feel, and lean into those emotions.', type: 'emotional' },
+      { text: 'Find yourself running through every possible scenario, often lying awake at night.', type: 'overthinking' },
+      { text: 'Just adapt as things unfold — you cross bridges when you reach them.', type: 'action' },
+      { text: 'Prepare thoughtfully while also making peace with what you can\'t control.', type: 'balanced' }
+    ]
+  }
+];
+
+const PRIORITIES = [
+  { id: 'p1', text: 'Certainty & clarity', icon: '🔎', type: 'analytical' },
+  { id: 'p2', text: 'Emotional harmony', icon: '💜', type: 'emotional' },
+  { id: 'p3', text: 'Risk avoidance', icon: '🛡️', type: 'overthinking' },
+  { id: 'p4', text: 'Speed & momentum', icon: '🚀', type: 'action' },
+  { id: 'p5', text: 'Personal growth', icon: '🌱', type: 'balanced' },
+  { id: 'p6', text: 'Data & evidence', icon: '📊', type: 'analytical' },
+  { id: 'p7', text: 'Authentic connection', icon: '🤝', type: 'emotional' },
+  { id: 'p8', text: 'Thorough preparation', icon: '📋', type: 'overthinking' },
+  { id: 'p9', text: 'Bold action', icon: '⚡', type: 'action' },
+  { id: 'p10', text: 'Nuanced perspective', icon: '⚖️', type: 'balanced' }
+];
+
+const TIMELINE_STEPS = [
+  { id: 't1', text: 'Gather information', icon: '🔍', type: 'analytical' },
+  { id: 't2', text: 'Check in with feelings', icon: '💛', type: 'emotional' },
+  { id: 't3', text: 'Consider every risk', icon: '⚠️', type: 'overthinking' },
+  { id: 't4', text: 'Just start doing', icon: '🏃', type: 'action' },
+  { id: 't5', text: 'Ask for perspective', icon: '💬', type: 'balanced' },
+  { id: 't6', text: 'Write pros and cons', icon: '📝', type: 'analytical' }
+];
+
+const INSIGHTS = {
+  analytical: [
+    'You often approach problems like a puzzle — gathering data before drawing conclusions.',
+    'This tendency means you rarely make impulsive decisions, which builds reliability.',
+    'You may sometimes delay action while searching for more certainty.',
+    'Your analytical nature is a strength in complex, information-rich environments.'
+  ],
+  emotional: [
+    'You tend to process the world through the lens of feelings and relationships.',
+    'This intuitive quality helps you connect deeply with others and sense unspoken dynamics.',
+    'You may find purely logical framings feel hollow or incomplete.',
+    'Your emotional intelligence is a genuine cognitive strength, not a bias to overcome.'
+  ],
+  overthinking: [
+    'Your mind often explores many branches simultaneously — which can look like worry but is really thoroughness.',
+    'You tend to anticipate problems before they arise, which can be deeply protective.',
+    'The challenge is knowing when enough exploration has happened and action is needed.',
+    'Channelling this pattern into structured planning can transform rumination into strategy.'
+  ],
+  action: [
+    'You often learn best by doing — thinking and acting simultaneously rather than sequentially.',
+    'This forward momentum helps you make progress where others stall in planning.',
+    'Pausing briefly to reflect before acting can strengthen your already considerable drive.',
+    'Your bias for action is a powerful energy — especially in fast-moving environments.'
+  ],
+  balanced: [
+    'You tend to move between logic and feeling with unusual fluidity.',
+    'This adaptability means you can communicate across very different types of thinkers.',
+    'You may sometimes feel like you don\'t have a strong "style" — but balance is its own sophisticated pattern.',
+    'Your reflective quality allows you to learn from experience faster than most.'
+  ]
+};
+
+let state = {
+  mode: 'calm',
+  scores: { analytical: 0, emotional: 0, overthinking: 0, action: 0, balanced: 0 },
+  ch1Answers: {},
+  ch1Current: 0,
+  ch2TopPriorities: [],
+  ch3Order: [],
+  dragItem: null,
+  touchDragEl: null,
+  touchDragData: null
+};
+
+function selectMode(el, mode) {
+  document.querySelectorAll('.mode-btn').forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed','false'); });
+  el.classList.add('selected'); el.setAttribute('aria-pressed','true');
+  state.mode = mode;
+  document.getElementById('modeDesc').textContent = mode === 'calm'
+    ? 'Calm Mode gives you space to reflect deeply on each scenario, with gentle pacing.'
+    : 'Quick Mode presents all scenarios at once for a faster, more direct experience.';
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  updateProgress(id);
+}
+
+function updateProgress(screenId) {
+  const map = { 'screen-start': 0, 'screen-ch1': 25, 'screen-ch2': 55, 'screen-ch3': 80, 'screen-results': 100 };
+  const pct = map[screenId] || 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  const ind = document.getElementById('chapterIndicator');
+  const labels = { 'screen-ch1': 'Chapter 1 of 3', 'screen-ch2': 'Chapter 2 of 3', 'screen-ch3': 'Chapter 3 of 3', 'screen-results': 'Reflection' };
+  if (labels[screenId]) { ind.textContent = labels[screenId]; ind.style.display = 'block'; }
+  else { ind.style.display = 'none'; }
+}
+
+function startJourney() {
+  state.scores = { analytical: 0, emotional: 0, overthinking: 0, action: 0, balanced: 0 };
+  state.ch1Answers = {};
+  state.ch1Current = 0;
+  buildChapter1();
+  showScreen('screen-ch1');
+}
+
+function buildChapter1() {
+  const container = document.getElementById('ch1Container');
+  const dotsEl = document.getElementById('ch1Dots');
+  container.innerHTML = '';
+  dotsEl.innerHTML = '';
+
+  SCENARIOS.forEach((sc, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.id = 'dot' + i;
+    dotsEl.appendChild(dot);
+  });
+
+  if (state.mode === 'calm') {
+    renderSingleScenario(0);
+  } else {
+    SCENARIOS.forEach((sc, i) => renderScenarioCard(sc, i, container));
+    document.getElementById('ch1Next').disabled = false;
+  }
+}
+
+function renderSingleScenario(idx) {
+  const container = document.getElementById('ch1Container');
+  container.innerHTML = '';
+  const sc = SCENARIOS[idx];
+  renderScenarioCard(sc, idx, container);
+  checkCh1Progress();
+}
+
+function renderScenarioCard(sc, idx, container) {
+  const div = document.createElement('div');
+  div.className = 'scenario-card';
+  div.id = 'scenario-' + idx;
+  const shuffled = [...sc.options].sort(() => Math.random() - 0.5);
+  div.innerHTML = `<div class="scenario-title">${idx + 1}. ${sc.text}</div><div class="options-grid" id="opts-${idx}"></div>`;
+  container.appendChild(div);
+  const grid = div.querySelector('.options-grid');
+  shuffled.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.text;
+    btn.setAttribute('data-type', opt.type);
+    btn.setAttribute('data-sc', idx);
+    btn.onclick = () => selectOption(btn, idx, opt.type);
+    grid.appendChild(btn);
+  });
+  if (state.ch1Answers[idx]) {
+    const saved = state.ch1Answers[idx];
+    grid.querySelectorAll('.option-btn').forEach(b => {
+      if (b.getAttribute('data-type') === saved) b.classList.add('selected');
+    });
+  }
+}
+
+function selectOption(btn, scIdx, type) {
+  const grid = btn.closest('.options-grid');
+  grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.ch1Answers[scIdx] = type;
+
+  for (const d in state.dots) {}
+  const dot = document.getElementById('dot' + scIdx);
+  if (dot) { dot.classList.remove('active'); dot.classList.add('done'); }
+
+  if (state.mode === 'calm') {
+    setTimeout(() => {
+      const nextIdx = scIdx + 1;
+      if (nextIdx < SCENARIOS.length) {
+        const nextDot = document.getElementById('dot' + nextIdx);
+        if (nextDot) nextDot.classList.add('active');
+        renderSingleScenario(nextIdx);
+        state.ch1Current = nextIdx;
+      }
+      checkCh1Progress();
+    }, 350);
+  } else {
+    checkCh1Progress();
+  }
+}
+
+function checkCh1Progress() {
+  const answered = Object.keys(state.ch1Answers).length;
+  document.getElementById('ch1Next').disabled = answered < SCENARIOS.length;
+}
+
+function nextChapter1() {
+  Object.values(state.ch1Answers).forEach(t => { if (state.scores[t] !== undefined) state.scores[t]++; });
+  buildChapter2();
+  showScreen('screen-ch2');
+}
+
+function buildChapter2() {
+  const container = document.getElementById('ch2Container');
+  container.innerHTML = '';
+
+  const poolDiv = document.createElement('div');
+  poolDiv.innerHTML = `
+    <div class="card" style="margin-bottom:1.5rem;">
+      <span class="drag-zone-label">Drag your top 3 priorities into the highlighted zone</span>
+      <div class="drag-zone" id="ch2Pool" style="min-height:60px;border-style:solid;border-color:var(--border);">
+        ${PRIORITIES.map(p => `<div class="draggable-card" draggable="true" data-id="${p.id}" data-type="${p.type}" id="dcard-${p.id}"><span class="drag-icon">⠿</span>${p.icon} ${p.text}</div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <span class="drag-zone-label" style="font-size:13px;color:var(--text);font-weight:600;">⭐ Your top priorities (drop up to 3 here)</span>
+      <div class="drag-zone" id="ch2Top" style="min-height:100px;"></div>
+    </div>`;
+  container.appendChild(poolDiv);
+
+  setupDragZone('ch2Pool', 'ch2Top', 3);
+  setTimeout(() => document.getElementById('ch2Next').disabled = false, 100);
+}
+
+function setupDragZone(poolId, topId, maxItems) {
+  const pool = document.getElementById(poolId);
+  const top = document.getElementById(topId);
+
+  function addDragListeners(card) {
+    card.addEventListener('dragstart', e => {
+      state.dragItem = card;
+      setTimeout(() => card.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => { card.classList.remove('dragging'); state.dragItem = null; });
+    addTouchDrag(card);
+  }
+
+  function addDropListeners(zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      if (!state.dragItem) return;
+      const isTop = zone.id === topId;
+      if (isTop && zone.querySelectorAll('.draggable-card').length >= maxItems) return;
+      zone.appendChild(state.dragItem);
+      updateCh2State();
+    });
+  }
+
+  pool.querySelectorAll('.draggable-card').forEach(addDragListeners);
+  addDropListeners(pool); addDropListeners(top);
+
+  function updateCh2State() {
+    const topCards = top.querySelectorAll('.draggable-card');
+    state.ch2TopPriorities = Array.from(topCards).map(c => c.getAttribute('data-type'));
+    const count = topCards.length;
+    const lbl = top.previousElementSibling;
+    if (lbl) lbl.textContent = `⭐ Your top priorities (${count}/3 selected)`;
+  }
+}
+
+function addTouchDrag(card) {
+  let startX, startY, clone;
+  card.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY;
+    const rect = card.getBoundingClientRect();
+    clone = card.cloneNode(true);
+    clone.classList.add('touch-dragging');
+    clone.style.width = rect.width + 'px';
+    clone.style.left = rect.left + 'px';
+    clone.style.top = rect.top + 'px';
+    document.body.appendChild(clone);
+    state.touchDragEl = card;
+    state.touchDragData = card;
+  }, { passive: true });
+
+  card.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!clone) return;
+    const t = e.touches[0];
+    clone.style.left = (t.clientX - clone.offsetWidth / 2) + 'px';
+    clone.style.top = (t.clientY - 20) + 'px';
+    const zones = document.querySelectorAll('.drag-zone');
+    zones.forEach(z => z.classList.remove('drag-over'));
+    const underEl = document.elementFromPoint(t.clientX, t.clientY);
+    const zone = underEl && underEl.closest('.drag-zone');
+    if (zone) zone.classList.add('drag-over');
+  }, { passive: false });
+
+  card.addEventListener('touchend', e => {
+    if (!clone) return;
+    const t = e.changedTouches[0];
+    const zones = document.querySelectorAll('.drag-zone');
+    zones.forEach(z => z.classList.remove('drag-over'));
+    const underEl = document.elementFromPoint(t.clientX, t.clientY);
+    const zone = underEl && underEl.closest('.drag-zone');
+    if (zone) {
+      const maxItems = zone.id === 'ch2Top' ? 3 : 999;
+      const isTop = zone.id === 'ch2Top';
+      if (!isTop || zone.querySelectorAll('.draggable-card').length < maxItems) {
+        zone.appendChild(card);
+        const topZone = document.getElementById('ch2Top');
+        if (topZone) {
+          const count = topZone.querySelectorAll('.draggable-card').length;
+          const topCards = topZone.querySelectorAll('.draggable-card');
+          state.ch2TopPriorities = Array.from(topCards).map(c => c.getAttribute('data-type'));
+          const lbl = topZone.previousElementSibling;
+          if (lbl) lbl.textContent = `⭐ Your top priorities (${count}/3 selected)`;
+        }
+        const slotZone = zone.closest('.timeline-slot');
+        if (slotZone) updateCh3State();
+      }
+    }
+    clone.remove(); clone = null;
+    state.touchDragEl = null;
+  });
+}
+
+function nextChapter2() {
+  state.ch2TopPriorities.forEach(t => { if (state.scores[t] !== undefined) state.scores[t] += 2; });
+  buildChapter3();
+  showScreen('screen-ch3');
+}
+
+function buildChapter3() {
+  const container = document.getElementById('ch3Container');
+  container.innerHTML = '';
+
+  const slotLabels = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth'];
+  let slotsHTML = '';
+  for (let i = 0; i < 6; i++) {
+    slotsHTML += `<div class="timeline-slot" data-slot="${i}" id="tslot-${i}"><span class="timeline-slot-label">${slotLabels[i]}</span></div>`;
+  }
+
+  const shuffled = [...TIMELINE_STEPS].sort(() => Math.random() - 0.5);
+  const poolHTML = shuffled.map(s =>
+    `<div class="draggable-card" draggable="true" data-id="${s.id}" data-type="${s.type}" id="tcard-${s.id}"><span class="drag-icon">⠿</span>${s.icon} ${s.text}</div>`
+  ).join('');
+
+  container.innerHTML = `
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="timeline-track">
+        <p style="font-size:13px;color:var(--text3);margin-bottom:0.75rem;">Drop cards into the numbered slots in the order you naturally approach decisions:</p>
+        <div class="timeline-slots">${slotsHTML}</div>
+        <div class="timeline-pool" id="tPool">${poolHTML}</div>
+      </div>
+    </div>`;
+
+  document.querySelectorAll('.timeline-slot').forEach(slot => {
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag-over'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault(); slot.classList.remove('drag-over');
+      if (!state.dragItem) return;
+      const existing = slot.querySelector('.draggable-card');
+      if (existing) {
+        const fromSlot = state.dragItem.closest('.timeline-slot');
+        const pool = document.getElementById('tPool');
+        if (fromSlot) { fromSlot.appendChild(existing); }
+        else { pool.appendChild(existing); }
+      }
+      slot.appendChild(state.dragItem);
+      updateCh3State();
+    });
+  });
+
+  const pool = document.getElementById('tPool');
+  pool.addEventListener('dragover', e => { e.preventDefault(); pool.classList.add('drag-over'); });
+  pool.addEventListener('dragleave', () => pool.classList.remove('drag-over'));
+  pool.addEventListener('drop', e => {
+    e.preventDefault(); pool.classList.remove('drag-over');
+    if (!state.dragItem) return;
+    pool.appendChild(state.dragItem);
+    updateCh3State();
+  });
+
+  document.querySelectorAll('#ch3Container .draggable-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      state.dragItem = card;
+      setTimeout(() => card.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => { card.classList.remove('dragging'); state.dragItem = null; });
+    addTouchDrag(card);
+  });
+}
+
+function updateCh3State() {
+  const filled = [];
+  for (let i = 0; i < 6; i++) {
+    const slot = document.getElementById('tslot-' + i);
+    const card = slot && slot.querySelector('.draggable-card');
+    if (card) filled.push({ order: i, type: card.getAttribute('data-type') });
+  }
+  state.ch3Order = filled;
+  document.getElementById('ch3Next').disabled = filled.length < 3;
+}
+
+function nextChapter3() {
+  state.ch3Order.forEach((item, idx) => {
+    const weight = idx === 0 ? 3 : idx === 1 ? 2 : 1;
+    if (state.scores[item.type] !== undefined) state.scores[item.type] += weight;
+  });
+  buildResults();
+  showScreen('screen-results');
+  launchConfetti();
+}
+
+function buildResults() {
+  const total = Object.values(state.scores).reduce((a, b) => a + b, 0) || 1;
+  const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+  const dominant = sorted[0][0];
+  const secondary = sorted[1][0];
+  const dominantPct = Math.round((sorted[0][1] / total) * 100);
+
+  document.getElementById('resultsSummary').textContent =
+    `Your patterns reveal a strong ${TYPES[dominant].label} style, with meaningful ${TYPES[secondary].label} threads woven through.`;
+
+  const container = document.getElementById('resultsContainer');
+  container.innerHTML = '';
+
+  const profileCard = document.createElement('div');
+  profileCard.className = 'card';
+  profileCard.style.cssText = 'margin-bottom:1.5rem;text-align:center;background:' + TYPES[dominant].light + ';border-color:' + TYPES[dominant].color;
+  profileCard.innerHTML = `
+    <div style="font-size:48px;margin-bottom:0.5rem;">${TYPES[dominant].icon}</div>
+    <h3 style="font-size:20px;margin-bottom:0.25rem;">${TYPES[dominant].label}</h3>
+    <p style="font-size:13px;">Your dominant thinking tendency</p>`;
+  container.appendChild(profileCard);
+
+  const barsCard = document.createElement('div');
+  barsCard.className = 'card';
+  barsCard.style.marginBottom = '1.5rem';
+  barsCard.innerHTML = '<h3 style="margin-bottom:1rem;">Pattern breakdown</h3>';
+  sorted.forEach(([type, score]) => {
+    const pct = Math.round((score / total) * 100);
+    const t = TYPES[type];
+    barsCard.innerHTML += `
+      <div class="result-bar-wrap">
+        <div class="result-bar-label">
+          <span style="font-size:13px;font-weight:500;">${t.icon} ${t.label}</span>
+          <span style="font-size:13px;color:var(--text3);">${pct}%</span>
+        </div>
+        <div class="result-bar-track">
+          <div class="result-bar-fill" data-width="${pct}" style="width:0%;background:${t.color};"></div>
+        </div>
+      </div>`;
+  });
+  container.appendChild(barsCard);
+
+  const insightsTitle = document.createElement('h3');
+  insightsTitle.style.cssText = 'margin-bottom:1rem;';
+  insightsTitle.textContent = '✨ Personalised insights';
+  container.appendChild(insightsTitle);
+
+  [dominant, secondary].forEach(type => {
+    const t = TYPES[type];
+    const insights = INSIGHTS[type];
+    const card = document.createElement('div');
+    card.className = 'insight-card ' + t.accent;
+    card.innerHTML = `<p style="font-size:12px;font-weight:600;color:${t.color};margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;">${t.icon} ${t.label}</p>`;
+    insights.slice(0, 2).forEach(ins => {
+      card.innerHTML += `<p style="font-size:14px;margin-bottom:0.4rem;">${ins}</p>`;
+    });
+    container.appendChild(card);
+  });
+
+  const tipCard = document.createElement('div');
+  tipCard.className = 'card';
+  tipCard.style.cssText = 'margin-bottom:1.5rem;background:var(--surface2);';
+  tipCard.innerHTML = `
+    <h3 style="margin-bottom:0.75rem;">💡 A reflection to sit with</h3>
+    <p style="font-size:14px;">${getReflectionPrompt(dominant, secondary)}</p>`;
+  container.appendChild(tipCard);
+
+  setTimeout(() => {
+    document.querySelectorAll('.result-bar-fill').forEach(bar => {
+      bar.style.width = bar.getAttribute('data-width') + '%';
+    });
+  }, 300);
+}
+
+function getReflectionPrompt(d, s) {
+  const prompts = {
+    analytical_emotional: 'You often lead with logic but feel deeply too — consider letting your emotional signals be data, not noise.',
+    analytical_overthinking: 'Your analytical mind and tendency toward thorough examination can sometimes loop. A useful question: "What\'s the minimum I need to know to move forward?"',
+    analytical_action: 'You balance careful thought with a bias for action — a rare and valuable combination in complex environments.',
+    analytical_balanced: 'Your analytical precision paired with balance suggests you can slow down or speed up your process depending on what a situation calls for.',
+    emotional_analytical: 'Your emotional attunement is a sophisticated form of intelligence. Pairing it with structured analysis can make your insights even more powerful.',
+    emotional_overthinking: 'Feelings and worries can amplify each other. Noticing when you\'re feeling versus when you\'re spiralling can be a useful inner check.',
+    emotional_action: 'You feel things deeply and move quickly — this combination creates momentum but benefits from occasional pauses.',
+    emotional_balanced: 'Emotional depth and reflective balance together suggest you process the world with real nuance and care.',
+    overthinking_analytical: 'Your thorough mind is an asset. The challenge is knowing when analysis has served its purpose — often earlier than it feels.',
+    overthinking_emotional: 'Overthinking and deep feeling can be exhausting companions. Gentle externalising — writing, talking — often interrupts the loop.',
+    overthinking_action: 'These two tendencies create an interesting tension: the urge to think everything through vs. the urge to just go. Noticing which is driving at any given moment gives you real agency.',
+    overthinking_balanced: 'Your thorough thinking, grounded in balance, suggests you process carefully but can often find a path through when needed.',
+    action_analytical: 'Speed and curiosity make for a dynamic thinker. The moments you pause to examine patterns before acting tend to be especially powerful.',
+    action_emotional: 'You move fast and feel deeply — this creates real energy. Building in brief reflection before major moves can deepen the impact of your actions.',
+    action_overthinking: 'An interesting pattern: sometimes acting quickly, sometimes spiralling into consideration. Understanding which situations trigger each can be insightful.',
+    action_balanced: 'Action-orientation with reflective balance means you tend to learn quickly from experience and course-correct without drama.',
+    balanced_analytical: 'Your balanced approach, with an analytical undertone, suggests a thoughtful adaptability that serves you well across different contexts.',
+    balanced_emotional: 'Balance and emotional sensitivity together create a rare capacity for nuanced presence — both in yourself and with others.',
+    balanced_overthinking: 'You can hold complexity without collapsing into it — most of the time. Being aware of when balance tips into rumination is a useful edge.',
+    balanced_action: 'Your balanced style with an action orientation means you tend to be decisive without being reckless — a genuinely useful combination.'
+  };
+  return prompts[d + '_' + s] || 'Your pattern is uniquely yours. The most important thing is noticing it — awareness itself changes how you relate to your thinking.';
+}
+
+function launchConfetti() {
+  const container = document.createElement('div');
+  container.className = 'confetti';
+  document.body.appendChild(container);
+  const colors = ['#7f77dd','#1d9e75','#d85a30','#ba7517','#378add'];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.cssText = `
+      left: ${Math.random() * 100}%;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      animation-duration: ${1.5 + Math.random() * 2}s;
+      animation-delay: ${Math.random() * 0.5}s;
+      width: ${6 + Math.random() * 8}px;
+      height: ${6 + Math.random() * 8}px;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+    `;
+    container.appendChild(piece);
+  }
+  setTimeout(() => container.remove(), 4000);
+}
+
+function saveJournal() {
+  const text = document.getElementById('journalEntry').value.trim();
+  if (!text) { alert('Write something first!'); return; }
+  const blob = new Blob([`Cognitive Pattern Explorer — Personal Reflection\n${'='.repeat(50)}\n\n${text}\n\nSaved: ${new Date().toLocaleDateString()}`], { type: 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'my-cognitive-reflection.txt'; a.click();
+}
+
+function restartApp() {
+  state = { mode: 'calm', scores: { analytical: 0, emotional: 0, overthinking: 0, action: 0, balanced: 0 }, ch1Answers: {}, ch1Current: 0, ch2TopPriorities: [], ch3Order: [], dragItem: null, touchDragEl: null, touchDragData: null };
+  showScreen('screen-start');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const active = document.querySelector('.screen.active');
+    if (active) active.querySelectorAll('.option-btn.selected').forEach(b => b.classList.remove('selected'));
+  }
+});
+</script>
+</body>
+</html>
