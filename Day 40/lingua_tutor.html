@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LinguaPlay — Your Playful Language Tutor</title>
+<style>
+  /* ── TOKENS ─────────────────────────────────────────────── */
+  :root {
+    --ink:       #1a1a2e;
+    --ink-soft:  #3d3d5c;
+    --paper:     #f7f5ff;
+    --surface:   #ffffff;
+    --purple:    #6c47ff;
+    --purple-lt: #ede8ff;
+    --teal:      #00c9a7;
+    --teal-lt:   #d4f7f0;
+    --coral:     #ff6b6b;
+    --coral-lt:  #ffe0e0;
+    --gold:      #ffc94a;
+    --gold-lt:   #fff4d4;
+    --radius:    16px;
+    --radius-sm: 10px;
+    --shadow:    0 4px 24px rgba(108,71,255,.12);
+    --shadow-md: 0 8px 40px rgba(108,71,255,.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--purple-lt);
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(108,71,255,.07);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--purple);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--purple), var(--teal));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  /* ── XP BAR ─────────────────────────────────────────────── */
+  .xp-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  .xp-track {
+    width: 120px; height: 8px;
+    background: var(--purple-lt);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--teal));
+    border-radius: 99px;
+    transition: width .6s ease;
+    width: 0%;
+  }
+
+  .streak { color: var(--coral); font-size: 1rem; }
+
+  /* ── SETUP SCREEN ────────────────────────────────────────── */
+  #setup-screen {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .setup-card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 40px 36px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+  }
+
+  .setup-card h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--purple);
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+  }
+
+  .setup-card p {
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+    font-size: .95rem;
+    line-height: 1.6;
+  }
+
+  .field-label {
+    text-align: left;
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    margin-top: 20px;
+  }
+
+  .lang-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .lang-btn {
+    padding: 12px 8px;
+    border: 2px solid var(--purple-lt);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    transition: all .18s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .lang-btn .flag { font-size: 1.6rem; }
+
+  .lang-btn:hover, .lang-btn.active {
+    border-color: var(--purple);
+    background: var(--purple-lt);
+    color: var(--purple);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108,71,255,.15);
+  }
+
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .level-btn {
+    padding: 12px;
+    border: 2px solid var(--purple-lt);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    transition: all .18s;
+  }
+
+  .level-btn:hover, .level-btn.active {
+    border-color: var(--teal);
+    background: var(--teal-lt);
+    color: #007a64;
+    transform: translateY(-2px);
+  }
+
+  .topic-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--purple-lt);
+    border-radius: var(--radius-sm);
+    font-size: .95rem;
+    font-family: inherit;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .18s;
+  }
+
+  .topic-input:focus { border-color: var(--purple); }
+
+  .start-btn {
+    margin-top: 28px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--purple), var(--teal));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: .3px;
+    transition: all .2s;
+    box-shadow: 0 4px 16px rgba(108,71,255,.3);
+  }
+
+  .start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(108,71,255,.4);
+  }
+
+  .start-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ── MAIN LAYOUT ─────────────────────────────────────────── */
+  #app-screen {
+    display: none;
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 24px 16px;
+    gap: 20px;
+    flex-direction: column;
+  }
+
+  /* ── SESSION INFO BAR ────────────────────────────────────── */
+  .session-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: .8rem;
+    font-weight: 700;
+  }
+
+  .badge-purple { background: var(--purple-lt); color: var(--purple); }
+  .badge-teal   { background: var(--teal-lt);   color: #007a64; }
+  .badge-gold   { background: var(--gold-lt);   color: #9a6200; }
+
+  .reset-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    border: 2px solid var(--coral-lt);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--coral);
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .18s;
+  }
+
+  .reset-btn:hover { background: var(--coral-lt); }
+
+  /* ── CHAT AREA ───────────────────────────────────────────── */
+  .chat-wrapper {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 460px;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 360px;
+    max-height: 480px;
+  }
+
+  /* ── MESSAGES ────────────────────────────────────────────── */
+  .msg {
+    display: flex;
+    gap: 12px;
+    animation: fadeUp .3s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+
+  .avatar.tutor { background: linear-gradient(135deg, var(--purple), var(--teal)); }
+  .avatar.user-av { background: var(--gold-lt); }
+
+  .bubble {
+    max-width: 76%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    line-height: 1.65;
+    font-size: .93rem;
+  }
+
+  .msg.tutor .bubble {
+    background: var(--purple-lt);
+    color: var(--ink);
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg.user .bubble {
+    background: linear-gradient(135deg, var(--purple), #8b67ff);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  /* ── CORRECTION BLOCK ────────────────────────────────────── */
+  .correction-block {
+    background: var(--coral-lt);
+    border-left: 4px solid var(--coral);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: .86rem;
+  }
+
+  .correction-block strong { color: var(--coral); }
+
+  .fix-text {
+    text-decoration: line-through;
+    color: #aaa;
+  }
+
+  .fix-arrow { color: var(--teal); font-weight: 700; }
+
+  /* ── EXERCISE CARD ───────────────────────────────────────── */
+  .exercise-card {
+    background: var(--gold-lt);
+    border: 2px solid var(--gold);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-top: 10px;
+    font-size: .9rem;
+  }
+
+  .exercise-card .ex-title {
+    font-weight: 800;
+    color: #9a6200;
+    margin-bottom: 8px;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+  }
+
+  .exercise-card .ex-options {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+  }
+
+  .ex-opt {
+    padding: 6px 14px;
+    border: 2px solid var(--gold);
+    border-radius: 99px;
+    background: #fff;
+    font-size: .86rem;
+    font-weight: 600;
+    color: #9a6200;
+    cursor: pointer;
+    transition: all .16s;
+  }
+
+  .ex-opt:hover { background: var(--gold); color: #fff; }
+
+  /* ── VOCAB TAGS ──────────────────────────────────────────── */
+  .vocab-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--teal-lt);
+    color: #007a64;
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-size: .8rem;
+    font-weight: 700;
+    margin: 3px 2px;
+  }
+
+  /* ── INPUT AREA ──────────────────────────────────────────── */
+  .chat-input-area {
+    border-top: 2px solid var(--purple-lt);
+    padding: 16px 20px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: #faf9ff;
+  }
+
+  .chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--purple-lt);
+    border-radius: var(--radius-sm);
+    font-size: .95rem;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 48px;
+    max-height: 120px;
+    transition: border-color .18s;
+    line-height: 1.5;
+  }
+
+  .chat-input:focus { border-color: var(--purple); }
+
+  .send-btn {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--purple), var(--teal));
+    border: none; border-radius: var(--radius-sm);
+    color: #fff; font-size: 1.2rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .18s;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(108,71,255,.25);
+  }
+
+  .send-btn:hover { transform: scale(1.06); }
+  .send-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  /* ── QUICK PROMPTS ───────────────────────────────────────── */
+  .quick-prompts {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 0 20px 14px;
+    background: #faf9ff;
+  }
+
+  .qp-btn {
+    padding: 5px 12px;
+    border: 2px solid var(--purple-lt);
+    border-radius: 99px;
+    background: var(--surface);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--purple);
+    cursor: pointer;
+    transition: all .16s;
+  }
+
+  .qp-btn:hover { background: var(--purple-lt); }
+
+  /* ── STATS SIDEBAR ───────────────────────────────────────── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: .74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--ink-soft);
+  }
+
+  .sv-purple { color: var(--purple); }
+  .sv-teal   { color: var(--teal); }
+  .sv-coral  { color: var(--coral); }
+
+  /* ── LOADING ─────────────────────────────────────────────── */
+  .typing-dots {
+    display: inline-flex; gap: 5px; align-items: center; padding: 4px 0;
+  }
+
+  .typing-dots span {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--purple);
+    animation: bounce .9s infinite;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: .15s; }
+  .typing-dots span:nth-child(3) { animation-delay: .3s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: .5; }
+    40%           { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ── DOC PANEL ───────────────────────────────────────────── */
+  .doc-toggle {
+    background: var(--surface);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    transition: background .18s;
+  }
+
+  .doc-toggle:hover { background: var(--purple-lt); color: var(--purple); }
+
+  .doc-panel {
+    display: none;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    line-height: 1.7;
+    font-size: .88rem;
+    color: var(--ink-soft);
+  }
+
+  .doc-panel h3 { color: var(--purple); margin: 16px 0 6px; font-size: .9rem; }
+  .doc-panel h3:first-child { margin-top: 0; }
+  .doc-panel code {
+    background: var(--purple-lt);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: .83rem;
+    color: var(--purple);
+  }
+
+  .doc-panel ul { padding-left: 20px; }
+  .doc-panel li { margin-bottom: 4px; }
+
+  /* ── EMPTY STATE ─────────────────────────────────────────── */
+  .empty-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--ink-soft);
+    font-size: .9rem;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .empty-chat .big-emoji { font-size: 3rem; }
+
+  /* ── TOAST ───────────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--teal);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: .88rem;
+    box-shadow: var(--shadow-md);
+    animation: slideIn .3s ease, fadeOut .4s 2.2s forwards;
+    z-index: 999;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(60px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateX(60px); }
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .lang-grid { grid-template-columns: repeat(3, 1fr); }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .bubble { max-width: 90%; }
+    .setup-card { padding: 28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🌍</div>
+    LinguaPlay
+  </div>
+  <div class="xp-bar">
+    <span class="streak" id="streak-display">🔥 0</span>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
+    <span id="xp-label">0 XP</span>
+  </div>
+</header>
+
+<div id="setup-screen">
+  <div class="setup-card">
+    <h1>🌍 LinguaPlay</h1>
+    <p>Your playful, adaptive language tutor. Pick your language, level, and topic — and let's go! 🚀</p>
+
+    <div class="field-label">🗣️ Language to learn</div>
+    <div class="lang-grid" id="lang-grid">
+      <button class="lang-btn" data-lang="Spanish"><span class="flag">🇪🇸</span>Spanish</button>
+      <button class="lang-btn" data-lang="French"><span class="flag">🇫🇷</span>French</button>
+      <button class="lang-btn" data-lang="Japanese"><span class="flag">🇯🇵</span>Japanese</button>
+      <button class="lang-btn" data-lang="German"><span class="flag">🇩🇪</span>German</button>
+      <button class="lang-btn" data-lang="Italian"><span class="flag">🇮🇹</span>Italian</button>
+      <button class="lang-btn" data-lang="Mandarin"><span class="flag">🇨🇳</span>Mandarin</button>
+    </div>
+
+    <div class="field-label">📊 Your current level</div>
+    <div class="level-grid" id="level-grid">
+      <button class="level-btn" data-level="Beginner">🌱 Beginner</button>
+      <button class="level-btn" data-level="Intermediate">🌿 Intermediate</button>
+      <button class="level-btn" data-level="Advanced">🌳 Advanced</button>
+    </div>
+
+    <div class="field-label">🎯 Conversation topic (optional)</div>
+    <input class="topic-input" id="topic-input" type="text"
+      placeholder="e.g. ordering food, travel, movies, work..." />
+
+    <button class="start-btn" id="start-btn" disabled onclick="startSession()">
+      Start Learning! 🎉
+    </button>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <div class="session-bar">
+    <span class="badge badge-purple" id="badge-lang">🇪🇸 Spanish</span>
+    <span class="badge badge-teal" id="badge-level">🌱 Beginner</span>
+    <span class="badge badge-gold" id="badge-topic">🎯 General</span>
+    <button class="reset-btn" onclick="resetSession()">↩ New session</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value sv-purple" id="stat-exchanges">0</div>
+      <div class="stat-label">💬 Exchanges</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value sv-teal" id="stat-corrections">0</div>
+      <div class="stat-label">✏️ Corrections</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value sv-coral" id="stat-vocab">0</div>
+      <div class="stat-label">📚 New Words</div>
+    </div>
+  </div>
+
+  <div class="chat-wrapper">
+    <div class="chat-messages" id="chat-messages">
+      <div class="empty-chat" id="empty-state">
+        <div class="big-emoji">🌟</div>
+        <strong>Your tutor is ready!</strong>
+        <p>Say anything in English or try in your target language. No pressure! 😊</p>
+      </div>
+    </div>
+
+    <div class="quick-prompts" id="quick-prompts">
+      <button class="qp-btn" onclick="quickSend('Say hello and introduce yourself')">👋 Say hello</button>
+      <button class="qp-btn" onclick="quickSend('Teach me 5 useful phrases')">📝 Useful phrases</button>
+      <button class="qp-btn" onclick="quickSend('Give me a grammar tip')">🧠 Grammar tip</button>
+      <button class="qp-btn" onclick="quickSend('Quiz me!')">🎮 Quiz me!</button>
+    </div>
+
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chat-input"
+        placeholder="Type in English or try your target language…"
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- DOC PANEL -->
+  <button class="doc-toggle" onclick="toggleDoc()">
+    <span>⚙️</span> <span>How this was built</span> <span id="doc-arrow">▼</span>
+  </button>
+  <div class="doc-panel" id="doc-panel">
+    <h3>🧠 System Prompt Design</h3>
+    <p>The tutor uses a carefully structured system prompt with these pillars:</p>
+    <ul>
+      <li><strong>Role + Personality:</strong> Defined as "LinguaPlay," a playful, encouraging tutor who uses emoji, gentle humor, and game mechanics (XP, streaks) to motivate learners.</li>
+      <li><strong>Adaptive Level Detection:</strong> The prompt instructs the AI to infer proficiency from user responses and adjust vocabulary/complexity accordingly, even mid-session.</li>
+      <li><strong>Structured Output Schema:</strong> Every response follows a predictable JSON schema: <code>chat</code>, <code>corrections</code>, <code>exercise</code>, <code>vocab</code>, <code>xp</code>. This allows the UI to render specialized components rather than raw text.</li>
+      <li><strong>Edge-case Handling:</strong> Irrelevant input (off-topic) is gently redirected. Missing context (no topic chosen) defaults to general conversation. Abuse/inappropriate content triggers a friendly, firm refusal.</li>
+    </ul>
+
+    <h3>🎨 UI Design Choices</h3>
+    <ul>
+      <li><strong>Dual-zone layout:</strong> Setup screen → app screen avoids a blank chatbot opening; context is set before any message is sent.</li>
+      <li><strong>Color system:</strong> Purple = AI/tutor; Teal = positive/vocab; Coral = corrections; Gold = exercises. Each semantic color maps to a learning concept.</li>
+      <li><strong>Inline correction blocks</strong> appear inside tutor bubbles rather than as separate messages — this keeps corrections contextual and non-intimidating.</li>
+      <li><strong>XP bar + stats:</strong> Gamification elements are persistent in the header and stats row, reinforcing progress even in short sessions.</li>
+      <li><strong>Quick prompts:</strong> Reduce blank-slate paralysis for new learners who don't know what to type first.</li>
+    </ul>
+
+    <h3>🚀 How to Extend It</h3>
+    <ul>
+      <li><strong>Add memory:</strong> Store conversation history in <code>localStorage</code>, inject it as assistant context on each call to simulate long-term memory.</li>
+      <li><strong>Add speech:</strong> Use the Web Speech API (<code>SpeechSynthesis</code> + <code>SpeechRecognition</code>) for voice input/output — especially powerful for pronunciation practice.</li>
+      <li><strong>Add tools:</strong> Connect a dictionary API (e.g. Wiktionary) or image search to show visual vocabulary cards.</li>
+      <li><strong>Multi-step flows:</strong> Add a "Lesson Mode" where the tutor runs a pre-scripted 5-step lesson using a <code>step</code> field in the response schema.</li>
+      <li><strong>Leaderboard:</strong> Sync XP to a backend (e.g. Supabase) to build social streaks and language-group challenges.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────
+let selectedLang  = '';
+let selectedLevel = '';
+let sessionTopic  = '';
+let conversationHistory = [];
+let xp            = 0;
+let streak        = 0;
+let exchanges     = 0;
+let corrections   = 0;
+let vocabCount    = 0;
+let isLoading     = false;
+
+// ── SETUP ─────────────────────────────────────────────────────
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedLang = btn.dataset.lang;
+    checkReady();
+  });
+});
+
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedLevel = btn.dataset.level;
+    checkReady();
+  });
+});
+
+function checkReady() {
+  document.getElementById('start-btn').disabled = !(selectedLang && selectedLevel);
+}
+
+// ── SESSION START ──────────────────────────────────────────────
+function startSession() {
+  sessionTopic = document.getElementById('topic-input').value.trim() || 'General conversation';
+  document.getElementById('setup-screen').style.display = 'none';
+  const app = document.getElementById('app-screen');
+  app.style.display = 'flex';
+
+  const flagMap = { Spanish:'🇪🇸', French:'🇫🇷', Japanese:'🇯🇵', German:'🇩🇪', Italian:'🇮🇹', Mandarin:'🇨🇳' };
+  const lvlMap  = { Beginner:'🌱', Intermediate:'🌿', Advanced:'🌳' };
+
+  document.getElementById('badge-lang').textContent  = `${flagMap[selectedLang]||'🌍'} ${selectedLang}`;
+  document.getElementById('badge-level').textContent = `${lvlMap[selectedLevel]||'📊'} ${selectedLevel}`;
+  document.getElementById('badge-topic').textContent = `🎯 ${sessionTopic}`;
+
+  // Kick off with tutor greeting
+  sendToAPI('START_SESSION', true);
+}
+
+function resetSession() {
+  conversationHistory = [];
+  xp = streak = exchanges = corrections = vocabCount = 0;
+  updateStats();
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="empty-chat" id="empty-state">
+      <div class="big-emoji">🌟</div>
+      <strong>Your tutor is ready!</strong>
+      <p>Say anything in English or try in your target language. No pressure! 😊</p>
+    </div>`;
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+  selectedLang = selectedLevel = '';
+  document.querySelectorAll('.lang-btn, .level-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('topic-input').value = '';
+}
+
+// ── MESSAGING ─────────────────────────────────────────────────
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function quickSend(text) {
+  document.getElementById('chat-input').value = text;
+  sendMessage();
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+  input.value = '';
+  input.style.height = 'auto';
+  removeEmpty();
+  appendUserBubble(text);
+  sendToAPI(text, false);
+}
+
+// ── API CALL ───────────────────────────────────────────────────
+async function sendToAPI(userText, isGreeting) {
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+
+  const systemPrompt = buildSystemPrompt();
+
+  if (!isGreeting) {
+    conversationHistory.push({ role: 'user', content: userText });
+  }
+
+  const messages = isGreeting
+    ? [{ role: 'user', content: `START_SESSION: Greet the user warmly and start our ${selectedLang} lesson on "${sessionTopic}" at ${selectedLevel} level. Introduce yourself as LinguaPlay!` }]
+    : conversationHistory;
+
+  // Show typing indicator
+  const typingId = appendTyping();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: messages
+      })
+    });
+
+    removeTyping(typingId);
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      appendTutorBubble({ chat: `😬 Oops! Something went wrong: ${err.error?.message || response.statusText}. Try again!`, corrections: [], exercise: null, vocab: [], xp: 0 });
+      isLoading = false;
+      document.getElementById('send-btn').disabled = false;
+      return;
+    }
+
+    const data = await response.json();
+    const rawText = data.content?.[0]?.text || '';
+
+    let parsed;
+    try {
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch {
+      // Fallback: treat as plain text
+      parsed = { chat: rawText, corrections: [], exercise: null, vocab: [], xp: 5 };
+    }
+
+    // Update conversation history with assistant reply
+    conversationHistory.push({ role: 'assistant', content: rawText });
+    if (!isGreeting) conversationHistory.push(...[]); // already pushed user above
+
+    // Render response
+    appendTutorBubble(parsed);
+
+    // Stats
+    exchanges++;
+    if (parsed.corrections?.length) corrections += parsed.corrections.length;
+    if (parsed.vocab?.length) vocabCount += parsed.vocab.length;
+    const earnedXP = parsed.xp || 5;
+    xp += earnedXP;
+    streak++;
+    updateStats();
+    showToast(`+${earnedXP} XP 🎉`);
+
+  } catch (err) {
+    removeTyping(typingId);
+    appendTutorBubble({ chat: `😬 Network error! Check your connection and try again.`, corrections: [], exercise: null, vocab: [], xp: 0 });
+  }
+
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+// ── RENDER HELPERS ─────────────────────────────────────────────
+function removeEmpty() {
+  const e = document.getElementById('empty-state');
+  if (e) e.remove();
+}
+
+function appendUserBubble(text) {
+  const box = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `
+    <div class="avatar user-av">🧑</div>
+    <div class="bubble">${escapeHtml(text)}</div>`;
+  box.appendChild(div);
+  scrollDown();
+}
+
+function appendTutorBubble(parsed) {
+  const box = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg tutor';
+
+  let inner = `<div class="bubble">`;
+  inner += `<div>${formatChat(parsed.chat)}</div>`;
+
+  // Corrections
+  if (parsed.corrections?.length) {
+    parsed.corrections.forEach(c => {
+      inner += `<div class="correction-block">
+        <strong>✏️ Correction:</strong><br>
+        <span class="fix-text">${escapeHtml(c.original)}</span>
+        <span class="fix-arrow"> → </span>
+        <strong>${escapeHtml(c.corrected)}</strong><br>
+        <small>💡 ${escapeHtml(c.explanation)}</small>
+      </div>`;
+    });
+  }
+
+  // Vocab
+  if (parsed.vocab?.length) {
+    inner += `<div style="margin-top:10px">`;
+    parsed.vocab.forEach(v => {
+      inner += `<span class="vocab-tag">📚 ${escapeHtml(v.word)} = ${escapeHtml(v.meaning)}</span>`;
+    });
+    inner += `</div>`;
+  }
+
+  // Exercise
+  if (parsed.exercise) {
+    inner += `<div class="exercise-card">
+      <div class="ex-title">🎮 Mini Exercise — ${escapeHtml(parsed.exercise.type)}</div>
+      <div>${escapeHtml(parsed.exercise.question)}</div>`;
+    if (parsed.exercise.options?.length) {
+      inner += `<div class="ex-options">`;
+      parsed.exercise.options.forEach(opt => {
+        inner += `<button class="ex-opt" onclick="checkAnswer(this,'${escapeAttr(parsed.exercise.answer)}')">${escapeHtml(opt)}</button>`;
+      });
+      inner += `</div>`;
+    }
+    inner += `</div>`;
+  }
+
+  inner += `</div>`;
+  div.innerHTML = `<div class="avatar tutor">🌍</div>${inner}`;
+  box.appendChild(div);
+  scrollDown();
+}
+
+function checkAnswer(btn, answer) {
+  const allOpts = btn.parentElement.querySelectorAll('.ex-opt');
+  allOpts.forEach(b => b.disabled = true);
+  if (btn.textContent.trim() === answer) {
+    btn.style.background = 'var(--teal)';
+    btn.style.color = '#fff';
+    btn.style.borderColor = 'var(--teal)';
+    showToast('✅ Correct! +10 XP');
+    xp += 10; updateStats();
+  } else {
+    btn.style.background = 'var(--coral)';
+    btn.style.color = '#fff';
+    btn.style.borderColor = 'var(--coral)';
+    // highlight correct
+    allOpts.forEach(b => {
+      if (b.textContent.trim() === answer) {
+        b.style.background = 'var(--teal)';
+        b.style.color = '#fff';
+        b.style.borderColor = 'var(--teal)';
+      }
+    });
+    showToast('❌ Not quite — see correct above!');
+  }
+}
+
+function appendTyping() {
+  const box = document.getElementById('chat-messages');
+  const id = 'typing-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg tutor';
+  div.id = id;
+  div.innerHTML = `<div class="avatar tutor">🌍</div>
+    <div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(div);
+  scrollDown();
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function scrollDown() {
+  const box = document.getElementById('chat-messages');
+  box.scrollTop = box.scrollHeight;
+}
+
+function updateStats() {
+  document.getElementById('stat-exchanges').textContent = exchanges;
+  document.getElementById('stat-corrections').textContent = corrections;
+  document.getElementById('stat-vocab').textContent = vocabCount;
+  document.getElementById('xp-label').textContent = `${xp} XP`;
+  document.getElementById('xp-fill').style.width = Math.min((xp % 100), 100) + '%';
+  document.getElementById('streak-display').textContent = `🔥 ${streak}`;
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2700);
+}
+
+function toggleDoc() {
+  const panel = document.getElementById('doc-panel');
+  const arrow = document.getElementById('doc-arrow');
+  if (panel.style.display === 'block') {
+    panel.style.display = 'none'; arrow.textContent = '▼';
+  } else {
+    panel.style.display = 'block'; arrow.textContent = '▲';
+  }
+}
+
+// ── FORMAT HELPERS ─────────────────────────────────────────────
+function formatChat(text) {
+  if (!text) return '';
+  return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escapeAttr(s) {
+  if (!s) return '';
+  return String(s).replace(/'/g, "\\'");
+}
+
+// ── SYSTEM PROMPT ──────────────────────────────────────────────
+function buildSystemPrompt() {
+  return `You are LinguaPlay 🌍, a playful, enthusiastic, and highly effective language tutor. Your student is learning ${selectedLang} at a ${selectedLevel} level, and today's session focuses on: "${sessionTopic}".
+
+PERSONALITY:
+- Warm, encouraging, and fun — use emojis naturally (not excessively)
+- Celebrate effort and progress enthusiastically 🎉
+- Use gentle humor and relatable examples
+- Never make the student feel bad about mistakes — reframe errors as "great learning moments"
+- Adapt complexity to the student's demonstrated proficiency (even if they said Beginner, if they write fluently, level up!)
+
+CORE BEHAVIORS:
+1. Conduct real conversations in ${selectedLang} or mixed language, matching the student's comfort level
+2. Gently correct grammar, vocabulary, and spelling mistakes without being pedantic
+3. Introduce 1-3 new vocabulary words per exchange, relevant to the conversation
+4. After every 1-2 exchanges, offer a short mini exercise (fill-in-the-blank, multiple choice, or translation)
+5. Praise correct usage specifically: "Great use of the subjunctive! 🌟"
+6. Suggest natural, native-sounding alternatives to what the student wrote
+
+EDGE CASES:
+- If input is off-topic or irrelevant: gently redirect to the language lesson with humor
+- If input is abusive or inappropriate: calmly decline and redirect
+- If you don't understand the input: ask for clarification in a friendly way
+- If the student is frustrated: offer encouragement, simplify, and suggest a different approach
+
+OUTPUT FORMAT — YOU MUST ALWAYS respond with valid JSON only, no markdown fences, no extra text:
+{
+  "chat": "Your main conversational reply as tutor (can include ${selectedLang} phrases with English explanations in parentheses). Use \\n for line breaks.",
+  "corrections": [
+    {
+      "original": "what the student wrote incorrectly",
+      "corrected": "the corrected version",
+      "explanation": "brief, friendly explanation of why"
+    }
+  ],
+  "vocab": [
+    { "word": "${selectedLang} word", "meaning": "English meaning" }
+  ],
+  "exercise": {
+    "type": "Multiple Choice | Fill in the Blank | Translation",
+    "question": "The exercise question",
+    "options": ["option A", "option B", "option C", "option D"],
+    "answer": "the correct option exactly as written above"
+  },
+  "xp": 10
+}
+
+RULES:
+- corrections: empty array [] if no corrections needed
+- vocab: empty array [] if no new words introduced
+- exercise: null if no exercise this turn (include exercise every 2 exchanges)
+- xp: award 5-15 XP based on effort and correctness
+- NEVER include markdown code fences in your response
+- NEVER deviate from this JSON schema`;
+}
+</script>
+</body>
+</html>
