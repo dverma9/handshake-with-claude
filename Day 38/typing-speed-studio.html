@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typing Speed Studio</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #16161d;
+    --surface2: #1e1e28;
+    --surface3: #26263a;
+    --border: #2e2e42;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a55;
+    --accent: #7c6af7;
+    --accent2: #a78bfa;
+    --accent-glow: rgba(124,106,247,0.18);
+    --correct: #4ade80;
+    --wrong: #f87171;
+    --cursor: #f8f8ff;
+    --gold: #f59e0b;
+    --teal: #2dd4bf;
+    --pink: #f472b6;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    --font-ui: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --font-size: 18px;
+  }
+  [data-theme="light"] {
+    --bg: #f4f4f8;
+    --surface: #ffffff;
+    --surface2: #f0f0f7;
+    --surface3: #e5e5f0;
+    --border: #d4d4e8;
+    --text: #1a1a2e;
+    --text-muted: #6b6b8a;
+    --text-dim: #c0c0d8;
+    --accent-glow: rgba(124,106,247,0.10);
+  }
+  [data-theme="sepia"] {
+    --bg: #1a1510;
+    --surface: #221d16;
+    --surface2: #2a231a;
+    --surface3: #342c20;
+    --border: #3d3328;
+    --text: #e8dcc8;
+    --text-muted: #8a7a60;
+    --text-dim: #4a3e2e;
+    --accent: #d4a843;
+    --accent2: #e8c070;
+    --accent-glow: rgba(212,168,67,0.15);
+    --correct: #7ec87e;
+    --wrong: #e07070;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background var(--transition), color var(--transition);
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .logo span { color: var(--accent2); }
+
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+
+  .btn-icon {
+    width: 36px; height: 36px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; transition: all var(--transition);
+  }
+  .btn-icon:hover { color: var(--text); border-color: var(--accent); background: var(--accent-glow); }
+
+  .main { flex: 1; padding: 24px 28px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* ── TABS (category) ── */
+  .category-bar {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 4px; margin-bottom: 20px;
+  }
+  .cat-btn {
+    padding: 6px 14px; border-radius: calc(var(--radius) - 2px);
+    border: none; background: transparent; color: var(--text-muted);
+    cursor: pointer; font-size: 13px; font-weight: 500; font-family: var(--font-ui);
+    transition: all var(--transition); white-space: nowrap;
+  }
+  .cat-btn:hover { color: var(--text); background: var(--surface2); }
+  .cat-btn.active { background: var(--accent); color: #fff; }
+
+  /* ── MODE ROW ── */
+  .mode-bar {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; align-items: center;
+  }
+  .mode-group { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px; }
+  .mode-btn {
+    padding: 5px 12px; border-radius: calc(var(--radius-sm) - 1px);
+    border: none; background: transparent; color: var(--text-muted);
+    cursor: pointer; font-size: 12px; font-weight: 500; font-family: var(--font-ui);
+    transition: all var(--transition); white-space: nowrap;
+  }
+  .mode-btn:hover { color: var(--text); }
+  .mode-btn.active { background: var(--accent); color: #fff; }
+
+  .mode-sep { width: 1px; background: var(--border); margin: 0 4px; }
+
+  /* ── LIVE STATS BAR ── */
+  .live-stats {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 20px;
+    margin-bottom: 20px;
+  }
+  .stat-item { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 56px; }
+  .stat-val {
+    font-size: 1.5rem; font-weight: 700; font-family: var(--font-mono);
+    color: var(--text); line-height: 1; transition: color 0.15s;
+  }
+  .stat-val.highlight { color: var(--accent2); }
+  .stat-label { font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+  .progress-wrap {
+    flex: 1; min-width: 120px; display: flex; flex-direction: column; justify-content: center; gap: 5px;
+  }
+  .progress-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
+  .progress-bar-bg { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.15s ease; }
+
+  /* ── TYPING AREA ── */
+  .typing-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .typing-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity var(--transition);
+  }
+  .typing-card.active::before { opacity: 1; }
+
+  /* Focus mode */
+  .typing-card.focus-mode { background: var(--bg); border-color: transparent; }
+
+  .text-display {
+    font-family: var(--font-mono);
+    font-size: var(--font-size);
+    line-height: 1.85;
+    color: var(--text-dim);
+    word-break: break-word;
+    user-select: none;
+    position: relative;
+    letter-spacing: 0.01em;
+    min-height: 120px;
+  }
+
+  .text-display.focus-mode {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+  }
+
+  .char { position: relative; transition: color 0.05s; }
+  .char.correct { color: var(--text); }
+  .char.wrong { color: var(--wrong); background: rgba(248,113,113,0.12); border-radius: 2px; }
+  .char.extra { color: var(--wrong); text-decoration: underline wavy var(--wrong); }
+  .char.missed { color: var(--text-dim); text-decoration: underline var(--wrong); }
+  .char.cursor {
+    position: relative;
+  }
+  .char.cursor::before {
+    content: '';
+    position: absolute;
+    left: -1px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--cursor);
+    border-radius: 2px;
+    animation: blink 1s ease-in-out infinite;
+    box-shadow: 0 0 6px var(--cursor);
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  #hidden-input {
+    position: fixed; opacity: 0; pointer-events: none; top: -999px; left: -999px;
+  }
+
+  .typing-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(15,15,19,0.92);
+    backdrop-filter: blur(8px);
+    border-radius: var(--radius);
+    z-index: 10;
+    gap: 12px;
+  }
+  [data-theme="light"] .typing-overlay { background: rgba(244,244,248,0.92); }
+  .typing-overlay p { color: var(--text-muted); font-size: 13px; }
+  .start-hint {
+    font-size: 0.85rem; color: var(--text-muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .kbd {
+    background: var(--surface3); border: 1px solid var(--border);
+    padding: 3px 8px; border-radius: 4px; font-family: var(--font-mono);
+    font-size: 11px; color: var(--text);
+  }
+
+  /* ── BOTTOM BAR ── */
+  .bottom-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 8px 18px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text); cursor: pointer; font-size: 13px; font-weight: 500;
+    font-family: var(--font-ui); transition: all var(--transition);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { opacity: 0.9; }
+
+  .spacer { flex: 1; }
+
+  .streak-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: var(--radius-sm); padding: 6px 12px;
+    font-size: 12px; font-weight: 600; color: var(--gold);
+  }
+
+  /* ── RESULTS ── */
+  #results-panel { display: none; }
+  #results-panel.visible { display: block; }
+
+  .results-hero {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .results-hero::after {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  }
+
+  .result-headline { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 6px; }
+  .result-wpm { font-size: 4rem; font-weight: 800; font-family: var(--font-mono); line-height: 1; color: var(--accent2); }
+  .result-wpm-label { font-size: 1rem; color: var(--text-muted); padding-bottom: 8px; }
+  .result-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+  .result-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .badge {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+  }
+  .badge-gold { background: rgba(245,158,11,0.15); color: var(--gold); border: 1px solid rgba(245,158,11,0.3); }
+  .badge-accent { background: var(--accent-glow); color: var(--accent2); border: 1px solid rgba(124,106,247,0.3); }
+  .badge-teal { background: rgba(45,212,191,0.1); color: var(--teal); border: 1px solid rgba(45,212,191,0.3); }
+  .badge-pink { background: rgba(244,114,182,0.1); color: var(--pink); border: 1px solid rgba(244,114,182,0.3); }
+
+  .results-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px;
+  }
+  .result-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px;
+  }
+  .result-card-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+  .result-stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .result-stat-row:last-child { border-bottom: none; }
+  .result-stat-name { font-size: 13px; color: var(--text-muted); }
+  .result-stat-val { font-size: 14px; font-weight: 600; font-family: var(--font-mono); color: var(--text); }
+  .result-stat-val.good { color: var(--correct); }
+  .result-stat-val.bad { color: var(--wrong); }
+
+  /* Charts */
+  .chart-canvas { width: 100%; height: 140px; }
+  canvas { display: block; }
+
+  /* Heatmap */
+  .heatmap-grid {
+    display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
+    margin-top: 10px;
+  }
+  .heatmap-key {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 4px; font-size: 11px; font-weight: 600;
+    font-family: var(--font-mono); height: 28px;
+    cursor: default; transition: transform 0.1s;
+  }
+  .heatmap-key:hover { transform: scale(1.2); }
+
+  /* Summary */
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .summary-section { margin-bottom: 16px; }
+  .summary-section:last-child { margin-bottom: 0; }
+  .summary-heading { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .summary-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .suggestion-item { display: flex; gap: 8px; margin-bottom: 6px; }
+  .suggestion-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex-shrink: 0; }
+
+  /* History */
+  #history-panel { display: none; padding: 20px 0; }
+  #history-panel.visible { display: block; }
+  .history-table { width: 100%; border-collapse: collapse; }
+  .history-table th {
+    text-align: left; padding: 10px 14px;
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-table td { padding: 10px 14px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--border); font-family: var(--font-mono); }
+  .history-table tr:hover td { background: var(--surface2); }
+  .history-empty { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
+
+  /* Settings Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px); z-index: 200;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; width: 440px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+  .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 13px; }
+  .setting-label small { display: block; color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+
+  .toggle {
+    width: 40px; height: 22px; background: var(--surface3); border-radius: 11px;
+    cursor: pointer; position: relative; transition: background var(--transition); border: none;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 16px; height: 16px; border-radius: 50%; background: #fff;
+    transition: transform var(--transition);
+  }
+  .toggle.on::after { transform: translateX(18px); }
+
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  input[type=range] {
+    -webkit-appearance: none; height: 4px; border-radius: 2px;
+    background: var(--surface3); outline: none; cursor: pointer; width: 120px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+  }
+  .slider-val { font-size: 12px; color: var(--text-muted); min-width: 30px; text-align: right; }
+
+  .theme-picker { display: flex; gap: 8px; }
+  .theme-dot {
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: border-color var(--transition);
+  }
+  .theme-dot.active { border-color: var(--text); }
+
+  /* Nav tabs */
+  .nav-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .nav-tab {
+    padding: 10px 18px; border: none; background: transparent;
+    color: var(--text-muted); cursor: pointer; font-size: 13px; font-weight: 500;
+    font-family: var(--font-ui); position: relative; transition: color var(--transition);
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent2); }
+  .nav-tab.active::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+    background: var(--accent);
+  }
+
+  /* PB badge */
+  .pb-flash {
+    position: fixed; top: 80px; right: 24px; z-index: 300;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; padding: 10px 16px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600;
+    transform: translateX(200px); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 20px rgba(124,106,247,0.4);
+  }
+  .pb-flash.show { transform: translateX(0); }
+
+  /* Zen mode */
+  .zen-overlay {
+    position: fixed; inset: 0; background: var(--bg);
+    z-index: 150; display: none; flex-direction: column;
+    align-items: center; justify-content: center; padding: 40px;
+  }
+  .zen-overlay.active { display: flex; }
+  .zen-close {
+    position: fixed; top: 20px; right: 20px;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .zen-overlay:hover .zen-close { opacity: 1; }
+  .zen-text {
+    font-family: var(--font-mono); font-size: 1.3rem; line-height: 2.2;
+    max-width: 800px; width: 100%; text-align: left; color: var(--text-dim);
+    word-break: break-word;
+  }
+
+  /* Custom text */
+  .custom-textarea {
+    width: 100%; min-height: 120px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); font-family: var(--font-mono); font-size: 13px;
+    padding: 12px; resize: vertical; outline: none;
+    transition: border-color var(--transition);
+  }
+  .custom-textarea:focus { border-color: var(--accent); }
+
+  /* WPM counter pulse */
+  @keyframes statPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); color: var(--accent2); }
+    100% { transform: scale(1); }
+  }
+  .stat-pulse { animation: statPulse 0.3s ease; }
+
+  /* Fade in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.35s ease forwards; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .main { padding: 14px; }
+    header { padding: 10px 14px; }
+    .live-stats { gap: 10px; padding: 10px 14px; }
+    .result-wpm { font-size: 2.8rem; }
+    .typing-card { padding: 18px; }
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<input type="text" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-hidden="true" tabindex="-1">
+
+<!-- PB Flash -->
+<div class="pb-flash" id="pb-flash">🏆 New Personal Best!</div>
+
+<!-- Zen Mode Overlay -->
+<div class="zen-overlay" id="zen-overlay">
+  <button class="btn btn-icon zen-close" onclick="exitZen()" title="Exit Zen (Esc)">✕</button>
+  <div class="zen-text" id="zen-text"></div>
+  <input type="text" id="zen-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="position:fixed;opacity:0;top:-999px;">
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div class="modal-title">⚙ Settings</div>
+      <button class="btn-icon" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">Theme<small>Interface color scheme</small></div>
+      <div class="theme-picker">
+        <div class="theme-dot active" style="background:#0f0f13;border-color:#7c6af7" onclick="setTheme('dark',this)" title="Dark"></div>
+        <div class="theme-dot" style="background:#f4f4f8;border-color:#ccc" onclick="setTheme('light',this)" title="Light"></div>
+        <div class="theme-dot" style="background:#1a1510;border-color:#d4a843" onclick="setTheme('sepia',this)" title="Sepia"></div>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">Font Size<small>Typing area text size</small></div>
+      <div class="slider-row">
+        <input type="range" min="13" max="28" value="18" id="font-size-slider" oninput="setFontSize(this.value)">
+        <span class="slider-val" id="font-size-val">18px</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">Sound Effects<small>Click sounds on keypress</small></div>
+      <button class="toggle" id="sound-toggle" onclick="toggleSetting('sound')"></button>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">Smooth Cursor<small>Animated cursor transitions</small></div>
+      <button class="toggle on" id="cursor-toggle" onclick="toggleSetting('cursor')"></button>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">Show Live WPM<small>Update WPM in real-time</small></div>
+      <button class="toggle on" id="wpm-toggle" onclick="toggleSetting('wpm')"></button>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">Keyboard Shortcuts<small>Tab=restart, Esc=pause, F1=settings</small></div>
+      <button class="toggle on" id="shortcuts-toggle" onclick="toggleSetting('shortcuts')"></button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⌨</div>
+      Typing Speed <span>Studio</span>
+    </div>
+    <div class="header-actions">
+      <div class="streak-badge" id="streak-badge" style="display:none">🔥 <span id="streak-count">0</span> day streak</div>
+      <button class="btn-icon" onclick="openSettings()" title="Settings (F1)">⚙</button>
+      <button class="btn-icon" onclick="showHistory()" title="History">📊</button>
+      <button class="btn-icon" onclick="toggleSound()" id="sound-btn" title="Sound">🔇</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- NAV TABS -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPanel('typing')">Practice</button>
+      <button class="nav-tab" onclick="showPanel('results')">Results</button>
+      <button class="nav-tab" onclick="showPanel('history')">History</button>
+    </div>
+
+    <!-- TYPING PANEL -->
+    <div id="typing-panel">
+      <!-- Category bar -->
+      <div class="category-bar">
+        <button class="cat-btn active" onclick="setCategory('english',this)">📝 English</button>
+        <button class="cat-btn" onclick="setCategory('programming',this)">💻 Programming</button>
+        <button class="cat-btn" onclick="setCategory('business',this)">💼 Business</button>
+        <button class="cat-btn" onclick="setCategory('medical',this)">🏥 Medical</button>
+        <button class="cat-btn" onclick="setCategory('legal',this)">⚖ Legal</button>
+        <button class="cat-btn" onclick="setCategory('academic',this)">🎓 Academic</button>
+        <button class="cat-btn" onclick="setCategory('creative',this)">✍ Creative</button>
+        <button class="cat-btn" onclick="setCategory('custom',this)">✏ Custom</button>
+      </div>
+
+      <!-- Custom text input (hidden by default) -->
+      <div id="custom-text-panel" style="display:none;margin-bottom:16px;">
+        <textarea class="custom-textarea" id="custom-textarea" placeholder="Paste or type your custom text here..."></textarea>
+        <button class="btn primary" style="margin-top:8px;" onclick="loadCustomText()">Use This Text</button>
+      </div>
+
+      <!-- Prog language selector -->
+      <div id="prog-lang-panel" style="display:none;margin-bottom:12px;">
+        <div class="mode-group" style="display:inline-flex;">
+          <button class="mode-btn active" onclick="setProgLang('javascript',this)">JS</button>
+          <button class="mode-btn" onclick="setProgLang('python',this)">Python</button>
+          <button class="mode-btn" onclick="setProgLang('java',this)">Java</button>
+          <button class="mode-btn" onclick="setProgLang('cpp',this)">C++</button>
+          <button class="mode-btn" onclick="setProgLang('html',this)">HTML</button>
+          <button class="mode-btn" onclick="setProgLang('css',this)">CSS</button>
+          <button class="mode-btn" onclick="setProgLang('sql',this)">SQL</button>
+        </div>
+      </div>
+
+      <!-- Mode bar -->
+      <div class="mode-bar">
+        <div class="mode-group">
+          <button class="mode-btn active" onclick="setMainMode('time',this)">⏱ Time</button>
+          <button class="mode-btn" onclick="setMainMode('words',this)">📝 Words</button>
+          <button class="mode-btn" onclick="setMainMode('quote',this)">💬 Quote</button>
+          <button class="mode-btn" onclick="setMainMode('adaptive',this)">🧠 Adaptive</button>
+        </div>
+        <div class="mode-sep"></div>
+        <!-- Time options -->
+        <div class="mode-group" id="time-options">
+          <button class="mode-btn active" onclick="setTimeLimit(15,this)">15s</button>
+          <button class="mode-btn" onclick="setTimeLimit(30,this)">30s</button>
+          <button class="mode-btn" onclick="setTimeLimit(60,this)">60s</button>
+          <button class="mode-btn" onclick="setTimeLimit(120,this)">120s</button>
+        </div>
+        <!-- Word count options (hidden) -->
+        <div class="mode-group" id="word-options" style="display:none;">
+          <button class="mode-btn" onclick="setWordTarget(25,this)">25w</button>
+          <button class="mode-btn active" onclick="setWordTarget(50,this)">50w</button>
+          <button class="mode-btn" onclick="setWordTarget(100,this)">100w</button>
+          <button class="mode-btn" onclick="setWordTarget(250,this)">250w</button>
+        </div>
+        <div class="mode-sep"></div>
+        <div class="mode-group">
+          <button class="mode-btn" onclick="toggleFocusMode(this)" id="focus-btn">🔦 Focus</button>
+          <button class="mode-btn" onclick="startZen()" id="zen-btn">🧘 Zen</button>
+        </div>
+      </div>
+
+      <!-- Live stats -->
+      <div class="live-stats">
+        <div class="stat-item">
+          <div class="stat-val" id="stat-wpm">0</div>
+          <div class="stat-label">WPM</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-val" id="stat-raw">0</div>
+          <div class="stat-label">Raw WPM</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-val" id="stat-acc">—</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-val" id="stat-cpm">0</div>
+          <div class="stat-label">CPM</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-val" id="stat-mistakes">0</div>
+          <div class="stat-label">Errors</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-val" id="stat-streak-live">0</div>
+          <div class="stat-label">Streak</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-val" id="stat-timer">—</div>
+          <div class="stat-label" id="stat-timer-label">Time</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span>Progress</span>
+            <span id="prog-pct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing area -->
+      <div class="typing-card" id="typing-card">
+        <div class="text-display" id="text-display">
+          <div class="typing-overlay" id="typing-overlay">
+            <div style="font-size:2rem;">⌨</div>
+            <div style="font-size:1rem;font-weight:600;color:var(--text)">Click here or start typing</div>
+            <div class="start-hint">Press <span class="kbd">Tab</span> to restart · <span class="kbd">Esc</span> to pause · <span class="kbd">F1</span> for settings</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="bottom-bar">
+        <button class="btn primary" onclick="restartTest()" title="Tab">↺ Restart</button>
+        <button class="btn" onclick="pauseTest()" id="pause-btn">⏸ Pause</button>
+        <button class="btn" onclick="newPassage()">🔄 New Text</button>
+        <div class="spacer"></div>
+        <div style="font-size:12px;color:var(--text-muted)">Category: <strong id="cat-label">English</strong></div>
+      </div>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div id="results-panel">
+      <div class="results-hero fade-up">
+        <div class="result-headline">
+          <div class="result-wpm" id="r-wpm">0</div>
+          <div class="result-wpm-label">wpm</div>
+        </div>
+        <div class="result-sub" id="r-sub">Complete a test to see your results</div>
+        <div class="result-badges" id="r-badges"></div>
+      </div>
+
+      <div class="results-grid">
+        <!-- Stats card -->
+        <div class="result-card fade-up">
+          <div class="result-card-title">📈 Performance</div>
+          <div class="result-stat-row"><span class="result-stat-name">WPM</span><span class="result-stat-val" id="r-s-wpm">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Raw WPM</span><span class="result-stat-val" id="r-s-raw">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">CPM</span><span class="result-stat-val" id="r-s-cpm">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Accuracy</span><span class="result-stat-val" id="r-s-acc">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Consistency</span><span class="result-stat-val" id="r-s-cons">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Duration</span><span class="result-stat-val" id="r-s-dur">—</span></div>
+        </div>
+
+        <!-- Characters card -->
+        <div class="result-card fade-up">
+          <div class="result-card-title">🔤 Characters</div>
+          <div class="result-stat-row"><span class="result-stat-name">Correct</span><span class="result-stat-val good" id="r-c-correct">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Incorrect</span><span class="result-stat-val bad" id="r-c-wrong">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Extra</span><span class="result-stat-val bad" id="r-c-extra">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Missed</span><span class="result-stat-val bad" id="r-c-missed">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Mistakes</span><span class="result-stat-val bad" id="r-c-mistakes">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Completion</span><span class="result-stat-val" id="r-c-comp">—</span></div>
+        </div>
+
+        <!-- PB card -->
+        <div class="result-card fade-up">
+          <div class="result-card-title">🏆 Records</div>
+          <div class="result-stat-row"><span class="result-stat-name">Best WPM</span><span class="result-stat-val" id="r-pb-wpm">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Best Accuracy</span><span class="result-stat-val" id="r-pb-acc">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Tests Taken</span><span class="result-stat-val" id="r-pb-tests">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Avg WPM</span><span class="result-stat-val" id="r-pb-avg">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Percentile Est.</span><span class="result-stat-val" id="r-percentile">—</span></div>
+          <div class="result-stat-row"><span class="result-stat-name">Typing Rhythm</span><span class="result-stat-val" id="r-rhythm">—</span></div>
+        </div>
+
+        <!-- WPM graph -->
+        <div class="result-card fade-up">
+          <div class="result-card-title">📊 WPM Over Time</div>
+          <canvas id="wpm-chart" class="chart-canvas"></canvas>
+        </div>
+
+        <!-- Accuracy graph -->
+        <div class="result-card fade-up">
+          <div class="result-card-title">🎯 Accuracy Over Time</div>
+          <canvas id="acc-chart" class="chart-canvas"></canvas>
+        </div>
+
+        <!-- Error heatmap -->
+        <div class="result-card fade-up" style="grid-column: span 1;">
+          <div class="result-card-title">🔥 Error Heatmap</div>
+          <div class="heatmap-grid" id="heatmap-grid"></div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-card fade-up" id="summary-card">
+        <div class="result-card-title" style="margin-bottom:16px;">🧠 Performance Summary</div>
+        <div id="summary-content"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn primary" onclick="restartTest();showPanel('typing')">↺ Try Again</button>
+        <button class="btn" onclick="newPassage();showPanel('typing')">🔄 New Text</button>
+      </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div id="history-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:1rem;font-weight:600;">Session History</div>
+        <button class="btn" onclick="clearHistory()" style="font-size:12px;">Clear All</button>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Date</th><th>Mode</th><th>Category</th>
+              <th>WPM</th><th>Accuracy</th><th>Duration</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+        <div class="history-empty" id="history-empty">No sessions yet. Complete a typing test to see your history.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const state = {
+  category: 'english',
+  mainMode: 'time',
+  timeLimit: 15,
+  wordTarget: 50,
+  progLang: 'javascript',
+  focusMode: false,
+  zenMode: false,
+  soundOn: false,
+  passage: '',
+  typed: '',
+  started: false,
+  finished: false,
+  paused: false,
+  startTime: null,
+  pauseStart: null,
+  totalPauseTime: 0,
+  elapsed: 0,
+  timer: null,
+  wpmHistory: [],
+  accHistory: [],
+  errorMap: {},
+  keyTimings: [],
+  lastKeyTime: null,
+  mistakes: 0,
+  currentStreak: 0,
+  bestStreak: 0,
+  settings: { sound: false, cursor: true, wpm: true, shortcuts: true },
+  adaptiveDifficulty: 1,
+};
+
+// ════════════════════════════════════════════════════════
+// PASSAGE GENERATORS
+// ════════════════════════════════════════════════════════
+const passages = {
+  english: [
+    "The sun dipped below the horizon, painting the sky in shades of amber and crimson. A cool breeze swept across the empty fields, carrying with it the faint scent of rain on dry earth. Somewhere in the distance, a dog barked once and then fell silent.",
+    "Learning to type quickly and accurately is one of the most valuable skills in the modern world. Every hour spent practicing builds the muscle memory that allows ideas to flow freely from mind to screen without interruption or friction.",
+    "The library was quiet at this hour, save for the soft rustle of pages turning and the occasional scratch of a pen. Rows of shelves stretched toward the ceiling, holding decades of accumulated knowledge between their covers.",
+    "Technology has fundamentally changed the way humans communicate, work, and think. Smartphones, once a luxury, have become an essential tool for billions of people. The internet connects us to information and to each other in ways that were unimaginable just thirty years ago.",
+    "She walked through the forest slowly, listening to the birds calling overhead and the crunch of fallen leaves beneath her feet. The morning mist had not yet lifted, and the trees loomed large and ghostlike in the pale early light.",
+    "Great writing requires clarity, precision, and an understanding of your audience. Every word should earn its place on the page. Cut anything that does not serve the reader, and never mistake complexity for sophistication.",
+  ],
+  business: [
+    "Please find attached the quarterly financial report for your review. Our revenue grew by twelve percent year over year, driven primarily by strong performance in the enterprise segment. We recommend scheduling a follow-up call to discuss next steps and align on the roadmap for the coming quarter.",
+    "Following our meeting last Thursday, I wanted to summarize the action items we agreed on. The product team will deliver a revised specification by end of week. Marketing will prepare campaign assets for the Q3 launch. Finance has been asked to update the budget projections accordingly.",
+    "Our strategic vision for the next fiscal year centers on three core pillars: customer acquisition, product differentiation, and operational efficiency. We believe these priorities, when executed with discipline, will position the company for sustainable long-term growth and improved margin performance.",
+    "Thank you for reaching out regarding the proposal. We have reviewed the terms and are generally aligned on the commercial structure. However, we would like to revisit the indemnification clause before signing. Our legal team will send over a redline by close of business Friday.",
+    "The board has approved a capital allocation strategy that prioritizes research and development alongside strategic acquisitions in adjacent markets. We remain committed to returning value to shareholders while investing aggressively in the capabilities required to compete in an evolving landscape.",
+  ],
+  medical: [
+    "The patient presented with acute dyspnea, bilateral crackles on auscultation, and peripheral edema consistent with congestive heart failure. A chest radiograph confirmed pulmonary vascular congestion. Intravenous furosemide was administered and the patient was admitted to the cardiac care unit for monitoring.",
+    "Myocardial infarction occurs when coronary artery blood flow is obstructed, resulting in ischemic necrosis of the myocardium. Early intervention with percutaneous coronary intervention is associated with significantly improved outcomes when performed within ninety minutes of symptom onset.",
+    "The histopathological examination revealed moderately differentiated adenocarcinoma with lymphovascular invasion. Immunohistochemical staining was positive for cytokeratin seven and negative for cytokeratin twenty, suggesting a pulmonary primary. Oncology was consulted for further staging and treatment planning.",
+    "Pharmacokinetics describes the movement of drugs through the body, encompassing absorption, distribution, metabolism, and excretion. Understanding these processes is essential for dosing calculations and predicting therapeutic drug levels in patients with renal or hepatic impairment.",
+    "The patient reported a three-week history of progressive fatigue, unintentional weight loss, and night sweats. Laboratory findings included lymphocytosis, elevated lactate dehydrogenase, and a mediastinal mass on computed tomography. A bone marrow biopsy was ordered to evaluate for lymphoma.",
+  ],
+  legal: [
+    "This Agreement is entered into as of the date last signed below by and between the parties identified herein. Each party represents and warrants that it has full authority to enter into this Agreement and to perform its obligations hereunder without the consent of any third party.",
+    "Notwithstanding any other provision of this Agreement, neither party shall be liable for any indirect, incidental, special, exemplary, or consequential damages, including lost profits, arising out of or related to this Agreement, however caused and under any theory of liability.",
+    "The Licensee shall not sublicense, sell, resell, transfer, assign, or otherwise make available the Software to any third party without the prior written consent of the Licensor. Any attempt to do so shall be void and shall immediately terminate all rights granted under this Agreement.",
+    "Pursuant to the settlement agreement executed on the aforementioned date, all claims, counterclaims, and cross-claims between the parties are hereby dismissed with prejudice. Each party shall bear its own attorneys fees and costs associated with the litigation.",
+    "The arbitration shall be conducted in accordance with the rules of the American Arbitration Association then in effect. The decision of the arbitrator shall be final and binding on both parties and may be enforced in any court of competent jurisdiction.",
+  ],
+  academic: [
+    "The empirical evidence supports the hypothesis that socioeconomic status is a significant predictor of educational attainment, independent of cognitive ability. Longitudinal studies conducted across multiple cohorts reveal persistent inequalities that are not adequately explained by individual-level variables alone.",
+    "Bayesian inference provides a probabilistic framework for updating prior beliefs in light of new evidence. Unlike frequentist methods, Bayesian approaches allow researchers to incorporate prior knowledge into the analysis and quantify uncertainty in a more intuitive and flexible manner.",
+    "The theory of cognitive dissonance, first articulated by Leon Festinger in 1957, proposes that individuals experience psychological discomfort when holding two or more contradictory beliefs simultaneously. This discomfort motivates attitude or behavior change to restore internal consistency.",
+    "Quantum entanglement describes a phenomenon in which the quantum states of two or more particles become correlated in such a way that the measurement of one particle instantaneously influences the state of the other, regardless of the distance separating them.",
+    "The historiographical debate surrounding the causes of the First World War has evolved considerably since the immediate postwar period. Contemporary scholarship emphasizes the role of systemic pressures, alliance structures, and strategic miscalculation rather than attributing sole responsibility to any single nation or leader.",
+  ],
+  creative: [
+    "The old clock on the mantelpiece had not ticked for twenty years, yet every night at midnight, she swore she could hear it. She told no one. The house had enough secrets without adding that particular one to the pile.",
+    "He wrote letters he would never send, filling notebook after notebook with words meant for someone who had long since stopped listening. The act itself was the point. The page asked nothing of him, judged nothing, and forgot nothing.",
+    "Rain had been falling for three days straight. The river was rising. In town, people spoke in hushed voices about the flood of nineteen sixty, the one that took the church and half of Main Street. Nobody wanted to say what everyone was thinking.",
+    "The market was loud and smelled of salt fish and ripe mango. She pushed through the crowd with practiced ease, her basket balanced on her head, her eyes scanning every face with the quick professional thoroughness of someone who had grown up here and trusted nothing.",
+    "There is a particular silence that comes just before dawn, different from all other silences. It is expectant. It holds its breath. Even the insects seem to pause, as if the world itself is gathering itself before the long work of another day.",
+  ],
+  programming: { javascript: [], python: [], java: [], cpp: [], html: [], css: [], sql: [] },
+};
+
+const codePassages = {
+  javascript: [
+    `async function fetchUserData(userId) {\n  try {\n    const response = await fetch(\`/api/users/\${userId}\`);\n    if (!response.ok) throw new Error('Network response was not ok');\n    const data = await response.json();\n    return { success: true, data };\n  } catch (error) {\n    console.error('Fetch error:', error);\n    return { success: false, error: error.message };\n  }\n}`,
+    `const debounce = (fn, delay) => {\n  let timeoutId;\n  return (...args) => {\n    clearTimeout(timeoutId);\n    timeoutId = setTimeout(() => fn.apply(this, args), delay);\n  };\n};\n\nconst handleSearch = debounce((query) => {\n  console.log('Searching for:', query);\n}, 300);`,
+    `class EventEmitter {\n  constructor() { this.events = {}; }\n  on(event, listener) {\n    if (!this.events[event]) this.events[event] = [];\n    this.events[event].push(listener);\n    return this;\n  }\n  emit(event, ...args) {\n    (this.events[event] || []).forEach(l => l(...args));\n  }\n  off(event, listener) {\n    if (this.events[event])\n      this.events[event] = this.events[event].filter(l => l !== listener);\n  }\n}`,
+  ],
+  python: [
+    `def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1`,
+    `from dataclasses import dataclass, field\nfrom typing import List\n\n@dataclass\nclass Student:\n    name: str\n    grade: int\n    scores: List[float] = field(default_factory=list)\n\n    @property\n    def average(self) -> float:\n        return sum(self.scores) / len(self.scores) if self.scores else 0.0\n\n    def __repr__(self):\n        return f"Student({self.name}, avg={self.average:.2f})"`,
+    `import asyncio\nimport aiohttp\n\nasync def fetch_all(urls):\n    async with aiohttp.ClientSession() as session:\n        tasks = [fetch_one(session, url) for url in urls]\n        return await asyncio.gather(*tasks)\n\nasync def fetch_one(session, url):\n    async with session.get(url) as response:\n        return await response.json()`,
+  ],
+  java: [
+    `public class LinkedList<T> {\n    private Node<T> head;\n    private int size;\n\n    private static class Node<T> {\n        T data;\n        Node<T> next;\n        Node(T data) { this.data = data; }\n    }\n\n    public void add(T data) {\n        Node<T> newNode = new Node<>(data);\n        if (head == null) { head = newNode; }\n        else {\n            Node<T> current = head;\n            while (current.next != null) current = current.next;\n            current.next = newNode;\n        }\n        size++;\n    }\n}`,
+    `@RestController\n@RequestMapping("/api/products")\npublic class ProductController {\n\n    @Autowired\n    private ProductService productService;\n\n    @GetMapping("/{id}")\n    public ResponseEntity<Product> getProduct(@PathVariable Long id) {\n        return productService.findById(id)\n            .map(ResponseEntity::ok)\n            .orElse(ResponseEntity.notFound().build());\n    }\n\n    @PostMapping\n    public ResponseEntity<Product> createProduct(@RequestBody Product product) {\n        Product saved = productService.save(product);\n        return ResponseEntity.status(HttpStatus.CREATED).body(saved);\n    }\n}`,
+  ],
+  cpp: [
+    `template <typename T>\nclass Stack {\nprivate:\n    std::vector<T> elements;\npublic:\n    void push(T const& elem) { elements.push_back(elem); }\n    void pop() {\n        if (elements.empty()) throw std::out_of_range("Stack is empty");\n        elements.pop_back();\n    }\n    T top() const {\n        if (elements.empty()) throw std::out_of_range("Stack is empty");\n        return elements.back();\n    }\n    bool empty() const { return elements.empty(); }\n};`,
+    `#include <iostream>\n#include <memory>\n\nstruct TreeNode {\n    int val;\n    std::shared_ptr<TreeNode> left, right;\n    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}\n};\n\nint height(std::shared_ptr<TreeNode> node) {\n    if (!node) return 0;\n    return 1 + std::max(height(node->left), height(node->right));\n}`,
+  ],
+  html: [
+    `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Product Card</title>\n    <link rel="stylesheet" href="styles.css">\n</head>\n<body>\n    <article class="product-card">\n        <img src="product.jpg" alt="Product image" class="product-image">\n        <div class="product-info">\n            <h2 class="product-title">Wireless Headphones</h2>\n            <p class="product-price">$89.99</p>\n            <button class="btn btn-primary" type="button">Add to Cart</button>\n        </div>\n    </article>\n</body>\n</html>`,
+    `<form class="contact-form" novalidate>\n    <div class="form-group">\n        <label for="name">Full Name</label>\n        <input type="text" id="name" name="name" required placeholder="John Doe">\n        <span class="error-msg" role="alert"></span>\n    </div>\n    <div class="form-group">\n        <label for="email">Email Address</label>\n        <input type="email" id="email" name="email" required placeholder="john@example.com">\n    </div>\n    <div class="form-group">\n        <label for="message">Message</label>\n        <textarea id="message" name="message" rows="5" required></textarea>\n    </div>\n    <button type="submit" class="btn-submit">Send Message</button>\n</form>`,
+  ],
+  css: [
+    `.card {\n    display: flex;\n    flex-direction: column;\n    background: #ffffff;\n    border-radius: 12px;\n    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);\n    overflow: hidden;\n    transition: transform 0.2s ease, box-shadow 0.2s ease;\n}\n\n.card:hover {\n    transform: translateY(-4px);\n    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);\n}\n\n.card-header {\n    padding: 20px 24px;\n    border-bottom: 1px solid #f0f0f0;\n}\n\n.card-body {\n    padding: 24px;\n    flex: 1;\n}`,
+    `@keyframes shimmer {\n    0% { background-position: -200% center; }\n    100% { background-position: 200% center; }\n}\n\n.skeleton {\n    background: linear-gradient(\n        90deg,\n        #f0f0f0 25%,\n        #e0e0e0 50%,\n        #f0f0f0 75%\n    );\n    background-size: 200% auto;\n    border-radius: 6px;\n    animation: shimmer 1.5s infinite linear;\n}`,
+  ],
+  sql: [
+    `SELECT\n    u.id,\n    u.name,\n    u.email,\n    COUNT(o.id) AS order_count,\n    SUM(o.total_amount) AS lifetime_value,\n    MAX(o.created_at) AS last_order_date\nFROM users u\nLEFT JOIN orders o ON o.user_id = u.id\nWHERE u.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)\n    AND u.status = 'active'\nGROUP BY u.id, u.name, u.email\nHAVING order_count > 0\nORDER BY lifetime_value DESC\nLIMIT 100;`,
+    `CREATE TABLE products (\n    id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    sku         VARCHAR(50) NOT NULL UNIQUE,\n    name        VARCHAR(255) NOT NULL,\n    description TEXT,\n    price       DECIMAL(10, 2) NOT NULL CHECK (price >= 0),\n    stock       INT NOT NULL DEFAULT 0,\n    category_id INT UNSIGNED,\n    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL\n);`,
+  ],
+};
+
+const quotes = [
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+  { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+  { text: "Strive not to be a success, but rather to be of value.", author: "Albert Einstein" },
+  { text: "The mind is everything. What you think you become.", author: "Buddha" },
+  { text: "An unexamined life is not worth living.", author: "Socrates" },
+  { text: "Spread love everywhere you go. Let no one ever come to you without leaving happier.", author: "Mother Teresa" },
+  { text: "When you reach the end of your rope, tie a knot in it and hang on.", author: "Franklin D. Roosevelt" },
+];
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function getPassage() {
+  const cat = state.category;
+  if (cat === 'programming') {
+    const snippets = codePassages[state.progLang];
+    return snippets[Math.floor(Math.random() * snippets.length)];
+  }
+  if (state.mainMode === 'quote') {
+    const q = quotes[Math.floor(Math.random() * quotes.length)];
+    return `"${q.text}" — ${q.author}`;
+  }
+  const pool = passages[cat] || passages.english;
+  let idx = Math.floor(Math.random() * pool.length);
+  // Adaptive mode: pick based on difficulty
+  if (state.mainMode === 'adaptive') {
+    const targetWords = Math.min(20 + state.adaptiveDifficulty * 15, 80);
+    const suited = pool.filter(p => {
+      const wc = p.split(/\s+/).length;
+      return Math.abs(wc - targetWords) < 20;
+    });
+    if (suited.length) idx = pool.indexOf(suited[Math.floor(Math.random() * suited.length)]);
+  }
+  if (state.mainMode === 'words') {
+    const all = pool.join(' ').split(/\s+/);
+    const shuffled = [...all].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, state.wordTarget).join(' ');
+  }
+  return pool[idx];
+}
+
+function elapsed() {
+  if (!state.startTime) return 0;
+  return (Date.now() - state.startTime - state.totalPauseTime) / 1000;
+}
+
+function calcWPM(correctChars, seconds) {
+  if (seconds < 1) return 0;
+  return Math.min(Math.round((correctChars / 5) / (seconds / 60)), 300);
+}
+
+function calcRawWPM(totalChars, seconds) {
+  if (seconds < 1) return 0;
+  return Math.min(Math.round((totalChars / 5) / (seconds / 60)), 350);
+}
+
+function calcAccuracy(correct, total) {
+  if (total === 0) return 100;
+  return Math.max(0, Math.round((correct / total) * 100));
+}
+
+function percentileEstimate(wpm) {
+  if (wpm < 30) return 'Bottom 10%';
+  if (wpm < 45) return 'Bottom 25%';
+  if (wpm < 60) return 'Average (50th)';
+  if (wpm < 80) return 'Top 40%';
+  if (wpm < 100) return 'Top 25%';
+  if (wpm < 120) return 'Top 15%';
+  if (wpm < 150) return 'Top 5%';
+  return 'Top 1%';
+}
+
+// Local storage
+function loadHistory() { try { return JSON.parse(localStorage.getItem('tss_history') || '[]'); } catch { return []; } }
+function saveHistory(h) { localStorage.setItem('tss_history', JSON.stringify(h)); }
+function loadPBs() { try { return JSON.parse(localStorage.getItem('tss_pbs') || '{}'); } catch { return {}; } }
+function savePBs(p) { localStorage.setItem('tss_pbs', JSON.stringify(p)); }
+function loadDayStreak() { try { return JSON.parse(localStorage.getItem('tss_streak') || '{"count":0,"last":""}'); } catch { return {count:0,last:''}; } }
+function saveDayStreak(s) { localStorage.setItem('tss_streak', JSON.stringify(s)); }
+
+// ════════════════════════════════════════════════════════
+// RENDER PASSAGE
+// ════════════════════════════════════════════════════════
+function renderPassage() {
+  const display = document.getElementById('text-display');
+  // Keep overlay
+  const overlay = document.getElementById('typing-overlay');
+  display.innerHTML = '';
+  display.appendChild(overlay);
+
+  state.passage.split('').forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className = 'char';
+    span.dataset.index = i;
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    if (ch === '\n') { span.textContent = '↵\n'; span.style.color = 'var(--text-dim)'; }
+    display.appendChild(span);
+  });
+  // Apply cursor to position 0
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const chars = document.querySelectorAll('#text-display .char');
+  const typed = state.typed;
+
+  chars.forEach((span, i) => {
+    span.className = 'char';
+    const ch = state.passage[i];
+    if (i < typed.length) {
+      if (typed[i] === ch) { span.className = 'char correct'; }
+      else { span.className = 'char wrong'; }
+    } else if (i === typed.length && !state.finished) {
+      span.className = 'char cursor';
+    }
+  });
+
+  // Scroll cursor into view (focus mode)
+  const cursorEl = document.querySelector('#text-display .char.cursor');
+  if (cursorEl && state.focusMode) {
+    cursorEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// TYPING LOGIC
+// ════════════════════════════════════════════════════════
+function onInput(e) {
+  if (state.finished || state.paused) { e.target.value = ''; return; }
+
+  const val = e.target.value;
+  e.target.value = '';
+
+  if (!state.started && val.length > 0) startTest();
+  if (!state.started) return;
+
+  const prevLen = state.typed.length;
+
+  if (val === '\u0008' || val.length === 0) {
+    // backspace - handled via keydown
+    return;
+  }
+
+  const ch = val[val.length - 1]; // last char typed
+  if (!ch) return;
+
+  // Key timing
+  const now = Date.now();
+  if (state.lastKeyTime) state.keyTimings.push(now - state.lastKeyTime);
+  state.lastKeyTime = now;
+
+  // Sound
+  if (state.soundOn) playClick(ch === state.passage[state.typed.length]);
+
+  // Error tracking
+  if (state.typed.length < state.passage.length) {
+    const expected = state.passage[state.typed.length];
+    if (ch !== expected) {
+      const key = ch.toLowerCase();
+      state.errorMap[key] = (state.errorMap[key] || 0) + 1;
+      state.mistakes++;
+      state.currentStreak = 0;
+    } else {
+      state.currentStreak++;
+      if (state.currentStreak > state.bestStreak) state.bestStreak = state.currentStreak;
+    }
+  }
+
+  state.typed += ch;
+
+  updateDisplay();
+  updateLiveStats();
+  updateZenDisplay();
+
+  // Check completion
+  if (state.typed.length >= state.passage.length) {
+    // word/quote/adaptive mode: finish when all chars typed
+    if (state.mainMode !== 'time') finishTest();
+  }
+}
+
+function onKeyDown(e) {
+  if (!state.settings.shortcuts && e.key !== 'Backspace') return;
+
+  if (e.key === 'Tab') { e.preventDefault(); restartTest(); return; }
+  if (e.key === 'Escape') { e.preventDefault(); pauseTest(); return; }
+  if (e.key === 'F1') { e.preventDefault(); openSettings(); return; }
+
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    if (state.typed.length > 0) {
+      state.typed = state.typed.slice(0, -1);
+      updateDisplay();
+      updateLiveStats();
+    }
+  }
+}
+
+function startTest() {
+  state.started = true;
+  state.startTime = Date.now();
+  state.totalPauseTime = 0;
+  document.getElementById('typing-overlay').style.display = 'none';
+  document.getElementById('typing-card').classList.add('active');
+  document.getElementById('pause-btn').disabled = false;
+
+  if (state.mainMode === 'time') {
+    startTimer();
+  }
+  // WPM sampling every second
+  state.wpmSampler = setInterval(() => {
+    if (state.started && !state.paused && !state.finished) {
+      const secs = elapsed();
+      const correctChars = countCorrectChars();
+      state.wpmHistory.push(calcWPM(correctChars, secs));
+      const total = state.typed.length;
+      const acc = calcAccuracy(correctChars, total);
+      state.accHistory.push(acc);
+    }
+  }, 1000);
+
+  // Update daily streak
+  const today = new Date().toDateString();
+  const streak = loadDayStreak();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (streak.last === today) {
+    // already counted today
+  } else if (streak.last === yesterday) {
+    streak.count++;
+    streak.last = today;
+    saveDayStreak(streak);
+  } else if (streak.last !== today) {
+    streak.count = 1;
+    streak.last = today;
+    saveDayStreak(streak);
+  }
+  if (streak.count > 1) {
+    document.getElementById('streak-badge').style.display = 'flex';
+    document.getElementById('streak-count').textContent = streak.count;
+  }
+}
+
+function startTimer() {
+  let remaining = state.timeLimit;
+  document.getElementById('stat-timer-label').textContent = 'Left';
+  state.timer = setInterval(() => {
+    if (state.paused) return;
+    remaining--;
+    const el = document.getElementById('stat-timer');
+    el.textContent = remaining;
+    if (remaining <= 5) el.style.color = 'var(--wrong)';
+    if (remaining <= 0) {
+      clearInterval(state.timer);
+      finishTest();
+    }
+  }, 1000);
+  document.getElementById('stat-timer').textContent = remaining;
+}
+
+function pauseTest() {
+  if (!state.started || state.finished) return;
+  if (!state.paused) {
+    state.paused = true;
+    state.pauseStart = Date.now();
+    document.getElementById('pause-btn').textContent = '▶ Resume';
+    document.getElementById('typing-overlay').style.display = 'flex';
+    document.getElementById('typing-overlay').querySelector('div:nth-child(2)').textContent = 'Paused — click to resume';
+  } else {
+    state.paused = false;
+    state.totalPauseTime += Date.now() - state.pauseStart;
+    document.getElementById('pause-btn').textContent = '⏸ Pause';
+    document.getElementById('typing-overlay').style.display = 'none';
+    document.getElementById('hidden-input').focus();
+  }
+}
+
+function countCorrectChars() {
+  let c = 0;
+  for (let i = 0; i < state.typed.length; i++) {
+    if (state.typed[i] === state.passage[i]) c++;
+  }
+  return c;
+}
+
+function updateLiveStats() {
+  if (!state.settings.wpm && state.started) { /* skip WPM live */ }
+  const secs = elapsed();
+  const correctChars = countCorrectChars();
+  const totalTyped = state.typed.length;
+
+  const wpm = calcWPM(correctChars, secs);
+  const raw = calcRawWPM(totalTyped, secs);
+  const acc = calcAccuracy(correctChars, totalTyped);
+  const cpm = totalTyped > 0 ? Math.round(correctChars / (secs / 60)) : 0;
+
+  setStatVal('stat-wpm', wpm);
+  setStatVal('stat-raw', raw);
+  document.getElementById('stat-acc').textContent = totalTyped > 0 ? acc + '%' : '—';
+  setStatVal('stat-cpm', isFinite(cpm) ? cpm : 0);
+  document.getElementById('stat-mistakes').textContent = state.mistakes;
+  document.getElementById('stat-streak-live').textContent = state.currentStreak;
+
+  if (state.mainMode !== 'time') {
+    const pct = Math.round((totalTyped / state.passage.length) * 100);
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-bar').style.width = pct + '%';
+    if (state.mainMode === 'words') {
+      const wordsTyped = state.typed.split(/\s+/).filter(Boolean).length;
+      const rem = Math.max(0, state.wordTarget - wordsTyped);
+      document.getElementById('stat-timer').textContent = rem + 'w';
+      document.getElementById('stat-timer-label').textContent = 'Left';
+    } else {
+      document.getElementById('stat-timer').textContent = Math.round(secs) + 's';
+      document.getElementById('stat-timer-label').textContent = 'Elapsed';
+    }
+  } else {
+    // progress in time mode = typed/passage
+    const pct = Math.round((totalTyped / state.passage.length) * 100);
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-bar').style.width = pct + '%';
+  }
+}
+
+let lastStatVals = {};
+function setStatVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (lastStatVals[id] !== val) {
+    el.textContent = val;
+    lastStatVals[id] = val;
+  }
+}
+
+function restartTest() {
+  clearInterval(state.timer);
+  clearInterval(state.wpmSampler);
+  Object.assign(state, {
+    typed: '', started: false, finished: false, paused: false,
+    startTime: null, pauseStart: null, totalPauseTime: 0,
+    wpmHistory: [], accHistory: [], errorMap: {}, keyTimings: [],
+    lastKeyTime: null, mistakes: 0, currentStreak: 0, bestStreak: 0,
+    timer: null, wpmSampler: null,
+  });
+  lastStatVals = {};
+  // Reset stats display
+  ['stat-wpm','stat-raw','stat-cpm','stat-mistakes','stat-streak-live'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '0';
+  });
+  document.getElementById('stat-acc').textContent = '—';
+  document.getElementById('stat-timer').textContent = state.mainMode === 'time' ? state.timeLimit : '—';
+  document.getElementById('stat-timer-label').textContent = state.mainMode === 'time' ? 'Left' : 'Time';
+  document.getElementById('stat-timer').style.color = '';
+  document.getElementById('prog-bar').style.width = '0%';
+  document.getElementById('prog-pct').textContent = '0%';
+  document.getElementById('typing-overlay').style.display = 'flex';
+  document.getElementById('typing-overlay').querySelector('div:nth-child(2)').textContent = 'Click here or start typing';
+  document.getElementById('typing-card').classList.remove('active');
+  document.getElementById('pause-btn').textContent = '⏸ Pause';
+  renderPassage();
+  document.getElementById('hidden-input').focus();
+}
+
+function newPassage() {
+  state.passage = getPassage();
+  restartTest();
+}
+
+// ════════════════════════════════════════════════════════
+// FINISH TEST
+// ════════════════════════════════════════════════════════
+function finishTest() {
+  if (state.finished) return;
+  state.finished = true;
+  state.elapsed = elapsed();
+  clearInterval(state.timer);
+  clearInterval(state.wpmSampler);
+
+  const correctChars = countCorrectChars();
+  const totalTyped = state.typed.length;
+  const wpm = calcWPM(correctChars, state.elapsed);
+  const rawWpm = calcRawWPM(totalTyped, state.elapsed);
+  const acc = calcAccuracy(correctChars, totalTyped);
+  const cpm = Math.round((correctChars / state.elapsed) * 60);
+
+  // Consistency (std dev of wpm samples)
+  let consistency = 100;
+  if (state.wpmHistory.length > 2) {
+    const mean = state.wpmHistory.reduce((a,b) => a+b,0) / state.wpmHistory.length;
+    const variance = state.wpmHistory.reduce((a,b) => a+(b-mean)**2,0) / state.wpmHistory.length;
+    const stdDev = Math.sqrt(variance);
+    consistency = Math.max(0, Math.min(100, Math.round(100 - (stdDev / Math.max(mean,1)) * 100)));
+  }
+
+  // Rhythm
+  let rhythm = 'Varied';
+  if (state.keyTimings.length > 5) {
+    const mean = state.keyTimings.reduce((a,b)=>a+b,0)/state.keyTimings.length;
+    const stdDev = Math.sqrt(state.keyTimings.reduce((a,b)=>a+(b-mean)**2,0)/state.keyTimings.length);
+    const cv = stdDev / mean;
+    if (cv < 0.2) rhythm = 'Very Steady';
+    else if (cv < 0.4) rhythm = 'Steady';
+    else if (cv < 0.6) rhythm = 'Varied';
+    else rhythm = 'Burst-heavy';
+  }
+
+  // Save to history & PBs
+  const history = loadHistory();
+  const pbs = loadPBs();
+  const catKey = state.category + '_' + state.mainMode;
+  const isPB = !pbs[catKey] || wpm > pbs[catKey].wpm;
+  if (isPB && wpm > 0) {
+    pbs[catKey] = { wpm, acc, date: new Date().toLocaleDateString() };
+    savePBs(pbs);
+    if (wpm > 0) showPBFlash();
+  }
+
+  const session = {
+    date: new Date().toLocaleString(),
+    mode: state.mainMode + (state.mainMode==='time'?' '+state.timeLimit+'s':state.mainMode==='words'?' '+state.wordTarget+'w':''),
+    category: state.category,
+    wpm, rawWpm, acc, cpm, consistency, rhythm,
+    correctChars, mistakes: state.mistakes,
+    duration: Math.round(state.elapsed),
+    completion: Math.round((totalTyped / state.passage.length) * 100),
+    isPB,
+  };
+  history.unshift(session);
+  if (history.length > 100) history.pop();
+  saveHistory(history);
+
+  // Adaptive: adjust difficulty
+  if (state.mainMode === 'adaptive') {
+    if (acc >= 95 && wpm >= 50 * state.adaptiveDifficulty) state.adaptiveDifficulty = Math.min(state.adaptiveDifficulty + 0.5, 5);
+    else if (acc < 85) state.adaptiveDifficulty = Math.max(1, state.adaptiveDifficulty - 0.5);
+  }
+
+  // Render results
+  renderResults(session, pbs, history);
+  showPanel('results');
+}
+
+// ════════════════════════════════════════════════════════
+// RESULTS RENDERING
+// ════════════════════════════════════════════════════════
+function renderResults(session, pbs, history) {
+  document.getElementById('r-wpm').textContent = session.wpm;
+  document.getElementById('r-sub').textContent =
+    `${session.acc}% accuracy · ${session.correctChars} correct chars · ${Math.round(session.duration)}s · ${session.category}`;
+
+  // Badges
+  const badges = [];
+  if (session.wpm >= 100) badges.push({cls:'badge-gold', icon:'⚡', label:'Speed Demon'});
+  if (session.wpm >= 80) badges.push({cls:'badge-accent', icon:'🚀', label:'Fast Fingers'});
+  if (session.acc >= 98) badges.push({cls:'badge-teal', icon:'🎯', label:'Sharpshooter'});
+  if (session.acc >= 95 && session.wpm >= 60) badges.push({cls:'badge-accent', icon:'✨', label:'Elite'});
+  if (session.isPB) badges.push({cls:'badge-gold', icon:'🏆', label:'New PB!'});
+  if (session.consistency >= 90) badges.push({cls:'badge-teal', icon:'📏', label:'Metronome'});
+  if (session.mistakes === 0) badges.push({cls:'badge-pink', icon:'💎', label:'Perfect!'});
+  document.getElementById('r-badges').innerHTML = badges.map(b =>
+    `<div class="badge ${b.cls}">${b.icon} ${b.label}</div>`).join('');
+
+  // Stats
+  set('r-s-wpm', session.wpm + ' wpm');
+  set('r-s-raw', session.rawWpm + ' wpm');
+  set('r-s-cpm', session.cpm + ' cpm');
+  set('r-s-acc', session.acc + '%');
+  set('r-s-cons', session.consistency + '%');
+  set('r-s-dur', session.duration + 's');
+
+  const missed = Math.max(0, state.passage.length - state.typed.length);
+  set('r-c-correct', session.correctChars);
+  set('r-c-wrong', session.mistakes);
+  set('r-c-extra', Math.max(0, state.typed.length - state.passage.length));
+  set('r-c-missed', missed);
+  set('r-c-mistakes', session.mistakes);
+  set('r-c-comp', session.completion + '%');
+
+  // PBs
+  const catKey = session.category + '_' + state.mainMode;
+  const pb = pbs[catKey] || {};
+  const allWpms = history.map(h => h.wpm).filter(Boolean);
+  const avgWpm = allWpms.length ? Math.round(allWpms.reduce((a,b)=>a+b,0)/allWpms.length) : 0;
+  set('r-pb-wpm', (pb.wpm || '—') + (pb.wpm ? ' wpm' : ''));
+  set('r-pb-acc', (pb.acc || '—') + (pb.acc ? '%' : ''));
+  set('r-pb-tests', history.length);
+  set('r-pb-avg', avgWpm + ' wpm');
+  set('r-percentile', percentileEstimate(session.wpm));
+  set('r-rhythm', session.rhythm);
+
+  // Charts
+  drawLineChart('wpm-chart', state.wpmHistory, '#7c6af7', 'WPM');
+  drawLineChart('acc-chart', state.accHistory, '#4ade80', 'Acc%');
+
+  // Heatmap
+  renderHeatmap(state.errorMap);
+
+  // Summary
+  renderSummary(session);
+}
+
+function set(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+
+function drawLineChart(canvasId, data, color, label) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 300;
+  const H = 140;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  if (!data.length) { ctx.fillStyle = '#6b6b8a'; ctx.font = '12px sans-serif'; ctx.fillText('Not enough data', 10, 70); return; }
+
+  const pad = { t: 10, r: 10, b: 30, l: 40 };
+  const cw = W - pad.l - pad.r;
+  const ch = H - pad.t - pad.b;
+  const max = Math.max(...data, 10);
+  const min = Math.min(...data, 0);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (ch / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+    const val = Math.round(max - (max - min) / 4 * i);
+    ctx.fillStyle = '#6b6b8a'; ctx.font = '10px monospace'; ctx.textAlign = 'right';
+    ctx.fillText(val, pad.l - 4, y + 4);
+  }
+
+  // Line
+  const pts = data.map((v, i) => ({
+    x: pad.l + (i / Math.max(data.length - 1, 1)) * cw,
+    y: pad.t + ch - ((v - min) / Math.max(max - min, 1)) * ch,
+  }));
+
+  // Fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  grad.addColorStop(0, color + '44');
+  grad.addColorStop(1, color + '00');
+  ctx.beginPath();
+  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pad.l + cw, pad.t + ch);
+  ctx.lineTo(pad.l, pad.t + ch);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Stroke
+  ctx.beginPath();
+  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots
+  pts.forEach(p => {
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+    ctx.fillStyle = color; ctx.fill();
+  });
+
+  // X label
+  ctx.fillStyle = '#6b6b8a'; ctx.font = '10px monospace'; ctx.textAlign = 'center';
+  ctx.fillText('Time (s)', pad.l + cw/2, H - 2);
+}
+
+function renderHeatmap(errorMap) {
+  const keys = 'qwertyuiopasdfghjklzxcvbnm,./'.split('');
+  const maxErr = Math.max(...Object.values(errorMap), 1);
+  const grid = document.getElementById('heatmap-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  keys.forEach(k => {
+    const count = errorMap[k] || 0;
+    const ratio = count / maxErr;
+    const r = Math.round(248 * ratio + 30 * (1 - ratio));
+    const g = Math.round(113 * ratio + 212 * (1 - ratio));
+    const b = Math.round(113 * ratio + 191 * (1 - ratio));
+    const alpha = count > 0 ? 0.3 + ratio * 0.7 : 0.1;
+    const el = document.createElement('div');
+    el.className = 'heatmap-key';
+    el.style.background = `rgba(${r},${g},${b},${alpha})`;
+    el.style.color = count > 0 ? '#fff' : 'var(--text-dim)';
+    el.title = `${k.toUpperCase()}: ${count} errors`;
+    el.textContent = k.toUpperCase();
+    grid.appendChild(el);
+  });
+}
+
+function renderSummary(s) {
+  const errors = Object.entries(state.errorMap).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const strengths = [], weaknesses = [], suggestions = [];
+
+  if (s.wpm >= 80) strengths.push('Excellent typing speed — you are in the top tier of typists.');
+  else if (s.wpm >= 60) strengths.push('Good typing speed, above the global average of ~45 WPM.');
+  else if (s.wpm >= 40) strengths.push('Solid speed — with consistent practice you can push past 60 WPM.');
+  else suggestions.push('Focus on accuracy first. Speed will naturally follow as muscle memory develops.');
+
+  if (s.acc >= 97) strengths.push('Near-perfect accuracy — you rarely commit typos under pressure.');
+  else if (s.acc >= 90) strengths.push('Good accuracy. Minor slip-ups are normal and will reduce with practice.');
+  else weaknesses.push('Accuracy is below 90%. Slow down slightly to build cleaner muscle memory before focusing on speed.');
+
+  if (s.consistency >= 85) strengths.push('Consistent rhythm — your typing is steady rather than burst-heavy.');
+  else weaknesses.push('Typing rhythm is inconsistent, suggesting some keys are slowing you down.');
+
+  if (errors.length) {
+    const topErr = errors.map(([k]) => k.toUpperCase()).join(', ');
+    weaknesses.push(`Most mistyped keys: ${topErr}. Dedicate practice time to these characters.`);
+    suggestions.push(`Practice words containing ${errors.slice(0,3).map(([k])=>k).join(', ')} frequently.`);
+  }
+
+  suggestions.push('Maintain proper posture and finger placement on home row keys (ASDF / JKL;).');
+  if (s.wpm < 80) suggestions.push('Use the Focus mode to eliminate distractions and build concentration.');
+  if (s.acc < 95) suggestions.push('Try slower, deliberate sessions — accuracy over 95% should be your first goal.');
+
+  document.getElementById('summary-content').innerHTML = `
+    ${strengths.length ? `<div class="summary-section"><div class="summary-heading">✅ Strengths</div>${strengths.map(t => `<div class="suggestion-item"><div class="suggestion-dot" style="background:var(--correct)"></div><div class="summary-text">${t}</div></div>`).join('')}</div>` : ''}
+    ${weaknesses.length ? `<div class="summary-section"><div class="summary-heading">⚠ Areas to Improve</div>${weaknesses.map(t => `<div class="suggestion-item"><div class="suggestion-dot" style="background:var(--gold)"></div><div class="summary-text">${t}</div></div>`).join('')}</div>` : ''}
+    <div class="summary-section"><div class="summary-heading">💡 Suggestions</div>${suggestions.map(t => `<div class="suggestion-item"><div class="suggestion-dot"></div><div class="summary-text">${t}</div></div>`).join('')}</div>
+  `;
+}
+
+// ════════════════════════════════════════════════════════
+// HISTORY
+// ════════════════════════════════════════════════════════
+function renderHistory() {
+  const history = loadHistory();
+  const tbody = document.getElementById('history-tbody');
+  const empty = document.getElementById('history-empty');
+  tbody.innerHTML = '';
+  if (!history.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  history.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td style="font-family:var(--font-ui);font-size:12px;">${s.date}</td>
+      <td>${s.mode}</td>
+      <td>${s.category}</td>
+      <td style="color:var(--accent2)">${s.wpm}</td>
+      <td style="color:${s.acc>=95?'var(--correct)':s.acc>=80?'var(--text)':'var(--wrong)'}">${s.acc}%</td>
+      <td>${s.duration}s</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function clearHistory() {
+  if (confirm('Clear all history? This cannot be undone.')) {
+    localStorage.removeItem('tss_history');
+    localStorage.removeItem('tss_pbs');
+    renderHistory();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// PANEL / MODE SWITCHING
+// ════════════════════════════════════════════════════════
+function showPanel(name) {
+  ['typing','results','history'].forEach(p => {
+    document.getElementById(p+'-panel').style.display = 'none';
+    document.getElementById(p+'-panel').classList.remove('visible');
+  });
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['typing','results','history'][i] === name);
+  });
+  const panel = document.getElementById(name+'-panel');
+  panel.style.display = 'block';
+  panel.classList.add('visible');
+  if (name === 'history') renderHistory();
+}
+
+function setCategory(cat, btn) {
+  state.category = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cat-label').textContent = cat.charAt(0).toUpperCase()+cat.slice(1);
+  document.getElementById('custom-text-panel').style.display = cat === 'custom' ? 'block' : 'none';
+  document.getElementById('prog-lang-panel').style.display = cat === 'programming' ? 'block' : 'none';
+  if (cat !== 'custom') { state.passage = getPassage(); restartTest(); }
+}
+
+function setMainMode(mode, btn) {
+  state.mainMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => { if (['⏱ Time','📝 Words','💬 Quote','🧠 Adaptive'].some(l=>b.textContent.includes(l.split(' ')[1]))) b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('time-options').style.display = mode === 'time' ? '' : 'none';
+  document.getElementById('word-options').style.display = mode === 'words' ? '' : 'none';
+  state.passage = getPassage();
+  restartTest();
+}
+
+function setTimeLimit(t, btn) {
+  state.timeLimit = t;
+  document.querySelectorAll('#time-options .mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  restartTest();
+}
+
+function setWordTarget(w, btn) {
+  state.wordTarget = w;
+  document.querySelectorAll('#word-options .mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.passage = getPassage(); restartTest();
+}
+
+function setProgLang(lang, btn) {
+  state.progLang = lang;
+  document.querySelectorAll('#prog-lang-panel .mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.passage = getPassage(); restartTest();
+}
+
+function loadCustomText() {
+  const txt = document.getElementById('custom-textarea').value.trim();
+  if (!txt) return;
+  state.passage = txt;
+  restartTest();
+}
+
+function toggleFocusMode(btn) {
+  state.focusMode = !state.focusMode;
+  btn.classList.toggle('active', state.focusMode);
+  const card = document.getElementById('typing-card');
+  const disp = document.getElementById('text-display');
+  card.classList.toggle('focus-mode', state.focusMode);
+  disp.classList.toggle('focus-mode', state.focusMode);
+}
+
+// ════════════════════════════════════════════════════════
+// ZEN MODE
+// ════════════════════════════════════════════════════════
+function startZen() {
+  state.zenMode = true;
+  state.passage = getPassage();
+  state.typed = '';
+  state.started = false;
+  state.finished = false;
+  document.getElementById('zen-overlay').classList.add('active');
+  renderZenDisplay();
+  document.getElementById('zen-input').focus();
+}
+
+function exitZen() {
+  state.zenMode = false;
+  document.getElementById('zen-overlay').classList.remove('active');
+  restartTest();
+}
+
+function renderZenDisplay() {
+  const el = document.getElementById('zen-text');
+  if (!el) return;
+  el.innerHTML = '';
+  state.passage.split('').forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className = 'char';
+    span.dataset.index = i;
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    el.appendChild(span);
+  });
+  updateZenDisplay();
+}
+
+function updateZenDisplay() {
+  if (!state.zenMode) return;
+  const chars = document.querySelectorAll('#zen-text .char');
+  chars.forEach((span, i) => {
+    span.className = 'char';
+    const ch = state.passage[i];
+    if (i < state.typed.length) {
+      span.className = state.typed[i] === ch ? 'char correct' : 'char wrong';
+    } else if (i === state.typed.length) {
+      span.className = 'char cursor';
+    }
+  });
+}
+
+// Zen input
+document.getElementById('zen-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { e.preventDefault(); exitZen(); return; }
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    if (state.typed.length > 0) { state.typed = state.typed.slice(0, -1); updateZenDisplay(); }
+  }
+});
+document.getElementById('zen-input').addEventListener('input', (e) => {
+  const val = e.target.value;
+  e.target.value = '';
+  if (!val) return;
+  const ch = val[val.length - 1];
+  if (!state.started) {
+    state.started = true;
+    state.startTime = Date.now();
+    state.totalPauseTime = 0;
+  }
+  if (ch === state.passage[state.typed.length]) state.currentStreak++;
+  else { state.mistakes++; state.currentStreak = 0; }
+  state.typed += ch;
+  updateZenDisplay();
+  if (state.typed.length >= state.passage.length) {
+    // Zen mode just restarts
+    setTimeout(() => { state.passage = getPassage(); state.typed = ''; state.started = false; renderZenDisplay(); }, 800);
+  }
+});
+
+// ════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════
+function openSettings() { document.getElementById('settings-modal').classList.add('open'); }
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
+function setTheme(theme, dot) {
+  document.body.dataset.theme = theme;
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  dot.classList.add('active');
+  localStorage.setItem('tss_theme', theme);
+}
+
+function setFontSize(val) {
+  document.documentElement.style.setProperty('--font-size', val + 'px');
+  document.getElementById('font-size-val').textContent = val + 'px';
+}
+
+function toggleSetting(key) {
+  state.settings[key] = !state.settings[key];
+  const btn = document.getElementById(key+'-toggle');
+  if (btn) btn.classList.toggle('on', state.settings[key]);
+}
+
+function toggleSound() {
+  state.soundOn = !state.soundOn;
+  document.getElementById('sound-btn').textContent = state.soundOn ? '🔊' : '🔇';
+}
+
+// ════════════════════════════════════════════════════════
+// SOUND ENGINE
+// ════════════════════════════════════════════════════════
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playClick(correct) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = correct ? 800 : 300;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.05);
+  } catch {}
+}
+
+// ════════════════════════════════════════════════════════
+// PB FLASH
+// ════════════════════════════════════════════════════════
+function showPBFlash() {
+  const el = document.getElementById('pb-flash');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ════════════════════════════════════════════════════════
+// KEYBOARD / FOCUS
+// ════════════════════════════════════════════════════════
+document.getElementById('hidden-input').addEventListener('input', onInput);
+document.addEventListener('keydown', (e) => {
+  if (state.zenMode) return;
+  if (document.getElementById('settings-modal').classList.contains('open') && e.key === 'Escape') {
+    closeSettings(); return;
+  }
+  onKeyDown(e);
+});
+
+document.getElementById('text-display').addEventListener('click', () => {
+  if (!state.started) {
+    document.getElementById('typing-overlay').style.display = 'none';
+  }
+  document.getElementById('hidden-input').focus();
+});
+
+document.getElementById('typing-card').addEventListener('click', () => {
+  document.getElementById('hidden-input').focus();
+});
+
+document.getElementById('settings-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeSettings();
+});
+
+// ════════════════════════════════════════════════════════
+// HISTORY button
+// ════════════════════════════════════════════════════════
+function showHistory() { showPanel('history'); }
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+function init() {
+  // Load saved theme
+  const savedTheme = localStorage.getItem('tss_theme') || 'dark';
+  document.body.dataset.theme = savedTheme;
+  const dots = document.querySelectorAll('.theme-dot');
+  if (savedTheme === 'light') { dots[0].classList.remove('active'); dots[1].classList.add('active'); }
+  if (savedTheme === 'sepia') { dots[0].classList.remove('active'); dots[2].classList.add('active'); }
+
+  // Load day streak
+  const streak = loadDayStreak();
+  if (streak.count > 1) {
+    document.getElementById('streak-badge').style.display = 'flex';
+    document.getElementById('streak-count').textContent = streak.count;
+  }
+
+  state.passage = getPassage();
+  renderPassage();
+  document.getElementById('stat-timer').textContent = state.timeLimit;
+  document.getElementById('hidden-input').focus();
+
+  // Initial mode button states
+  document.getElementById('time-options').style.display = '';
+  document.getElementById('word-options').style.display = 'none';
+
+  // Pause btn starts disabled
+  document.getElementById('pause-btn').disabled = false;
+}
+
+init();
+</script>
+</body>
+</html>
