@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Learning Studio — The 12 Principles of Animation</title>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141417;
+    --surface2: #1c1c21;
+    --surface3: #242429;
+    --border: #2e2e36;
+    --text: #e8e8f0;
+    --text-muted: #8a8a9e;
+    --text-dim: #5a5a6e;
+    --accent: #c97fff;
+    --accent2: #7fc4ff;
+    --accent3: #ff8c69;
+    --accent4: #5dffa0;
+    --gold: #ffd166;
+    --red: #ff5e5e;
+    --green: #4ade80;
+    --font-display: 'Georgia', serif;
+    --font-body: system-ui, -apple-system, sans-serif;
+    --font-mono: 'Courier New', monospace;
+    --radius: 12px;
+    --radius-sm: 6px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --glow: 0 0 24px rgba(201,127,255,0.15);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.7;overflow-x:hidden}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:var(--surface)}
+  ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+  /* LAYOUT */
+  .app{display:flex;min-height:100vh}
+  .sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;transition:transform .3s ease}
+  .main{margin-left:280px;flex:1;min-height:100vh}
+  @media(max-width:900px){
+    .sidebar{transform:translateX(-100%)}
+    .sidebar.open{transform:translateX(0)}
+    .main{margin-left:0}
+  }
+
+  /* SIDEBAR */
+  .sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+  .sidebar-logo{font-family:var(--font-display);font-size:13px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+  .sidebar-title{font-size:15px;font-weight:600;color:var(--text);line-height:1.3}
+  .sidebar-progress{margin-top:12px}
+  .progress-label{font-size:11px;color:var(--text-muted);margin-bottom:6px;display:flex;justify-content:space-between}
+  .progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .5s ease}
+  .sidebar-nav{padding:12px 0}
+  .nav-section{padding:8px 20px 4px;font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;transition:all .2s;font-size:13px;color:var(--text-muted);border-left:2px solid transparent;text-decoration:none}
+  .nav-item:hover{background:var(--surface2);color:var(--text)}
+  .nav-item.active{background:rgba(201,127,255,.08);color:var(--accent);border-left-color:var(--accent)}
+  .nav-item.locked{opacity:.4;cursor:not-allowed}
+  .nav-item.completed .nav-check{color:var(--green)}
+  .nav-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0}
+  .nav-item.active .nav-dot{background:var(--accent)}
+  .nav-item.completed .nav-dot{background:var(--green)}
+  .nav-check{font-size:11px;margin-left:auto}
+  .xp-badge{margin:16px 20px;background:linear-gradient(135deg,rgba(201,127,255,.12),rgba(127,196,255,.08));border:1px solid rgba(201,127,255,.2);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px}
+  .xp-icon{font-size:22px}
+  .xp-label{font-size:11px;color:var(--text-muted)}
+  .xp-value{font-size:18px;font-weight:700;color:var(--gold)}
+
+  /* TOP BAR */
+  .topbar{background:rgba(13,13,15,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .topbar-left{display:flex;align-items:center;gap:16px}
+  .menu-btn{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;padding:4px}
+  @media(max-width:900px){.menu-btn{display:block}}
+  .breadcrumb{font-size:13px;color:var(--text-muted)}
+  .breadcrumb span{color:var(--text)}
+  .topbar-right{display:flex;align-items:center;gap:12px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:none;text-decoration:none}
+  .btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:var(--text);border-color:var(--text-muted)}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#a855f7);color:#fff}
+  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* CONTENT */
+  .content{padding:40px 48px 80px;max-width:900px}
+  @media(max-width:700px){.content{padding:24px 20px 60px}}
+
+  /* SECTIONS */
+  .section{display:none}
+  .section.active{display:block}
+
+  /* HERO */
+  .hero{margin-bottom:48px}
+  .hero-eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent)}
+  .hero-title{font-family:var(--font-display);font-size:clamp(32px,5vw,52px);line-height:1.15;color:var(--text);margin-bottom:20px}
+  .hero-title em{font-style:normal;color:var(--accent)}
+  .hero-desc{font-size:17px;color:var(--text-muted);max-width:640px;line-height:1.8}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:20px;margin-top:28px}
+  .meta-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:12px;min-width:160px}
+  .meta-icon{font-size:22px}
+  .meta-label{font-size:11px;color:var(--text-muted);margin-bottom:2px}
+  .meta-value{font-size:14px;font-weight:600;color:var(--text)}
+
+  /* OBJECTIVES */
+  .objectives-card{background:linear-gradient(135deg,rgba(201,127,255,.06),rgba(127,196,255,.04));border:1px solid rgba(201,127,255,.2);border-radius:var(--radius);padding:28px;margin:32px 0}
+  .objectives-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+  .obj-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .obj-list li{display:flex;align-items:flex-start;gap:10px;font-size:15px;color:var(--text-muted)}
+  .obj-list li::before{content:'◆';color:var(--accent);font-size:9px;margin-top:5px;flex-shrink:0}
+
+  /* REWARD SYSTEM */
+  .reward-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:16px}
+  .reward-badge{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;transition:all .3s}
+  .reward-badge.earned{border-color:var(--gold);background:rgba(255,209,102,.06)}
+  .reward-badge.earned .badge-icon{filter:none}
+  .badge-icon{font-size:28px;display:block;margin-bottom:8px;filter:grayscale(1) opacity(.4);transition:all .3s}
+  .reward-badge.earned .badge-icon{filter:none}
+  .badge-name{font-size:11px;color:var(--text-muted);font-weight:500}
+  .reward-badge.earned .badge-name{color:var(--gold)}
+
+  /* MODULE CARD */
+  .module-header{margin-bottom:36px}
+  .module-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(201,127,255,.1);border:1px solid rgba(201,127,255,.2);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--accent);margin-bottom:16px}
+  .module-title{font-family:var(--font-display);font-size:clamp(24px,4vw,38px);color:var(--text);margin-bottom:12px}
+  .module-subtitle{font-size:16px;color:var(--text-muted)}
+
+  /* CONTENT BLOCKS */
+  h2{font-family:var(--font-display);font-size:24px;color:var(--text);margin:40px 0 16px;position:relative}
+  h2::after{content:'';display:block;width:32px;height:2px;background:var(--accent);margin-top:6px;border-radius:1px}
+  h3{font-size:17px;font-weight:600;color:var(--text);margin:28px 0 12px}
+  p{color:var(--text-muted);margin-bottom:16px;font-size:15px;line-height:1.8}
+  strong{color:var(--text);font-weight:600}
+
+  .info-box{background:var(--surface2);border-left:3px solid var(--accent2);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:16px 20px;margin:20px 0;font-size:14px;color:var(--text-muted)}
+  .info-box.warning{border-left-color:var(--accent3)}
+  .info-box.success{border-left-color:var(--green)}
+  .info-box .info-title{font-weight:600;color:var(--text);margin-bottom:4px;font-size:13px}
+
+  .callout{background:linear-gradient(135deg,rgba(93,255,160,.05),rgba(127,196,255,.05));border:1px solid rgba(93,255,160,.15);border-radius:var(--radius);padding:20px 24px;margin:24px 0}
+  .callout-icon{font-size:18px;margin-bottom:8px}
+  .callout-text{font-size:14px;color:var(--text-muted)}
+
+  /* PRINCIPLE CARDS */
+  .principles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:24px 0}
+  .principle-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all .25s;cursor:default}
+  .principle-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--glow)}
+  .pc-number{font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-bottom:8px;letter-spacing:.05em}
+  .pc-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px}
+  .pc-desc{font-size:13px;color:var(--text-muted);line-height:1.6}
+  .pc-tag{display:inline-block;background:rgba(201,127,255,.1);border-radius:20px;padding:2px 10px;font-size:10px;color:var(--accent);margin-top:10px}
+
+  /* ANIMATION DEMOS */
+  .demo-stage{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin:24px 0;text-align:center;overflow:hidden;position:relative;min-height:160px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+  .demo-title{font-size:12px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;position:absolute;top:12px;left:16px}
+  .demo-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .demo-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 16px;font-size:12px;color:var(--text-muted);cursor:pointer;transition:all .2s}
+  .demo-btn:hover,.demo-btn.active{background:rgba(201,127,255,.1);border-color:var(--accent);color:var(--accent)}
+
+  /* BALL ANIMATIONS */
+  .ball{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 16px rgba(201,127,255,.4);display:inline-block;position:relative}
+  .ball-container{width:100%;height:80px;display:flex;align-items:flex-end;justify-content:center;position:relative}
+
+  /* SQUASH DEMO */
+  @keyframes squash-bounce{
+    0%{transform:translateY(-60px) scaleX(1) scaleY(1)}
+    85%{transform:translateY(0) scaleX(1) scaleY(1)}
+    90%{transform:translateY(0) scaleX(1.6) scaleY(.5)}
+    95%{transform:translateY(-20px) scaleX(1) scaleY(1)}
+    100%{transform:translateY(0) scaleX(1.6) scaleY(.5)}
+  }
+  .ball-squash{animation:squash-bounce 1s ease-in infinite}
+
+  @keyframes rigid-bounce{
+    0%{transform:translateY(-60px)}
+    100%{transform:translateY(0)}
+  }
+  .ball-rigid{animation:rigid-bounce .4s ease-in infinite alternate}
+
+  /* ANTICIPATION */
+  @keyframes anticipate-throw{
+    0%{transform:translateX(0) rotate(0)}
+    15%{transform:translateX(-20px) rotate(-15deg)}
+    100%{transform:translateX(120px) rotate(20deg)}
+  }
+  .ball-anticipate{animation:anticipate-throw 1.4s ease-in-out infinite alternate}
+
+  /* EASE */
+  @keyframes ease-demo{0%{transform:translateX(-120px)}100%{transform:translateX(120px)}}
+  .ball-ease-in{animation:ease-demo 1.5s ease-in infinite alternate}
+  .ball-ease-out{animation:ease-demo 1.5s ease-out infinite alternate}
+  .ball-ease-both{animation:ease-demo 1.5s ease-in-out infinite alternate}
+  .ball-linear{animation:ease-demo 1.5s linear infinite alternate}
+
+  /* FOLLOW THROUGH */
+  @keyframes follow-car{0%{transform:translateX(-80px)}60%{transform:translateX(80px)}100%{transform:translateX(80px)}}
+  @keyframes follow-tail{0%{transform:translateX(-80px) scaleX(1.5)}55%{transform:translateX(60px) scaleX(1.2)}100%{transform:translateX(90px) scaleX(1)}}
+
+  /* ARC */
+  @keyframes arc-motion{
+    0%{transform:translate(-80px,20px)}
+    50%{transform:translate(0,-30px)}
+    100%{transform:translate(80px,20px)}
+  }
+  .ball-arc{animation:arc-motion 1.5s ease-in-out infinite alternate}
+
+  /* STAGING */
+  .staging-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;width:200px;height:120px;display:flex;align-items:center;justify-content:center;position:relative}
+  .staging-good .character{position:absolute;left:50%;transform:translateX(-50%);font-size:32px}
+  .staging-bad .character{position:absolute;left:20%;font-size:32px}
+  .background-clutter{position:absolute;font-size:20px;opacity:.3}
+
+  /* COMPARISON TABLE */
+  .compare-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:14px}
+  .compare-table th{background:var(--surface3);padding:12px 16px;text-align:left;font-weight:600;color:var(--text);border-bottom:1px solid var(--border);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+  .compare-table td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-muted);vertical-align:top}
+  .compare-table tr:hover td{background:rgba(255,255,255,.02)}
+  .tag-good{color:var(--green);font-size:11px}
+  .tag-bad{color:var(--red);font-size:11px}
+
+  /* MISCONCEPTION */
+  .misconception{background:rgba(255,94,94,.05);border:1px solid rgba(255,94,94,.15);border-radius:var(--radius);padding:20px 24px;margin:16px 0}
+  .misconception-title{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .misconception p{color:var(--text-muted);font-size:14px;margin:0}
+  .misconception .reality{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,94,94,.1);color:var(--green) !important}
+
+  /* KEY TAKEAWAYS */
+  .takeaways{background:linear-gradient(135deg,rgba(201,127,255,.06),transparent);border:1px solid rgba(201,127,255,.15);border-radius:var(--radius);padding:24px;margin:32px 0}
+  .takeaways-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .takeaways ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .takeaways li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-muted)}
+  .takeaways li::before{content:'→';color:var(--accent);flex-shrink:0;margin-top:1px}
+
+  /* PRACTICE EXERCISE */
+  .exercise{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:24px 0}
+  .exercise-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .exercise-icon{width:36px;height:36px;border-radius:50%;background:rgba(201,127,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .exercise-title{font-size:15px;font-weight:600;color:var(--text)}
+  .exercise-subtitle{font-size:12px;color:var(--text-muted)}
+  .exercise-body{font-size:14px;color:var(--text-muted)}
+  .exercise-steps{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .exercise-steps li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-muted)}
+  .step-num{background:var(--accent);color:#000;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+
+  /* SVG DIAGRAMS */
+  .diagram-wrap{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:24px 0;overflow-x:auto}
+  .diagram-label{font-size:11px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+  svg text{fill:var(--text-muted);font-family:var(--font-body);font-size:12px}
+
+  /* QUIZ */
+  .quiz-header{text-align:center;margin-bottom:36px}
+  .quiz-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.2);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--gold);margin-bottom:16px}
+  .quiz-title{font-family:var(--font-display);font-size:28px;color:var(--text);margin-bottom:8px}
+  .quiz-subtitle{font-size:14px;color:var(--text-muted)}
+  .quiz-progress{display:flex;gap:8px;justify-content:center;margin-top:20px}
+  .qpip{width:28px;height:4px;border-radius:2px;background:var(--border);transition:all .3s}
+  .qpip.done{background:var(--green)}
+  .qpip.current{background:var(--accent)}
+  .question-block{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;display:none}
+  .question-block.active{display:block}
+  .q-number{font-size:11px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+  .q-text{font-size:17px;color:var(--text);font-weight:500;margin-bottom:24px;line-height:1.5}
+  .options-list{display:flex;flex-direction:column;gap:10px}
+  .option{display:flex;align-items:flex-start;gap:12px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;cursor:pointer;transition:all .2s;font-size:14px;color:var(--text-muted)}
+  .option:hover{border-color:var(--accent);color:var(--text)}
+  .option.selected{border-color:var(--accent);background:rgba(201,127,255,.08);color:var(--text)}
+  .option.correct{border-color:var(--green);background:rgba(74,222,128,.08);color:var(--green)}
+  .option.wrong{border-color:var(--red);background:rgba(255,94,94,.08);color:var(--red)}
+  .option-letter{width:22px;height:22px;border-radius:4px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s}
+  .option.selected .option-letter{background:var(--accent);color:#000}
+  .option.correct .option-letter{background:var(--green);color:#000}
+  .option.wrong .option-letter{background:var(--red);color:#fff}
+  .explanation{background:rgba(127,196,255,.05);border:1px solid rgba(127,196,255,.15);border-radius:var(--radius-sm);padding:14px 16px;margin-top:14px;font-size:13px;color:var(--text-muted);display:none}
+  .explanation.show{display:block}
+  .quiz-actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+  .quiz-score{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;text-align:center;display:none}
+  .score-circle{width:100px;height:100px;border-radius:50%;border:4px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;font-weight:700;color:var(--accent);position:relative}
+  .score-label{font-size:14px;color:var(--text-muted);margin-bottom:8px}
+  .score-title{font-size:20px;font-weight:600;color:var(--text);margin-bottom:8px}
+  .score-desc{font-size:14px;color:var(--text-muted)}
+
+  /* FINAL CHALLENGE */
+  .challenge-card{background:linear-gradient(135deg,rgba(255,140,105,.06),rgba(201,127,255,.06));border:1px solid rgba(255,140,105,.2);border-radius:var(--radius);padding:32px;margin:24px 0}
+  .challenge-title{font-family:var(--font-display);font-size:22px;color:var(--text);margin-bottom:12px}
+  .challenge-desc{font-size:15px;color:var(--text-muted);margin-bottom:20px}
+  .challenge-steps{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .challenge-steps li{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--text-muted)}
+  .cstep{background:var(--accent3);color:#000;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+
+  /* CHEAT SHEET */
+  .cheat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:20px 0}
+  .cheat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+  .cheat-num{font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-bottom:4px}
+  .cheat-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .cheat-desc{font-size:12px;color:var(--text-muted);line-height:1.5}
+  .cheat-keyword{display:inline-block;background:rgba(201,127,255,.08);border-radius:3px;padding:1px 6px;font-size:10px;color:var(--accent);margin-top:6px}
+
+  /* RESOURCES */
+  .resource-list{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+  .resource-item{display:flex;align-items:flex-start;gap:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;transition:all .2s}
+  .resource-item:hover{border-color:var(--accent2)}
+  .resource-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+  .resource-name{font-size:14px;font-weight:500;color:var(--text)}
+  .resource-desc{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .resource-badge{display:inline-block;background:rgba(127,196,255,.1);border-radius:3px;padding:1px 7px;font-size:10px;color:var(--accent2);margin-top:4px}
+
+  /* PRINT */
+  .print-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+  .print-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+
+  /* UNLOCK BANNER */
+  .unlock-banner{background:linear-gradient(135deg,rgba(93,255,160,.06),rgba(127,196,255,.06));border:1px solid rgba(93,255,160,.2);border-radius:var(--radius);padding:24px;text-align:center;margin:32px 0;display:none}
+  .unlock-banner.show{display:block}
+  .unlock-title{font-size:18px;font-weight:600;color:var(--green);margin-bottom:8px}
+  .unlock-desc{font-size:14px;color:var(--text-muted);margin-bottom:16px}
+
+  /* CONFETTI */
+  .confetti-piece{position:fixed;pointer-events:none;z-index:9999;border-radius:2px;animation:confetti-fall 2s ease-in forwards}
+  @keyframes confetti-fall{
+    0%{transform:translateY(-20px) rotate(0);opacity:1}
+    100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+  }
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text);z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--shadow)}
+  .toast.show{transform:translateY(0);opacity:1}
+
+  /* TABS */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px}
+  .tab{padding:10px 20px;font-size:13px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  /* TOOLTIP */
+  .tooltip-wrap{position:relative;display:inline-block}
+  .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:200;box-shadow:var(--shadow)}
+  .tooltip-wrap:hover .tooltip{opacity:1}
+
+  @media print{
+    .sidebar,.topbar,.demo-controls,.btn,.quiz-actions{display:none!important}
+    .main{margin-left:0}
+    .section{display:block!important}
+    body{background:#fff;color:#000}
+  }
+
+  /* INTERACTIVE EASE VISUALIZER */
+  .ease-visualizer{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+  @media(max-width:600px){.ease-visualizer{grid-template-columns:1fr}}
+  .ease-lane{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;display:flex;flex-direction:column;gap:8px}
+  .ease-name{font-size:12px;color:var(--text-muted);font-weight:500}
+  .ease-track{height:8px;background:var(--border);border-radius:4px;overflow:visible;position:relative;margin-top:4px}
+  .ease-ball{width:14px;height:14px;border-radius:50%;background:var(--accent);position:absolute;top:-3px;left:0;margin-left:-7px;transition:none}
+
+  /* SPACING */
+  .spacer{height:24px}
+  .divider{height:1px;background:var(--border);margin:36px 0}
+
+  /* FINAL COMPLETE */
+  .complete-hero{text-align:center;padding:40px 0}
+  .trophy{font-size:64px;margin-bottom:16px;animation:bounce-trophy .6s ease infinite alternate}
+  @keyframes bounce-trophy{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+  .complete-title{font-family:var(--font-display);font-size:32px;color:var(--gold);margin-bottom:12px}
+  .complete-sub{font-size:16px;color:var(--text-muted);max-width:500px;margin:0 auto 24px}
+  .stats-row{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin:24px 0}
+  .stat-pill{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 24px;text-align:center}
+  .stat-num{font-size:24px;font-weight:700;color:var(--accent)}
+  .stat-lbl{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+  /* SEARCH KEYWORDS */
+  .keyword-cloud{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  .keyword{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--text-muted);transition:all .2s;cursor:default}
+  .keyword:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* AI PROMPTS */
+  .prompt-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);position:relative;line-height:1.6}
+  .prompt-card::before{content:'"';font-size:20px;color:var(--accent);line-height:0;vertical-align:middle;margin-right:6px}
+
+  /* Module locked state */
+  .module-locked{text-align:center;padding:60px 20px}
+  .lock-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+  .lock-text{color:var(--text-muted);font-size:15px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">Interactive Learning Studio</div>
+      <div class="sidebar-title">The 12 Principles of Animation</div>
+      <div class="sidebar-progress">
+        <div class="progress-label"><span>Overall Progress</span><span id="progressPct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Start Here</div>
+      <a class="nav-item active" onclick="navigate('intro')" id="nav-intro"><span class="nav-dot"></span>Introduction <span class="nav-check" id="chk-intro"></span></a>
+      <div class="nav-section">Modules</div>
+      <a class="nav-item" onclick="navigate('m1')" id="nav-m1"><span class="nav-dot"></span>Module 1: The Physical Laws <span class="nav-check" id="chk-m1"></span></a>
+      <a class="nav-item" onclick="navigate('q1')" id="nav-q1"><span class="nav-dot"></span>&nbsp;&nbsp;↳ Module 1 Quiz <span class="nav-check" id="chk-q1"></span></a>
+      <a class="nav-item locked" onclick="navigate('m2')" id="nav-m2"><span class="nav-dot"></span>Module 2: Character & Staging <span class="nav-check" id="chk-m2"></span></a>
+      <a class="nav-item locked" onclick="navigate('q2')" id="nav-q2"><span class="nav-dot"></span>&nbsp;&nbsp;↳ Module 2 Quiz <span class="nav-check" id="chk-q2"></span></a>
+      <a class="nav-item locked" onclick="navigate('m3')" id="nav-m3"><span class="nav-dot"></span>Module 3: Motion Quality <span class="nav-check" id="chk-m3"></span></a>
+      <a class="nav-item locked" onclick="navigate('q3')" id="nav-q3"><span class="nav-dot"></span>&nbsp;&nbsp;↳ Module 3 Quiz <span class="nav-check" id="chk-q3"></span></a>
+      <a class="nav-item locked" onclick="navigate('m4')" id="nav-m4"><span class="nav-dot"></span>Module 4: Art & Appeal <span class="nav-check" id="chk-m4"></span></a>
+      <a class="nav-item locked" onclick="navigate('q4')" id="nav-q4"><span class="nav-dot"></span>&nbsp;&nbsp;↳ Module 4 Quiz <span class="nav-check" id="chk-q4"></span></a>
+      <div class="nav-section">Mastery</div>
+      <a class="nav-item locked" onclick="navigate('final')" id="nav-final"><span class="nav-dot"></span>Final Challenge <span class="nav-check" id="chk-final"></span></a>
+      <a class="nav-item locked" onclick="navigate('resources')" id="nav-resources"><span class="nav-dot"></span>Cheatsheet & Resources <span class="nav-check" id="chk-resources"></span></a>
+    </nav>
+    <div class="xp-badge">
+      <div class="xp-icon">⚡</div>
+      <div>
+        <div class="xp-label">XP Earned</div>
+        <div class="xp-value" id="xpDisplay">0 XP</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="breadcrumb" id="breadcrumb"><span>Introduction</span></div>
+      </div>
+      <div class="topbar-right">
+        <button class="print-btn" onclick="window.print()">🖨 Print Notes</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ INTRO ══ -->
+      <div class="section active" id="section-intro">
+        <div class="hero">
+          <div class="hero-eyebrow">Interactive Learning Studio</div>
+          <div class="hero-title">The <em>12 Principles</em><br>of Animation</div>
+          <div class="hero-desc">Master the foundational language of motion — the timeless rules first articulated by Disney's Nine Old Men that give life, weight, and soul to every animated character and object.</div>
+          <div class="hero-meta">
+            <div class="meta-card"><div class="meta-icon">⏱</div><div><div class="meta-label">Estimated Time</div><div class="meta-value">3–4 Hours</div></div></div>
+            <div class="meta-card"><div class="meta-icon">📊</div><div><div class="meta-label">Difficulty</div><div class="meta-value">Beginner → Advanced</div></div></div>
+            <div class="meta-card"><div class="meta-icon">🎯</div><div><div class="meta-label">Modules</div><div class="meta-value">4 + Final Challenge</div></div></div>
+            <div class="meta-card"><div class="meta-icon">🏅</div><div><div class="meta-label">Max XP</div><div class="meta-value">1,200 XP</div></div></div>
+          </div>
+        </div>
+
+        <div class="objectives-card">
+          <div class="objectives-title">🎯 Learning Objectives</div>
+          <ul class="obj-list">
+            <li>Name and explain all 12 principles of animation and their real-world purpose</li>
+            <li>Identify which principles are at work when watching any animated film or UI motion</li>
+            <li>Apply squash & stretch, anticipation, and follow-through to create believable motion</li>
+            <li>Distinguish between good and bad easing, and know when to use each type</li>
+            <li>Design staging and composition choices that guide the viewer's eye</li>
+            <li>Synthesize multiple principles to produce polished, professional-quality animation</li>
+          </ul>
+        </div>
+
+        <h2>Prerequisites</h2>
+        <p>None! This course is designed to be accessible to complete beginners in animation. A general familiarity with design concepts or any animation software is helpful but not required. You only need curiosity and a keen eye for motion.</p>
+
+        <h2>Expected Outcomes</h2>
+        <div class="principles-grid">
+          <div class="principle-card"><div class="pc-name">🎬 Fluency</div><div class="pc-desc">You will speak the vocabulary of motion with confidence — the shared language of every professional animator in the world.</div></div>
+          <div class="principle-card"><div class="pc-name">👁 Critical Eye</div><div class="pc-desc">You will be able to watch any animated sequence and immediately identify which principles are being used and how effectively.</div></div>
+          <div class="principle-card"><div class="pc-name">✏️ Application</div><div class="pc-desc">You will understand how to intentionally apply each principle — from bouncing balls to UI transitions to character rigs.</div></div>
+          <div class="principle-card"><div class="pc-name">🏗 Foundation</div><div class="pc-desc">You will have the solid conceptual bedrock to learn any animation software — After Effects, Blender, CSS, or a pencil and paper.</div></div>
+        </div>
+
+        <h2>🏅 Reward System</h2>
+        <p>Complete modules and quizzes to earn XP and unlock achievement badges. Badges are displayed in your sidebar and saved automatically.</p>
+        <div class="reward-grid" id="badgeGrid">
+          <div class="reward-badge" id="badge-starter"><div class="badge-icon">🎬</div><div class="badge-name">Animator's Spark</div></div>
+          <div class="reward-badge" id="badge-m1"><div class="badge-icon">⚡</div><div class="badge-name">Forces Mastered</div></div>
+          <div class="reward-badge" id="badge-m2"><div class="badge-icon">🎭</div><div class="badge-name">Stage Director</div></div>
+          <div class="reward-badge" id="badge-m3"><div class="badge-icon">🌊</div><div class="badge-name">Smooth Operator</div></div>
+          <div class="reward-badge" id="badge-m4"><div class="badge-icon">✨</div><div class="badge-name">Appeal Artist</div></div>
+          <div class="reward-badge" id="badge-complete"><div class="badge-icon">🏆</div><div class="badge-name">Master Animator</div></div>
+        </div>
+
+        <div class="spacer"></div>
+        <div style="text-align:center">
+          <button class="btn btn-primary" style="font-size:16px;padding:14px 36px" onclick="startCourse()">Begin Learning → </button>
+        </div>
+      </div>
+
+      <!-- ══ MODULE 1 ══ -->
+      <div class="section" id="section-m1">
+        <div class="module-header">
+          <div class="module-tag">📦 Module 1 of 4</div>
+          <div class="module-title">The Physical Laws</div>
+          <div class="module-subtitle">Principles 1–3: Squash & Stretch · Anticipation · Staging</div>
+        </div>
+
+        <h2>Why Physics Matters in Animation</h2>
+        <p>Animation is the art of <strong>controlled deception</strong>. Your audience has spent their entire life watching how the physical world behaves — gravity, mass, momentum, cause and effect. Their brain is a finely tuned physics engine. The moment something looks "wrong," the immersion breaks.</p>
+        <p>The first group of principles is rooted in the observable world: how objects deform under force, how bodies prepare for movement, and how a scene is arranged so the viewer knows exactly where to look. These are the bedrock principles — get them wrong and nothing else you do will save the animation.</p>
+
+        <div class="info-box">
+          <div class="info-title">📖 Historical Context</div>
+          The 12 Principles were codified by Disney animators Ollie Johnston and Frank Thomas in their 1981 book <em>The Illusion of Life: Disney Animation</em>. They emerged from decades of trial, error, and observation at Disney Studios during the golden age of animation (1930s–1960s).
+        </div>
+
+        <!-- PRINCIPLE 1 -->
+        <h2>Principle 1: Squash & Stretch</h2>
+        <p>Squash and stretch is considered by many the <strong>single most important principle of animation</strong>. It gives the illusion of weight, mass, and flexibility. When a ball hits the ground, it squashes (compresses). When it bounces back up or flies through the air, it stretches (elongates). This deformation tells us how heavy, fast, and elastic the object is.</p>
+
+        <p><strong>The golden rule:</strong> Volume must remain constant during squash and stretch. When a ball squashes horizontally, it must expand vertically to compensate. Violating this rule makes objects feel like they're magically gaining or losing mass.</p>
+
+        <div class="demo-stage">
+          <div class="demo-title">INTERACTIVE DEMO — Squash & Stretch</div>
+          <div style="display:flex;gap:60px;align-items:flex-end;justify-content:center;height:90px">
+            <div style="text-align:center">
+              <div class="ball ball-squash" style="width:40px;height:40px;position:relative"></div>
+              <div style="font-size:11px;color:var(--accent);margin-top:8px">With S&S ✓</div>
+            </div>
+            <div style="text-align:center">
+              <div class="ball ball-rigid" style="width:40px;height:40px"></div>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:8px">Without S&S ✗</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:8px">Notice how the left ball feels heavy and alive; the right feels like a rock.</div>
+        </div>
+
+        <h3>Analogy: The Water Balloon</h3>
+        <div class="callout">
+          <div class="callout-icon">💡</div>
+          <div class="callout-text">Think of every animated object as a <strong>water balloon</strong>. When you press down on one, it doesn't compress — the water shifts sideways. The total volume stays the same, but the shape changes dramatically. A rubber ball is barely a water balloon. A jelly character is very much one. The elasticity of your squash and stretch communicates the material properties of your subject.</div>
+        </div>
+
+        <h3>Squash & Stretch Applied to Characters</h3>
+        <p>This principle isn't just for balls! When a character is surprised, their eyes widen (stretch). When they land from a jump, their whole body flattens (squash). When running fast, limbs stretch in the direction of motion. Even subtle facial expressions rely on this: raised eyebrows stretch the forehead, puffed cheeks squash the face.</p>
+
+        <div class="diagram-wrap">
+          <div class="diagram-label">Diagram — Volume Conservation in Squash & Stretch</div>
+          <svg viewBox="0 0 580 180" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <!-- Normal -->
+            <circle cx="90" cy="90" r="40" fill="rgba(201,127,255,0.15)" stroke="#c97fff" stroke-width="1.5"/>
+            <text x="90" y="150" text-anchor="middle" fill="#8a8a9e" font-size="12">Normal</text>
+            <text x="90" y="163" text-anchor="middle" fill="#5a5a6e" font-size="10">Vol = πr²</text>
+            <!-- Arrow -->
+            <path d="M 145 90 L 185 90" stroke="#5a5a6e" stroke-width="1" marker-end="url(#arrow)"/>
+            <!-- Squash -->
+            <ellipse cx="240" cy="110" rx="60" ry="22" fill="rgba(201,127,255,0.1)" stroke="#c97fff" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="240" y="150" text-anchor="middle" fill="#8a8a9e" font-size="12">Squash ↕</text>
+            <text x="240" y="163" text-anchor="middle" fill="#5dffa0" font-size="10">Same Volume ✓</text>
+            <!-- Arrow down -->
+            <path d="M 240 50 L 240 80" stroke="#ff8c69" stroke-width="2" marker-end="url(#arrow2)"/>
+            <text x="255" y="70" fill="#ff8c69" font-size="10">Force</text>
+            <!-- Arrow -->
+            <path d="M 305 90 L 345 90" stroke="#5a5a6e" stroke-width="1" marker-end="url(#arrow)"/>
+            <!-- Stretch -->
+            <ellipse cx="420" cy="90" rx="22" ry="55" fill="rgba(127,196,255,0.1)" stroke="#7fc4ff" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="420" y="158" text-anchor="middle" fill="#8a8a9e" font-size="12">Stretch ↕</text>
+            <text x="420" y="171" text-anchor="middle" fill="#5dffa0" font-size="10">Same Volume ✓</text>
+            <!-- Arrow up -->
+            <path d="M 420 125 L 420 158" stroke="#7fc4ff" stroke-width="2" marker-end="url(#arrow3)"/>
+            <!-- Wrong version -->
+            <ellipse cx="520" cy="110" rx="60" ry="45" fill="rgba(255,94,94,0.06)" stroke="#ff5e5e" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="520" y="163" text-anchor="middle" fill="#ff5e5e" font-size="10">Wrong! Vol grows ✗</text>
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#5a5a6e"/></marker>
+              <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff8c69"/></marker>
+              <marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="270"><path d="M0,0 L0,6 L8,3 z" fill="#7fc4ff"/></marker>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="misconception">
+          <div class="misconception-title">⚠ Common Misconception</div>
+          <p>"Squash and stretch only applies to cartoon animation — it would look silly in realistic 3D."</p>
+          <p class="reality">✅ Reality: Squash and stretch exists in all great 3D animation, including Pixar's hyper-realistic work. It's often subtle — a cheek puff, a slight body compress on landing — but it's always there. Without it, even photorealistic characters feel like plastic mannequins. The amount of exaggeration is what varies, not the principle itself.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-header">
+            <div class="exercise-icon">✏️</div>
+            <div><div class="exercise-title">Practice Exercise 1.1</div><div class="exercise-subtitle">The Bouncing Ball Observation</div></div>
+          </div>
+          <div class="exercise-body">
+            <p>Grab a ball (any ball — tennis, basketball, even a water bottle), drop it, and watch carefully.</p>
+            <ul class="exercise-steps">
+              <li><span class="step-num">1</span>Watch how it deforms on contact with the ground. Even rigid balls show a tiny squash imperceptible to the naked eye — try slow-motion video on your phone.</li>
+              <li><span class="step-num">2</span>Notice how a basketball (high elasticity) vs a bowling ball (low elasticity) behave differently. How does squash & stretch communicate this?</li>
+              <li><span class="step-num">3</span>Sketch three bounces of each, exaggerating the squash/stretch intentionally. Don't worry about accuracy — exaggeration IS the point.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- PRINCIPLE 2 -->
+        <div class="divider"></div>
+        <h2>Principle 2: Anticipation</h2>
+        <p>Anticipation is a <strong>preparatory movement</strong> that occurs before the main action. Before a character punches, they pull their arm back. Before a jump, they crouch. Before throwing a ball, they wind up. This prepares the audience for what's about to happen, making the subsequent action feel powerful, deliberate, and believable.</p>
+
+        <p>Without anticipation, actions feel abrupt and jarring — like someone editing the first frame of a video. With it, they feel natural and grounded in physical reality. Anticipation also applies in reverse: a character can pause or "settle" after a big action (this becomes "follow-through," covered in Module 3).</p>
+
+        <div class="demo-stage">
+          <div class="demo-title">DEMO — Anticipation Before Action</div>
+          <div style="height:80px;display:flex;align-items:center;justify-content:center">
+            <div class="ball ball-anticipate" style="width:36px;height:36px"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim)">Watch the ball pull back (anticipation) before launching forward. Without the pull-back, the launch would feel random.</div>
+        </div>
+
+        <h3>The Three Functions of Anticipation</h3>
+        <table class="compare-table">
+          <thead><tr><th>Function</th><th>Example</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Signals intention</strong></td><td>A character looks left before running left</td><td>Audience knows what's coming and can follow</td></tr>
+            <tr><td><strong>Builds energy</strong></td><td>Arm pulling back before a punch</td><td>Makes the main action feel more powerful</td></tr>
+            <tr><td><strong>Adds weight</strong></td><td>Body sinking before jumping</td><td>Communicates mass and effort required</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Analogy: The Bowler</h3>
+        <div class="callout">
+          <div class="callout-icon">🎳</div>
+          <div class="callout-text">A bowler doesn't just instantly release the ball — they swing their arm back first. That backswing is pure anticipation. Its duration and depth tell you how hard they're about to throw. A tiny backswing = gentle roll. A huge backswing = power throw. The anticipation <strong>sets the expectation</strong> for what follows.</div>
+        </div>
+
+        <!-- PRINCIPLE 3 -->
+        <div class="divider"></div>
+        <h2>Principle 3: Staging</h2>
+        <p>Staging is the art of <strong>presenting an idea clearly</strong>. It's borrowed directly from theatre and film: where do you position the character? What's in the background? What angle does the camera take? The goal is that the audience instantly understands what is happening, without ambiguity.</p>
+
+        <p>Great staging means that if you took a single frame from the middle of an action, a person who had never seen the film before could understand what's happening. Poor staging clutters the scene, buries the key action, or presents it from an angle where the key motion is hidden.</p>
+
+        <h3>Silhouette Test</h3>
+        <p>The fastest way to evaluate staging is the <strong>silhouette test</strong>: fill your character with solid black and see if the pose is still readable. If it's not — if limbs blend together, if the action is unclear — the staging needs work.</p>
+
+        <div class="diagram-wrap">
+          <div class="diagram-label">Diagram — Good vs Bad Staging (Silhouette Test)</div>
+          <svg viewBox="0 0 520 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <!-- Good staging: running figure with clear silhouette -->
+            <text x="120" y="20" text-anchor="middle" fill="#5dffa0" font-size="12">✓ Good Staging</text>
+            <!-- Body -->
+            <ellipse cx="120" cy="80" rx="18" ry="24" fill="#c97fff" opacity="0.7"/>
+            <!-- Head -->
+            <circle cx="120" cy="52" r="13" fill="#c97fff" opacity="0.7"/>
+            <!-- Arms outstretched clearly -->
+            <path d="M 102 82 L 72 68" stroke="#c97fff" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+            <path d="M 138 82 L 160 60" stroke="#c97fff" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+            <!-- Legs in run pose -->
+            <path d="M 112 104 L 96 140" stroke="#c97fff" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+            <path d="M 128 104 L 148 135" stroke="#c97fff" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+            <text x="120" y="170" text-anchor="middle" fill="#8a8a9e" font-size="11">Clear silhouette = clear pose</text>
+            <!-- Bad staging -->
+            <text x="380" y="20" text-anchor="middle" fill="#ff5e5e" font-size="12">✗ Bad Staging</text>
+            <!-- body facing camera, limbs overlap -->
+            <ellipse cx="380" cy="80" rx="18" ry="24" fill="#ff5e5e" opacity="0.5"/>
+            <circle cx="380" cy="52" r="13" fill="#ff5e5e" opacity="0.5"/>
+            <!-- Arms pointing directly at viewer (foreshortened) -->
+            <circle cx="360" cy="82" r="8" fill="#ff5e5e" opacity="0.5"/>
+            <circle cx="400" cy="82" r="8" fill="#ff5e5e" opacity="0.5"/>
+            <!-- Legs close together -->
+            <path d="M 373 104 L 368 140" stroke="#ff5e5e" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+            <path d="M 387 104 L 392 140" stroke="#ff5e5e" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+            <text x="380" y="170" text-anchor="middle" fill="#8a8a9e" font-size="11">Limbs blend = confusing pose</text>
+            <!-- Divider -->
+            <line x1="250" y1="10" x2="250" y2="185" stroke="#2e2e36" stroke-width="1" stroke-dasharray="4"/>
+          </svg>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-title">Staging vs. Composition</div>
+          Staging encompasses composition but goes further. Composition is a static art concept (where things are placed). Staging in animation also includes timing, camera movement, and how elements are revealed over time. A well-staged scene uses all of these to direct the viewer's attention at exactly the right moment.
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-header">
+            <div class="exercise-icon">🎭</div>
+            <div><div class="exercise-title">Practice Exercise 1.2</div><div class="exercise-subtitle">The Silhouette Reading Game</div></div>
+          </div>
+          <div class="exercise-body">
+            <p>Open any animated film or series to a random scene. Pause on a character in mid-action.</p>
+            <ul class="exercise-steps">
+              <li><span class="step-num">1</span>Can you tell what emotion the character feels just from the pose? What action are they performing?</li>
+              <li><span class="step-num">2</span>Take a screenshot and use any photo editor to fill the character with black silhouette. Is the pose still readable?</li>
+              <li><span class="step-num">3</span>Find one well-staged and one poorly staged pose. Describe why each works or fails.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="takeaways">
+          <div class="takeaways-title">🔑 Module 1 Key Takeaways</div>
+          <ul>
+            <li>Squash & stretch communicates weight, elasticity, and life — volume must always be conserved</li>
+            <li>Anticipation prepares the viewer for action and makes subsequent movement feel powerful</li>
+            <li>Staging is about clarity — if the viewer doesn't immediately understand what's happening, it fails</li>
+            <li>These three principles are the most grounded in physics and theatre — they make scenes feel real</li>
+            <li>Apply the silhouette test to any pose: if it's readable as a black shape, it's well staged</li>
+          </ul>
+        </div>
+
+        <div style="text-align:right;margin-top:32px">
+          <button class="btn btn-primary" onclick="completeModule('m1')">Take Module 1 Quiz →</button>
+        </div>
+      </div>
+
+      <!-- ══ QUIZ 1 ══ -->
+      <div class="section" id="section-q1">
+        <div class="quiz-header">
+          <div class="quiz-tag">⚡ Module 1 Quiz</div>
+          <div class="quiz-title">Test Your Knowledge</div>
+          <div class="quiz-subtitle">4 questions · Instant feedback · Unlock Module 2 on completion</div>
+          <div class="quiz-progress"><div class="qpip current" id="q1p1"></div><div class="qpip" id="q1p2"></div><div class="qpip" id="q1p3"></div><div class="qpip" id="q1p4"></div></div>
+        </div>
+
+        <div class="question-block active" id="q1-q1">
+          <div class="q-number">Question 1 of 4</div>
+          <div class="q-text">When a ball squashes on impact with the ground, what must happen to maintain the illusion of correct volume?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q1',1,false)"><div class="option-letter">A</div>The ball should grow bigger to show squash</div>
+            <div class="option" onclick="selectOption(this,'q1',1,true)"><div class="option-letter">B</div>As the ball compresses vertically, it must expand horizontally to keep the same volume</div>
+            <div class="option" onclick="selectOption(this,'q1',1,false)"><div class="option-letter">C</div>Volume doesn't matter — audiences don't notice</div>
+            <div class="option" onclick="selectOption(this,'q1',1,false)"><div class="option-letter">D</div>The ball should stay perfectly round at all times</div>
+          </div>
+          <div class="explanation" id="exp-q1-1">✅ Correct! Volume conservation is the golden rule of squash and stretch. When an object compresses in one axis, it must expand in another. Violating this makes objects feel like they're gaining or losing mass — instantly breaking the illusion.</div>
+        </div>
+
+        <div class="question-block" id="q1-q2">
+          <div class="q-number">Question 2 of 4</div>
+          <div class="q-text">Which best describes the primary purpose of anticipation in animation?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q1',2,false)"><div class="option-letter">A</div>To make animations run faster and smoother</div>
+            <div class="option" onclick="selectOption(this,'q1',2,false)"><div class="option-letter">B</div>To add more frames to a scene</div>
+            <div class="option" onclick="selectOption(this,'q1',2,true)"><div class="option-letter">C</div>To prepare the audience for a coming action and make it feel powerful and believable</div>
+            <div class="option" onclick="selectOption(this,'q1',2,false)"><div class="option-letter">D</div>To create visual interest through random movements</div>
+          </div>
+          <div class="explanation" id="exp-q1-2">✅ Correct! Anticipation signals intention, builds energy, and communicates the weight and effort of the coming action. It's a preparatory movement that "winds up" before the main action fires — just like a bowler's backswing or a sprinter crouching before the start gun.</div>
+        </div>
+
+        <div class="question-block" id="q1-q3">
+          <div class="q-number">Question 3 of 4</div>
+          <div class="q-text">A quick way to test whether a character's pose is well-staged is to:</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q1',3,false)"><div class="option-letter">A</div>Count the number of frames it appears on screen</div>
+            <div class="option" onclick="selectOption(this,'q1',3,true)"><div class="option-letter">B</div>Fill the character with solid black and see if the pose is still readable</div>
+            <div class="option" onclick="selectOption(this,'q1',3,false)"><div class="option-letter">C</div>Show it to someone who knows nothing about animation</div>
+            <div class="option" onclick="selectOption(this,'q1',3,false)"><div class="option-letter">D</div>Make sure the character is centered on screen</div>
+          </div>
+          <div class="explanation" id="exp-q1-3">✅ The silhouette test! If a pose reads clearly as a black shape with no color or detail, it's well staged. This is because the human eye reads shape and outline before it reads color or texture. If the limbs all blend into one blob, the staging has failed.</div>
+        </div>
+
+        <div class="question-block" id="q1-q4">
+          <div class="q-number">Question 4 of 4</div>
+          <div class="q-text">Squash and stretch is only relevant for cartoon-style animation and would look wrong in realistic 3D films. True or False?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q1',4,false)"><div class="option-letter">A</div>True — it's only for cartoons</div>
+            <div class="option" onclick="selectOption(this,'q1',4,true)"><div class="option-letter">B</div>False — all great animation uses it, even if subtly</div>
+            <div class="option" onclick="selectOption(this,'q1',4,false)"><div class="option-letter">C</div>True — Pixar never uses squash and stretch</div>
+            <div class="option" onclick="selectOption(this,'q1',4,false)"><div class="option-letter">D</div>False — but only in animation software, not hand-drawn</div>
+          </div>
+          <div class="explanation" id="exp-q1-4">✅ False! Squash and stretch appears in all quality animation. Even hyper-realistic 3D characters use it — subtle cheek puffs, body compress on landing, eyes widening in surprise. The difference between styles is the degree of exaggeration, not whether the principle is used at all.</div>
+        </div>
+
+        <div class="quiz-score" id="score-q1">
+          <div class="score-circle" id="scoreCircle-q1">0/4</div>
+          <div class="score-label">Module 1 Score</div>
+          <div class="score-title" id="scoreTitle-q1">Well done!</div>
+          <div class="score-desc" id="scoreDesc-q1"></div>
+          <div style="margin-top:20px">
+            <button class="btn btn-primary" onclick="unlockNext('m2','Module 2')">Continue to Module 2 →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MODULE 2 ══ -->
+      <div class="section" id="section-m2">
+        <div class="module-header">
+          <div class="module-tag">🎭 Module 2 of 4</div>
+          <div class="module-title">Character & Staging</div>
+          <div class="module-subtitle">Principles 4–6: Straight-Ahead vs Pose-to-Pose · Follow Through & Overlapping Action · Slow In & Slow Out</div>
+        </div>
+
+        <h2>How Animators Actually Work</h2>
+        <p>The principles in this module address the <strong>process and mechanics</strong> of creating animation — not just the physics, but the method. How do you approach a complex scene? How do you handle multiple objects moving at once? How do you make motion feel organic rather than mechanical? These principles answer those questions.</p>
+
+        <!-- PRINCIPLE 4 -->
+        <h2>Principle 4: Straight-Ahead vs Pose-to-Pose</h2>
+        <p>These are two distinct <strong>methods of creating animation</strong>, and each has different strengths. Great animators know when to use which approach — and many combine them.</p>
+
+        <div class="ease-visualizer" style="grid-template-columns:1fr 1fr;gap:20px;margin:20px 0">
+          <div style="background:var(--surface2);border:1px solid rgba(201,127,255,.2);border-radius:var(--radius);padding:20px">
+            <div style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:10px">Straight-Ahead</div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.7">Draw or key frame by frame, from beginning to end. Natural, spontaneous, fluid — but hard to control timing or maintain proportions. Best for: fire, water, smoke, wild action sequences.</div>
+            <div style="margin-top:10px;font-size:11px;color:var(--green)">✓ Organic feel &nbsp; ✓ Spontaneous &nbsp; ✗ Hard to control</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid rgba(127,196,255,.2);border-radius:var(--radius);padding:20px">
+            <div style="font-size:14px;font-weight:600;color:var(--accent2);margin-bottom:10px">Pose-to-Pose</div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.7">Plan the key poses first (start, middle, end), then fill in the "in-between" frames. Precise, controllable, structured. Best for: dialogue, dramatic moments, precise timing in performance.</div>
+            <div style="margin-top:10px;font-size:11px;color:var(--green)">✓ Precise timing &nbsp; ✓ Controlled &nbsp; ✗ Can feel stiff</div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-icon">🎬</div>
+          <div class="callout-text">Modern digital animation largely uses pose-to-pose (setting keyframes), but great animators introduce straight-ahead-style spontaneity by using <strong>graph editors</strong> to sculpt the motion curves between keys — blending the precision of one method with the fluidity of the other.</div>
+        </div>
+
+        <!-- PRINCIPLE 5 -->
+        <div class="divider"></div>
+        <h2>Principle 5: Follow-Through & Overlapping Action</h2>
+        <p>These two closely related principles describe what happens <strong>after the main action stops</strong> and how different parts of a body move <strong>at different rates</strong>.</p>
+
+        <h3>Follow-Through</h3>
+        <p>When a character stops, not all parts of them stop at the same time. A running dog stops its body, but its ears, tail, and fur continue moving forward — then settle back. A woman stops walking; her ponytail continues swinging. This is follow-through: parts that are lighter or more flexible <strong>lag behind</strong> and overshoot the stopping point before coming to rest.</p>
+
+        <h3>Overlapping Action</h3>
+        <p>While follow-through deals with what happens after stopping, overlapping action deals with <strong>different body parts moving at different times and speeds</strong> during a movement. When a character turns their head, the neck leads, then the head follows, then the hair lags behind. Nothing moves as one rigid unit — different elements start and end at different times.</p>
+
+        <div class="demo-stage">
+          <div class="demo-title">DEMO — Overlapping Timing</div>
+          <div style="display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap">
+            <div style="text-align:center">
+              <div style="background:var(--surface3);padding:12px 20px;border-radius:var(--radius-sm);position:relative;overflow:hidden;width:180px;height:60px">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);position:absolute;top:18px;animation:ease-demo 1.5s ease-in-out infinite alternate;left:calc(50% - 12px)"></div>
+                <div style="width:10px;height:10px;border-radius:50%;background:var(--accent2);position:absolute;top:22px;animation:ease-demo 1.5s ease-in-out .3s infinite alternate;left:calc(50% - 5px);opacity:.7"></div>
+              </div>
+              <div style="font-size:11px;color:var(--accent);margin-top:6px">With overlap (tail lags)</div>
+            </div>
+            <div style="text-align:center">
+              <div style="background:var(--surface3);padding:12px 20px;border-radius:var(--radius-sm);position:relative;overflow:hidden;width:180px;height:60px">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--text-dim);position:absolute;top:18px;animation:ease-demo 1.5s ease-in-out infinite alternate;left:calc(50% - 12px)"></div>
+                <div style="width:10px;height:10px;border-radius:50%;background:var(--text-dim);position:absolute;top:22px;animation:ease-demo 1.5s ease-in-out infinite alternate;left:calc(50% - 5px)"></div>
+              </div>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:6px">No overlap (rigid)</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:8px">The small dot (a "tail") lags behind the main object on the left — this is overlapping action in action.</div>
+        </div>
+
+        <h3>Analogy: The Orchestra</h3>
+        <div class="callout">
+          <div class="callout-icon">🎻</div>
+          <div class="callout-text">A symphony orchestra doesn't have every instrument play the same note at the same instant. Different sections enter and exit, overlap and follow each other. If they all played in perfect unison all the time, it would sound robotic. Animation works the same way: when every body part moves in lockstep, the character feels like a robot. <strong>Stagger the timing</strong> and suddenly there's life.</div>
+        </div>
+
+        <!-- PRINCIPLE 6 -->
+        <div class="divider"></div>
+        <h2>Principle 6: Slow In & Slow Out (Easing)</h2>
+        <p>This is arguably the principle that separates beginner animation from professional work. In the real world, <strong>nothing starts or stops instantaneously</strong>. A car doesn't go from 0 to 60 in one frame. A hand doesn't move at constant speed from point A to point B — it accelerates at first, then decelerates at the end.</p>
+
+        <p>"Slow in" means more frames near the end of a movement (deceleration). "Slow out" means more frames near the beginning (acceleration). In modern software this is called <strong>easing</strong>, and it's controlled by curves in a graph editor.</p>
+
+        <div class="demo-stage">
+          <div class="demo-title">INTERACTIVE — Compare Easing Types</div>
+          <div style="padding:16px 0">
+            <div style="display:flex;flex-direction:column;gap:16px;max-width:400px;margin:0 auto">
+              <div class="ease-lane">
+                <div class="ease-name" style="color:var(--accent)">Ease In-Out (natural)</div>
+                <div style="height:8px;background:var(--border);border-radius:4px;position:relative;overflow:visible">
+                  <div style="width:16px;height:16px;border-radius:50%;background:var(--accent);position:absolute;top:-4px;left:0;margin-left:-8px;animation:ease-demo 2s ease-in-out infinite alternate"></div>
+                </div>
+              </div>
+              <div class="ease-lane">
+                <div class="ease-name" style="color:var(--accent2)">Linear (robotic)</div>
+                <div style="height:8px;background:var(--border);border-radius:4px;position:relative;overflow:visible">
+                  <div style="width:16px;height:16px;border-radius:50%;background:var(--accent2);position:absolute;top:-4px;left:0;margin-left:-8px;animation:ease-demo 2s linear infinite alternate"></div>
+                </div>
+              </div>
+              <div class="ease-lane">
+                <div class="ease-name" style="color:var(--accent3)">Ease In (starts slow)</div>
+                <div style="height:8px;background:var(--border);border-radius:4px;position:relative;overflow:visible">
+                  <div style="width:16px;height:16px;border-radius:50%;background:var(--accent3);position:absolute;top:-4px;left:0;margin-left:-8px;animation:ease-demo 2s ease-in infinite alternate"></div>
+                </div>
+              </div>
+              <div class="ease-lane">
+                <div class="ease-name" style="color:var(--accent4)">Ease Out (ends slow)</div>
+                <div style="height:8px;background:var(--border);border-radius:4px;position:relative;overflow:visible">
+                  <div style="width:16px;height:16px;border-radius:50%;background:var(--accent4);position:absolute;top:-4px;left:0;margin-left:-8px;animation:ease-demo 2s ease-out infinite alternate"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Notice how ease-in-out feels natural, while linear feels mechanical and cheap.</div>
+        </div>
+
+        <h3>When to Break the Rules</h3>
+        <p>Linear motion (no easing) isn't always wrong. Machines, robots, and supernatural elements can intentionally use linear motion to feel inhuman or mechanical. The power of knowing the rule is knowing <em>when</em> breaking it is the right artistic choice.</p>
+
+        <div class="misconception">
+          <div class="misconception-title">⚠ Common Misconception</div>
+          <p>"Slow in and slow out means the animation is slow overall."</p>
+          <p class="reality">✅ Reality: The total duration of the animation can be anything. "Slow in" and "slow out" refer to the <em>distribution of frames within</em> that duration — more frames clustered at the start/end, fewer in the middle. A fast, snappy 12-frame animation can still use slow in/out; it just means 3–4 frames at the extremes and a fast blur in the middle.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-header">
+            <div class="exercise-icon">📊</div>
+            <div><div class="exercise-title">Practice Exercise 2.1</div><div class="exercise-subtitle">Easing Comparison</div></div>
+          </div>
+          <div class="exercise-body">
+            <p>Open any CSS animation editor (or even Chrome DevTools) and create a simple ball moving from left to right.</p>
+            <ul class="exercise-steps">
+              <li><span class="step-num">1</span>Try animation-timing-function: linear. How does it feel?</li>
+              <li><span class="step-num">2</span>Switch to ease-in-out. What's the difference?</li>
+              <li><span class="step-num">3</span>Try cubic-bezier(0.68,-0.55,0.27,1.55) — what does overshoot/bounce feel like?</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="takeaways">
+          <div class="takeaways-title">🔑 Module 2 Key Takeaways</div>
+          <ul>
+            <li>Straight-ahead creates organic fluid motion; pose-to-pose creates precise controlled performance</li>
+            <li>Follow-through: parts of a character continue moving after the main action stops</li>
+            <li>Overlapping action: different body parts start and stop at different times — nothing moves as one rigid unit</li>
+            <li>Slow in and slow out (easing) is the most visible sign of professional vs amateur animation</li>
+            <li>Linear motion = mechanical, robotic — use it intentionally, not by default</li>
+          </ul>
+        </div>
+
+        <div style="text-align:right;margin-top:32px">
+          <button class="btn btn-primary" onclick="completeModule('m2')">Take Module 2 Quiz →</button>
+        </div>
+      </div>
+
+      <!-- ══ QUIZ 2 ══ -->
+      <div class="section" id="section-q2">
+        <div class="quiz-header">
+          <div class="quiz-tag">⚡ Module 2 Quiz</div>
+          <div class="quiz-title">Character & Staging</div>
+          <div class="quiz-subtitle">4 questions · Unlock Module 3 on completion</div>
+          <div class="quiz-progress"><div class="qpip current" id="q2p1"></div><div class="qpip" id="q2p2"></div><div class="qpip" id="q2p3"></div><div class="qpip" id="q2p4"></div></div>
+        </div>
+
+        <div class="question-block active" id="q2-q1">
+          <div class="q-number">Question 1 of 4</div>
+          <div class="q-text">Which animation method is best suited for animating unpredictable natural phenomena like fire, water, or smoke?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q2',1,false)"><div class="option-letter">A</div>Pose-to-pose, because it gives precise control</div>
+            <div class="option" onclick="selectOption(this,'q2',1,true)"><div class="option-letter">B</div>Straight-ahead, because it produces natural, fluid, unpredictable motion</div>
+            <div class="option" onclick="selectOption(this,'q2',1,false)"><div class="option-letter">C</div>Neither — natural phenomena can't be animated by hand</div>
+            <div class="option" onclick="selectOption(this,'q2',1,false)"><div class="option-letter">D</div>Pose-to-pose, because you need to plan fire in advance</div>
+          </div>
+          <div class="explanation" id="exp-q2-1">✅ Straight-ahead animation, where you move from frame to frame spontaneously, produces the organic, unpredictable feel that natural phenomena require. Pose-to-pose's planned structure would make fire feel stiff and mechanical.</div>
+        </div>
+
+        <div class="question-block" id="q2-q2">
+          <div class="q-number">Question 2 of 4</div>
+          <div class="q-text">A character's ponytail continues swinging after she stops walking, then gradually settles. This is an example of:</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q2',2,false)"><div class="option-letter">A</div>Squash and stretch</div>
+            <div class="option" onclick="selectOption(this,'q2',2,false)"><div class="option-letter">B</div>Anticipation</div>
+            <div class="option" onclick="selectOption(this,'q2',2,true)"><div class="option-letter">C</div>Follow-through</div>
+            <div class="option" onclick="selectOption(this,'q2',2,false)"><div class="option-letter">D</div>Straight-ahead animation</div>
+          </div>
+          <div class="explanation" id="exp-q2-2">✅ Follow-through! Lighter or more flexible parts of a character (hair, ears, clothing, tail) continue moving forward past the stopping point of the main body, then settle back. This is follow-through — it makes the character feel like they have real inertia and mass.</div>
+        </div>
+
+        <div class="question-block" id="q2-q3">
+          <div class="q-number">Question 3 of 4</div>
+          <div class="q-text">In animation software, "easing" refers to the same concept as which Disney principle?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q2',3,false)"><div class="option-letter">A</div>Anticipation</div>
+            <div class="option" onclick="selectOption(this,'q2',3,false)"><div class="option-letter">B</div>Staging</div>
+            <div class="option" onclick="selectOption(this,'q2',3,true)"><div class="option-letter">C</div>Slow In and Slow Out</div>
+            <div class="option" onclick="selectOption(this,'q2',3,false)"><div class="option-letter">D</div>Overlapping Action</div>
+          </div>
+          <div class="explanation" id="exp-q2-3">✅ "Slow In and Slow Out" is the principle, and "easing" is the modern software term for the same concept. Objects in the real world accelerate and decelerate — they don't move at constant speed. In software, this is controlled through bezier curves in the graph editor.</div>
+        </div>
+
+        <div class="question-block" id="q2-q4">
+          <div class="q-number">Question 4 of 4</div>
+          <div class="q-text">When a character turns their head, the neck leads, then the head follows, then the hair lags behind. This is an example of:</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q2',4,false)"><div class="option-letter">A</div>Follow-through</div>
+            <div class="option" onclick="selectOption(this,'q2',4,true)"><div class="option-letter">B</div>Overlapping action</div>
+            <div class="option" onclick="selectOption(this,'q2',4,false)"><div class="option-letter">C</div>Pose-to-pose animation</div>
+            <div class="option" onclick="selectOption(this,'q2',4,false)"><div class="option-letter">D</div>Slow in and slow out</div>
+          </div>
+          <div class="explanation" id="exp-q2-4">✅ Overlapping action! Different parts of the body start and stop their motion at different times — the neck, head, and hair are all moving but on offset timing. This staggered timing is what makes characters feel organic rather than robotic.</div>
+        </div>
+
+        <div class="quiz-score" id="score-q2">
+          <div class="score-circle" id="scoreCircle-q2">0/4</div>
+          <div class="score-label">Module 2 Score</div>
+          <div class="score-title" id="scoreTitle-q2">Keep going!</div>
+          <div class="score-desc" id="scoreDesc-q2"></div>
+          <div style="margin-top:20px">
+            <button class="btn btn-primary" onclick="unlockNext('m3','Module 3')">Continue to Module 3 →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MODULE 3 ══ -->
+      <div class="section" id="section-m3">
+        <div class="module-header">
+          <div class="module-tag">🌊 Module 3 of 4</div>
+          <div class="module-title">Motion Quality</div>
+          <div class="module-subtitle">Principles 7–9: Arcs · Secondary Action · Timing</div>
+        </div>
+
+        <h2>The Invisible Craft</h2>
+        <p>The principles in this module are often <strong>invisible when done correctly</strong> — and glaringly obvious when violated. Arcs, secondary action, and timing are what make an animation feel effortless and natural. They operate below the level of conscious perception for most viewers, but their absence is immediately felt as something being "off."</p>
+
+        <!-- PRINCIPLE 7 -->
+        <h2>Principle 7: Arcs</h2>
+        <p>Every natural movement in the world follows a <strong>curved path</strong>, not a straight one. This is a physical reality: momentum, gravity, and the rotational nature of limbs all conspire to create curved trajectories. A hand swinging from the shoulder describes an arc. A thrown ball follows a parabola. Eyes moving from left to right trace a slight curve.</p>
+
+        <p>The most common beginner mistake is creating "twinning" — straight-line motion between two points. This feels mechanical and dead. Introduce even a subtle arc and the motion immediately comes alive.</p>
+
+        <div class="demo-stage">
+          <div class="demo-title">DEMO — Arc vs Straight-Line Motion</div>
+          <div style="display:flex;gap:48px;align-items:center;justify-content:center">
+            <div style="text-align:center">
+              <div style="width:200px;height:80px;position:relative;overflow:visible">
+                <div class="ball-arc" style="width:24px;height:24px;border-radius:50%;background:var(--accent);display:inline-block;position:absolute;top:20px;left:calc(50% - 12px)"></div>
+              </div>
+              <div style="font-size:11px;color:var(--accent);margin-top:8px">Arc path ✓ Natural</div>
+            </div>
+            <div style="text-align:center">
+              <div style="width:200px;height:80px;position:relative;overflow:visible">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--text-dim);display:inline-block;position:absolute;top:28px;left:0;animation:ease-demo 1.5s ease-in-out infinite alternate"></div>
+              </div>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:8px">Straight path ✗ Mechanical</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:8px">The ball on the left traces a natural arc; the right slides mechanically in a straight line.</div>
+        </div>
+
+        <h3>Arcs in Character Animation</h3>
+        <p>The arc principle extends far beyond throwing and jumping. Even the motion of a character's eyes, the movement of fingers on a piano, and the turn of a head should all follow curved paths. The straighter the path, the more robotic and computer-generated it feels — ironically, since computers default to linear interpolation, animators must manually impose arcs.</p>
+
+        <div class="diagram-wrap">
+          <div class="diagram-label">Diagram — How Arcs Arise from Rotational Limb Movement</div>
+          <svg viewBox="0 0 480 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <!-- Arm anatomy -->
+            <circle cx="120" cy="80" r="8" fill="var(--surface2)" stroke="#c97fff" stroke-width="2"/>
+            <text x="120" y="58" text-anchor="middle" fill="#8a8a9e" font-size="11">Shoulder</text>
+            <!-- Upper arm options -->
+            <line x1="120" y1="80" x2="190" y2="130" stroke="#c97fff" stroke-width="2" opacity=".4"/>
+            <line x1="120" y1="80" x2="170" y2="140" stroke="#c97fff" stroke-width="2" opacity=".6"/>
+            <line x1="120" y1="80" x2="145" y2="148" stroke="#c97fff" stroke-width="2" opacity=".8"/>
+            <line x1="120" y1="80" x2="118" y2="152" stroke="#c97fff" stroke-width="2"/>
+            <!-- Arc of hand -->
+            <path d="M 195 130 Q 165 175 120 155 Q 90 148 100 130" stroke="#7fc4ff" stroke-width="1.5" fill="none" stroke-dasharray="5"/>
+            <text x="105" y="185" fill="#7fc4ff" font-size="11">Arc of hand end-point</text>
+            <!-- Right side: eye movement -->
+            <rect x="280" y="60" width="160" height="80" rx="8" fill="var(--surface2)" stroke="#2e2e36" stroke-width="1"/>
+            <circle cx="310" cy="100" r="14" fill="#1c1c21" stroke="#8a8a9e" stroke-width="1"/>
+            <circle cx="360" cy="100" r="14" fill="#1c1c21" stroke="#8a8a9e" stroke-width="1"/>
+            <circle cx="410" cy="100" r="14" fill="#1c1c21" stroke="#8a8a9e" stroke-width="1"/>
+            <!-- Pupils moving in arc -->
+            <circle cx="306" cy="97" r="5" fill="var(--accent)" opacity=".5"/>
+            <circle cx="357" cy="96" r="5" fill="var(--accent)" opacity=".7"/>
+            <circle cx="407" cy="97" r="5" fill="var(--accent)"/>
+            <path d="M 306 97 Q 357 90 407 97" stroke="#c97fff" stroke-width="1" fill="none" stroke-dasharray="3"/>
+            <text x="360" y="155" text-anchor="middle" fill="#8a8a9e" font-size="11">Even eye movement follows an arc</text>
+          </svg>
+        </div>
+
+        <!-- PRINCIPLE 8 -->
+        <div class="divider"></div>
+        <h2>Principle 8: Secondary Action</h2>
+        <p>Secondary actions are <strong>supporting movements that reinforce or add depth</strong> to the main action. They must never compete with or distract from the primary action — instead, they enrich it and add dimensionality to the character.</p>
+
+        <p>A character walking (primary action) might swing their arms, move their hair in the breeze, adjust their bag, or blink — these are secondary actions. Together they create the sense of a fully alive being rather than a puppet executing a single command.</p>
+
+        <table class="compare-table">
+          <thead><tr><th>Primary Action</th><th>Good Secondary Action</th><th>Why it Works</th></tr></thead>
+          <tbody>
+            <tr><td>Character running</td><td>Arms pumping, slight body lean, face showing effort</td><td>Adds exertion and personality without competing</td></tr>
+            <tr><td>Character speaking</td><td>Subtle eyebrow raises, hand gestures, weight shifts</td><td>Makes speech feel embodied, not disembodied</td></tr>
+            <tr><td>Character sleeping</td><td>Gentle chest rise, occasional twitching, eyelids flutter</td><td>Makes stillness feel alive, not frozen</td></tr>
+            <tr><td>Ball bouncing</td><td>Subtle rotation as it bounces</td><td>Adds realism — balls spin in the real world</td></tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-title">⚠ The Secondary Action Trap</div>
+          Secondary action becomes a problem when it overwhelms the primary. If a character is delivering emotional dialogue and their secondary actions (fidgeting, gesturing wildly) are more interesting than their face and words, the composition has broken. Secondary actions must be subordinate — they support, never compete.
+        </div>
+
+        <!-- PRINCIPLE 9 -->
+        <div class="divider"></div>
+        <h2>Principle 9: Timing</h2>
+        <p>Timing is the principle that determines <strong>how many frames an action takes</strong>. In traditional animation at 24fps: a 12-frame action happens in half a second, a 24-frame action in a full second. Timing communicates weight, mood, and personality more powerfully than almost any other principle.</p>
+
+        <p>A heavy boulder rolling: slow timing (many frames). A hummingbird wing: fast timing (few frames, sometimes a blur). A sad character walking: slow, heavy timing. An excited child running: fast, bouncy timing. The same action — a hand reaching for a cup — feels completely different with slow, deliberate timing vs fast, nervous timing.</p>
+
+        <h3>Timing as Storytelling</h3>
+        <div class="callout">
+          <div class="callout-icon">🕐</div>
+          <div class="callout-text">Consider a comedic "take" — a character sees something shocking. If the take happens in 2 frames, it's barely noticeable. In 8 frames, it reads. In 4 frames with a hold and then a slow settle, it's comedic gold. <strong>Timing IS the joke</strong> in comedy animation. The same is true for drama — a 3-second pause before a character speaks can be more emotionally devastating than any line of dialogue.</div>
+        </div>
+
+        <h3>Spacing and Timing</h3>
+        <p>Timing (number of frames) works together with <strong>spacing</strong> (how far apart the positions are between frames). Fast action = large spacing between frames. Slow action = small spacing. Easing = variable spacing. Understanding the relationship between timing and spacing is what separates the professionals.</p>
+
+        <div class="diagram-wrap">
+          <div class="diagram-label">Diagram — How Timing + Spacing Create Different Feels</div>
+          <svg viewBox="0 0 520 160" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <!-- Heavy -->
+            <text x="10" y="30" fill="#8a8a9e" font-size="11">Heavy / Slow</text>
+            <line x1="10" y1="50" x2="510" y2="50" stroke="#2e2e36" stroke-width="1"/>
+            <circle cx="20" cy="50" r="7" fill="#c97fff" opacity=".8"/>
+            <circle cx="60" cy="50" r="7" fill="#c97fff" opacity=".8"/>
+            <circle cx="110" cy="50" r="7" fill="#c97fff" opacity=".8"/>
+            <circle cx="175" cy="50" r="7" fill="#c97fff" opacity=".8"/>
+            <circle cx="260" cy="50" r="7" fill="#c97fff" opacity=".8"/>
+            <circle cx="370" cy="50" r="7" fill="#c97fff" opacity=".8"/>
+            <circle cx="500" cy="50" r="7" fill="#c97fff" opacity=".8"/>
+            <text x="255" y="75" text-anchor="middle" fill="#5a5a6e" font-size="10">Wide spacing at extremes → feels heavy, effortful</text>
+            <!-- Light -->
+            <text x="10" y="110" fill="#8a8a9e" font-size="11">Light / Fast</text>
+            <line x1="10" y1="130" x2="510" y2="130" stroke="#2e2e36" stroke-width="1"/>
+            <circle cx="20" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="42" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="64" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="86" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="108" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="130" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="152" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="174" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="196" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="218" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="240" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="262" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="320" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="400" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <circle cx="500" cy="130" r="5" fill="#7fc4ff" opacity=".8"/>
+            <text x="255" y="155" text-anchor="middle" fill="#5a5a6e" font-size="10">Dense spacing (many frames close together) → feels light, quick</text>
+          </svg>
+        </div>
+
+        <div class="takeaways">
+          <div class="takeaways-title">🔑 Module 3 Key Takeaways</div>
+          <ul>
+            <li>Arcs: nearly all natural motion follows curved paths — straight-line motion feels robotic and digital</li>
+            <li>Secondary action enriches the primary action without competing with it — it must always be subordinate</li>
+            <li>Timing (number of frames) communicates weight, personality, and mood more powerfully than almost any other principle</li>
+            <li>Spacing and timing work together — understanding their relationship is the mark of a professional animator</li>
+            <li>Slow timing = heavy, deliberate, dramatic. Fast timing = light, energetic, comedic or nervous</li>
+          </ul>
+        </div>
+
+        <div style="text-align:right;margin-top:32px">
+          <button class="btn btn-primary" onclick="completeModule('m3')">Take Module 3 Quiz →</button>
+        </div>
+      </div>
+
+      <!-- ══ QUIZ 3 ══ -->
+      <div class="section" id="section-q3">
+        <div class="quiz-header">
+          <div class="quiz-tag">⚡ Module 3 Quiz</div>
+          <div class="quiz-title">Motion Quality</div>
+          <div class="quiz-subtitle">4 questions · Unlock Module 4 on completion</div>
+          <div class="quiz-progress"><div class="qpip current" id="q3p1"></div><div class="qpip" id="q3p2"></div><div class="qpip" id="q3p3"></div><div class="qpip" id="q3p4"></div></div>
+        </div>
+
+        <div class="question-block active" id="q3-q1">
+          <div class="q-number">Question 1 of 4</div>
+          <div class="q-text">Why do animators deliberately give limbs arc-shaped motion paths instead of straight ones?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q3',1,false)"><div class="option-letter">A</div>Because straight motion is harder to calculate in software</div>
+            <div class="option" onclick="selectOption(this,'q3',1,true)"><div class="option-letter">B</div>Because real-world limbs rotate around joints, naturally producing curved paths</div>
+            <div class="option" onclick="selectOption(this,'q3',1,false)"><div class="option-letter">C</div>Because arcs look more visually interesting than straight lines</div>
+            <div class="option" onclick="selectOption(this,'q3',1,false)"><div class="option-letter">D</div>Because it makes the animation faster to produce</div>
+          </div>
+          <div class="explanation" id="exp-q3-1">✅ The physical reality is that limbs rotate around joints (shoulder, elbow, hip, knee), which naturally produces arc paths. Straight-line motion between two points is physically impossible for organic limb movement — it's an artifact of computer linear interpolation that animators must manually correct by imposing arcs.</div>
+        </div>
+
+        <div class="question-block" id="q3-q2">
+          <div class="q-number">Question 2 of 4</div>
+          <div class="q-text">A character is delivering emotional dialogue. Which secondary action would be MOST problematic?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q3',2,false)"><div class="option-letter">A</div>Subtle eyebrow movements that reflect the emotion</div>
+            <div class="option" onclick="selectOption(this,'q3',2,true)"><div class="option-letter">B</div>Wild, energetic hand gestures that are more interesting than the facial performance</div>
+            <div class="option" onclick="selectOption(this,'q3',2,false)"><div class="option-letter">C</div>Gentle weight shifts from foot to foot</div>
+            <div class="option" onclick="selectOption(this,'q3',2,false)"><div class="option-letter">D</div>A slight swallow before a difficult line</div>
+          </div>
+          <div class="explanation" id="exp-q3-2">✅ Secondary actions must never compete with the primary action. Wild gestures that steal attention from the facial performance violate this rule. The face IS the performance in a dialogue scene — everything else should support it, not fight for the viewer's attention.</div>
+        </div>
+
+        <div class="question-block" id="q3-q3">
+          <div class="q-number">Question 3 of 4</div>
+          <div class="q-text">In traditional animation at 24fps, a heavy boulder rolling slowly would use:</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q3',3,false)"><div class="option-letter">A</div>Many frames with large spacing between positions</div>
+            <div class="option" onclick="selectOption(this,'q3',3,true)"><div class="option-letter">B</div>Many frames with small spacing between positions</div>
+            <div class="option" onclick="selectOption(this,'q3',3,false)"><div class="option-letter">C</div>Few frames with large spacing between positions</div>
+            <div class="option" onclick="selectOption(this,'q3',3,false)"><div class="option-letter">D</div>Few frames with small spacing between positions</div>
+          </div>
+          <div class="explanation" id="exp-q3-3">✅ A heavy boulder rolling slowly uses MANY frames (slow timing) with SMALL spacing between each position (because it moves slowly, each frame advances only a tiny bit). Few frames with large spacing = fast movement. Many frames with small spacing = slow, heavy movement. Understanding this timing/spacing relationship is essential.</div>
+        </div>
+
+        <div class="question-block" id="q3-q4">
+          <div class="q-number">Question 4 of 4</div>
+          <div class="q-text">Timing in animation primarily communicates:</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q3',4,false)"><div class="option-letter">A</div>The exact duration of a scene in real-world seconds</div>
+            <div class="option" onclick="selectOption(this,'q3',4,false)"><div class="option-letter">B</div>How smooth the motion curves are</div>
+            <div class="option" onclick="selectOption(this,'q3',4,true)"><div class="option-letter">C</div>Weight, mood, personality, and emotional tone of a movement</div>
+            <div class="option" onclick="selectOption(this,'q3',4,false)"><div class="option-letter">D</div>How many characters appear on screen at once</div>
+          </div>
+          <div class="explanation" id="exp-q3-4">✅ Timing is one of animation's most powerful storytelling tools. The same physical action — a hand reaching for a cup — feels completely different depending on how many frames it takes. Slow = deliberate, heavy, thoughtful. Fast = nervous, excited, automatic. Timing tells us everything about the inner life of a character.</div>
+        </div>
+
+        <div class="quiz-score" id="score-q3">
+          <div class="score-circle" id="scoreCircle-q3">0/4</div>
+          <div class="score-label">Module 3 Score</div>
+          <div class="score-title" id="scoreTitle-q3">Excellent!</div>
+          <div class="score-desc" id="scoreDesc-q3"></div>
+          <div style="margin-top:20px">
+            <button class="btn btn-primary" onclick="unlockNext('m4','Module 4')">Continue to Module 4 →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MODULE 4 ══ -->
+      <div class="section" id="section-m4">
+        <div class="module-header">
+          <div class="module-tag">✨ Module 4 of 4</div>
+          <div class="module-title">Art & Appeal</div>
+          <div class="module-subtitle">Principles 10–12: Exaggeration · Solid Drawing · Appeal</div>
+        </div>
+
+        <h2>The Artistic Summit</h2>
+        <p>The final three principles move from physics and process into the realm of pure artistic sensibility. These are the principles that separate technically competent animation from <strong>truly memorable, emotionally resonant</strong> work. They require taste, observation, and a deep understanding of human perception — things that can be learned but not automated.</p>
+
+        <!-- PRINCIPLE 10 -->
+        <h2>Principle 10: Exaggeration</h2>
+        <p>Exaggeration is the principle that animation isn't about perfect realism — it's about <strong>capturing the essence of reality and amplifying it</strong>. A surprised character doesn't just open their eyes slightly wider; their eyes bug out of their head. A sneaky character doesn't just lean forward slightly; they hunch, tiptoe, and peek with cartoonish discretion. This is not about being unrealistic — it's about being <em>more real than real</em>.</p>
+
+        <p>Walt Disney said: "Take a real action and push it to the extreme." The trap beginners fall into is "too subtle" — they animate something realistic and wonder why it looks dead on screen. The camera reduces everything; you need to push further than feels comfortable in life.</p>
+
+        <h3>Exaggeration is Relative</h3>
+        <div class="ease-visualizer" style="grid-template-columns:repeat(3,1fr)">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center">
+            <div style="font-size:32px;margin-bottom:8px">😐</div>
+            <div style="font-size:12px;color:var(--text-muted)"><strong style="color:var(--text)">Too subtle</strong><br>Realistic but dead on screen. Audiences don't feel it.</div>
+          </div>
+          <div style="background:rgba(201,127,255,.06);border:1px solid rgba(201,127,255,.3);border-radius:var(--radius);padding:16px;text-align:center">
+            <div style="font-size:40px;margin-bottom:8px">😲</div>
+            <div style="font-size:12px;color:var(--text-muted)"><strong style="color:var(--accent)">Well exaggerated</strong><br>Amplified truth. The emotion reads clearly and immediately.</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center">
+            <div style="font-size:28px;margin-bottom:8px">🤪</div>
+            <div style="font-size:12px;color:var(--text-muted)"><strong style="color:var(--red)">Over-exaggerated</strong><br>Grotesque or incoherent. Loses meaning entirely.</div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-icon">🎨</div>
+          <div class="callout-text">Exaggeration requires understanding what the <strong>essence</strong> of an action is, then amplifying that essence while preserving everything else. When exaggerating fear, you push the eyes wider, the shoulders up, the body backward — all in service of the core emotional truth. Random exaggeration that amplifies the wrong thing creates confusion, not emphasis.</div>
+        </div>
+
+        <div class="misconception">
+          <div class="misconception-title">⚠ Common Misconception</div>
+          <p>"Exaggeration is only for cartoon or comedy animation — realistic animations shouldn't use it."</p>
+          <p class="reality">✅ Reality: Every effective animation — including realistic drama — uses exaggeration. The degree varies: a realistic drama might exaggerate by 10–15%, a cartoon by 200%. Without any exaggeration, even realistic animation looks like a motion-captured actor performing with no direction. Exaggeration is what transforms motion capture data into performance.</p>
+        </div>
+
+        <!-- PRINCIPLE 11 -->
+        <div class="divider"></div>
+        <h2>Principle 11: Solid Drawing</h2>
+        <p>Solid drawing is the principle that animated characters must <strong>feel three-dimensional and have a sense of weight, depth, and form</strong> — even if they're drawn in 2D. This comes from an understanding of anatomy, perspective, and volume, and extends into 3D animation as understanding how to pose characters convincingly in three-dimensional space.</p>
+
+        <h3>The Three-Dimensional Illusion</h3>
+        <p>A flat, unconvincing character "floats" on the screen — it doesn't feel like it inhabits the same space as its environment. A solidly drawn character feels present, grounded, and tangible. This requires animators to constantly think about where the <strong>weight is</strong>, how the body is supported, and what the camera's perspective does to the reading of a pose.</p>
+
+        <table class="compare-table">
+          <thead><tr><th>Solid Drawing Principle</th><th>What to Do</th><th>Common Violation</th></tr></thead>
+          <tbody>
+            <tr><td>Volume consistency</td><td>Character's head stays the same size as they turn</td><td>Head grows or shrinks when seen from different angles</td></tr>
+            <tr><td>Weight distribution</td><td>Balance point is always under the center of mass</td><td>Character appears to float or tip without support</td></tr>
+            <tr><td>Twinning avoidance</td><td>Both arms/legs never do the exact same thing at once</td><td>Both arms raised to exact same height simultaneously</td></tr>
+            <tr><td>Depth and perspective</td><td>Overlapping forms establish what's in front/behind</td><td>Flat designs where depth is unclear</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Twinning: The Silent Killer</h3>
+        <p><strong>Twinning</strong> occurs when both sides of a character mirror each other exactly — same arm angles, same leg positions, same eye direction. It instantly makes characters feel stiff and robotic. Nature abhors perfect symmetry in motion, and so does good animation. Always offset and vary the two sides of a character.</p>
+
+        <!-- PRINCIPLE 12 -->
+        <div class="divider"></div>
+        <h2>Principle 12: Appeal</h2>
+        <p>Appeal is the most subjective principle, and perhaps the most important. A character with appeal has <strong>charisma</strong> — a quality that makes the audience want to watch them. This doesn't mean every character must be cute or likeable. A menacing villain has appeal if they're compelling. A tragic character has appeal if they're emotionally resonant.</p>
+
+        <p>Appeal in design comes from clarity of shape, readable silhouette, and a design that's simple enough to be understood at a glance but rich enough to reward further attention. Appeal in animation comes from the same source as great acting: specificity, commitment, and the sense that every movement comes from a genuine internal motivation.</p>
+
+        <h3>The Elements of Appeal</h3>
+        <div class="principles-grid">
+          <div class="principle-card">
+            <div class="pc-name">Shape Clarity</div>
+            <div class="pc-desc">Simple, readable shapes that can be understood instantly. Disney characters are built from basic geometric forms — circles, triangles, rectangles — that convey personality at a glance.</div>
+            <div class="pc-tag">Design</div>
+          </div>
+          <div class="principle-card">
+            <div class="pc-name">Specificity</div>
+            <div class="pc-desc">Characters that feel like individuals, not types. The way THIS character scratches their nose is different from any other character — small details of behavior create uniqueness.</div>
+            <div class="pc-tag">Performance</div>
+          </div>
+          <div class="principle-card">
+            <div class="pc-name">Asymmetry</div>
+            <div class="pc-desc">Slightly asymmetric designs feel more natural and alive. Perfect symmetry reads as mask-like and artificial. A subtle tilt, a slightly different eye size, creates organic appeal.</div>
+            <div class="pc-tag">Design</div>
+          </div>
+          <div class="principle-card">
+            <div class="pc-name">Commitment</div>
+            <div class="pc-desc">Characters with appeal commit fully to their emotions and actions. Halfway expressions or ambivalent poses read as weak. Go all in on the emotional beat.</div>
+            <div class="pc-tag">Performance</div>
+          </div>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-header">
+            <div class="exercise-icon">🎭</div>
+            <div><div class="exercise-title">Practice Exercise 4.1</div><div class="exercise-subtitle">The Appeal Analysis</div></div>
+          </div>
+          <div class="exercise-body">
+            <p>Choose your favorite animated character from any film or series. Analyze their appeal:</p>
+            <ul class="exercise-steps">
+              <li><span class="step-num">1</span>What basic geometric shapes make up their design? (Round = soft/friendly, triangle = sharp/dangerous, square = sturdy/reliable)</li>
+              <li><span class="step-num">2</span>Find a moment where they perform an action uniquely — something that couldn't be any other character doing it. What makes it specific?</li>
+              <li><span class="step-num">3</span>How does exaggeration factor into their most memorable expressions? Find the biggest expression and estimate what percentage over real life it's pushed.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="takeaways">
+          <div class="takeaways-title">🔑 Module 4 Key Takeaways</div>
+          <ul>
+            <li>Exaggeration amplifies the essence of an action — too subtle is as much of a failure as too exaggerated</li>
+            <li>Solid drawing gives characters volume, weight, and a tangible presence in their environment</li>
+            <li>Twinning (both sides mirroring perfectly) makes characters feel robotic — always vary and offset</li>
+            <li>Appeal isn't about cuteness — it's about charisma, clarity, and specificity of character behavior</li>
+            <li>Every great character is built from simple readable shapes and committed, specific performance</li>
+          </ul>
+        </div>
+
+        <div style="text-align:right;margin-top:32px">
+          <button class="btn btn-primary" onclick="completeModule('m4')">Take Module 4 Quiz →</button>
+        </div>
+      </div>
+
+      <!-- ══ QUIZ 4 ══ -->
+      <div class="section" id="section-q4">
+        <div class="quiz-header">
+          <div class="quiz-tag">⚡ Module 4 Quiz</div>
+          <div class="quiz-title">Art & Appeal</div>
+          <div class="quiz-subtitle">4 questions · Unlock Final Challenge on completion</div>
+          <div class="quiz-progress"><div class="qpip current" id="q4p1"></div><div class="qpip" id="q4p2"></div><div class="qpip" id="q4p3"></div><div class="qpip" id="q4p4"></div></div>
+        </div>
+
+        <div class="question-block active" id="q4-q1">
+          <div class="q-number">Question 1 of 4</div>
+          <div class="q-text">Walt Disney's advice on exaggeration was to "take a real action and push it to the extreme." What is the primary risk of NOT exaggerating enough?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q4',1,false)"><div class="option-letter">A</div>The animation will look too cartoony</div>
+            <div class="option" onclick="selectOption(this,'q4',1,true)"><div class="option-letter">B</div>The animation will look dead and unconvincing — the camera reduces everything, so subtle actions don't read</div>
+            <div class="option" onclick="selectOption(this,'q4',1,false)"><div class="option-letter">C</div>The rendering will take longer</div>
+            <div class="option" onclick="selectOption(this,'q4',1,false)"><div class="option-letter">D</div>The character's anatomy will look wrong</div>
+          </div>
+          <div class="explanation" id="exp-q4-1">✅ The camera (real or virtual) compresses and reduces everything. What feels exaggerated in life looks subtle on screen. Animators who don't push far enough produce "dead" animation where the emotional intent never reaches the audience — even in realistic styles, some amplification is always necessary.</div>
+        </div>
+
+        <div class="question-block" id="q4-q2">
+          <div class="q-number">Question 2 of 4</div>
+          <div class="q-text">A character has both arms raised to exactly the same angle and both eyes pointing in exactly the same direction. This problem is called:</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q4',2,false)"><div class="option-letter">A</div>Follow-through error</div>
+            <div class="option" onclick="selectOption(this,'q4',2,false)"><div class="option-letter">B</div>Arc violation</div>
+            <div class="option" onclick="selectOption(this,'q4',2,true)"><div class="option-letter">C</div>Twinning</div>
+            <div class="option" onclick="selectOption(this,'q4',2,false)"><div class="option-letter">D</div>Staging failure</div>
+          </div>
+          <div class="explanation" id="exp-q4-2">✅ Twinning! When both sides of a character mirror each other perfectly, the result looks stiff and robotic. Nature and organic movement are never perfectly symmetrical. Animators deliberately offset limb positions, vary arm angles, and stagger movements to avoid twinning.</div>
+        </div>
+
+        <div class="question-block" id="q4-q3">
+          <div class="q-number">Question 3 of 4</div>
+          <div class="q-text">Appeal in animation is best described as:</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q4',3,false)"><div class="option-letter">A</div>Making every character cute and likeable</div>
+            <div class="option" onclick="selectOption(this,'q4',3,true)"><div class="option-letter">B</div>A quality of charisma and readability that makes the audience want to watch — even in villains</div>
+            <div class="option" onclick="selectOption(this,'q4',3,false)"><div class="option-letter">C</div>Having detailed, realistic textures and rendering</div>
+            <div class="option" onclick="selectOption(this,'q4',3,false)"><div class="option-letter">D</div>Using a consistent color palette throughout the animation</div>
+          </div>
+          <div class="explanation" id="exp-q4-3">✅ Appeal is about charisma, not cuteness. A compelling villain has appeal. A tragic character has appeal. It's the quality that makes an audience lean forward — driven by design clarity, specificity of behavior, and committed performance. A perfectly modeled, lifeless character has zero appeal.</div>
+        </div>
+
+        <div class="question-block" id="q4-q4">
+          <div class="q-number">Question 4 of 4</div>
+          <div class="q-text">Which combination of Disney's Basic Shapes primarily communicates: "trustworthy, sturdy, and reliable"?</div>
+          <div class="options-list">
+            <div class="option" onclick="selectOption(this,'q4',4,false)"><div class="option-letter">A</div>Triangles — sharp and dangerous</div>
+            <div class="option" onclick="selectOption(this,'q4',4,false)"><div class="option-letter">B</div>Circles — soft and friendly</div>
+            <div class="option" onclick="selectOption(this,'q4',4,true)"><div class="option-letter">C</div>Squares and rectangles — stable and solid</div>
+            <div class="option" onclick="selectOption(this,'q4',4,false)"><div class="option-letter">D</div>Spirals — chaotic and unpredictable</div>
+          </div>
+          <div class="explanation" id="exp-q4-4">✅ Squares and rectangles convey stability, reliability, and trustworthiness — think of Wreck-It Ralph's blocky frame or the broad-shouldered heroes of classic Disney. Circles = approachable and soft. Triangles = threatening and dangerous. These shape language principles are used universally in character design.</div>
+        </div>
+
+        <div class="quiz-score" id="score-q4">
+          <div class="score-circle" id="scoreCircle-q4">0/4</div>
+          <div class="score-label">Module 4 Score</div>
+          <div class="score-title" id="scoreTitle-q4">Fantastic!</div>
+          <div class="score-desc" id="scoreDesc-q4"></div>
+          <div style="margin-top:20px">
+            <button class="btn btn-primary" onclick="unlockNext('final','Final Challenge')">Go to Final Challenge →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ FINAL CHALLENGE ══ -->
+      <div class="section" id="section-final">
+        <div class="module-header">
+          <div class="module-tag">🏆 Final Challenge</div>
+          <div class="module-title">The Bouncing Character</div>
+          <div class="module-subtitle">Synthesize all 12 principles in a single animation project</div>
+        </div>
+
+        <div class="challenge-card">
+          <div class="challenge-title">🎬 Project Brief: The Character Bounce</div>
+          <div class="challenge-desc">Create a short animation (3–8 seconds) of a character with a distinct personality bouncing a ball. This deceptively simple premise requires you to apply all 12 principles simultaneously — making it the definitive test of your understanding.</div>
+          <ul class="challenge-steps">
+            <li><span class="cstep">1</span><strong>Design your character</strong> — choose a personality (nervous, excitable, sluggish, pompous). Use shape language from the Appeal principle to communicate this in their silhouette.</li>
+            <li><span class="cstep">2</span><strong>Plan your staging</strong> — choose an angle where both the character AND the ball are clearly visible and readable. Run the silhouette test on your key poses.</li>
+            <li><span class="cstep">3</span><strong>Animate the ball</strong> — apply squash & stretch, timing, arcs, and slow in/out to the ball itself before adding the character.</li>
+            <li><span class="cstep">4</span><strong>Add the character's action</strong> — show anticipation before they throw/catch. What secondary actions reveal their personality? Do their clothes/hair show follow-through?</li>
+            <li><span class="cstep">5</span><strong>Exaggerate deliberately</strong> — take your first pass and push it 20% further. Does it read better? Keep pushing until you've gone "too far," then pull back slightly.</li>
+            <li><span class="cstep">6</span><strong>Check all 12</strong> — go through the cheat sheet and verify each principle is present. Note any that are missing and add them.</li>
+          </ul>
+        </div>
+
+        <h2>Self-Assessment Rubric</h2>
+        <table class="compare-table">
+          <thead><tr><th>Criterion</th><th>Needs Work</th><th>Solid</th><th>Excellent</th></tr></thead>
+          <tbody>
+            <tr><td>Squash & Stretch</td><td>Ball stays round throughout</td><td>Ball squashes on impact</td><td>Volume maintained; character also uses S&S</td></tr>
+            <tr><td>Anticipation</td><td>Actions start without preparation</td><td>Character winds up before throwing</td><td>Anticipation has its own anticipation (micro-anticipation)</td></tr>
+            <tr><td>Timing</td><td>Linear, all same speed</td><td>Ball has appropriate weight timing</td><td>Timing reveals character personality</td></tr>
+            <tr><td>Appeal</td><td>Generic character, unclear personality</td><td>Shape language suggests personality</td><td>Every action is specific to THIS character</td></tr>
+            <tr><td>Exaggeration</td><td>Too subtle, feels dead</td><td>Emotions read clearly</td><td>Pushed to "cartoon truth" level appropriately</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Reflection Prompts</h2>
+        <div class="callout">
+          <div class="callout-icon">💭</div>
+          <div class="callout-text">After completing your animation, write a short paragraph for each of the 12 principles explaining specifically where and how you used it. If you can't find a principle in your animation, add it in a revision pass. This exercise will train your eye to see principles at work in any animation you watch from this point forward.</div>
+        </div>
+
+        <div style="text-align:center;margin-top:36px">
+          <button class="btn btn-primary" style="font-size:15px;padding:12px 32px" onclick="completeFinal()">Mark Challenge Complete ✓</button>
+        </div>
+      </div>
+
+      <!-- ══ RESOURCES ══ -->
+      <div class="section" id="section-resources">
+        <div class="complete-hero">
+          <div class="trophy">🏆</div>
+          <div class="complete-title">You've Mastered the 12 Principles!</div>
+          <div class="complete-sub">You now speak the universal language of animation — a vocabulary shared by every animator from Walt Disney's Nine Old Men to today's Pixar and indie studios.</div>
+          <div class="stats-row">
+            <div class="stat-pill"><div class="stat-num" id="finalXP">0</div><div class="stat-lbl">Total XP</div></div>
+            <div class="stat-pill"><div class="stat-num" id="finalQuizScore">—</div><div class="stat-lbl">Quiz Average</div></div>
+            <div class="stat-pill"><div class="stat-num">12</div><div class="stat-lbl">Principles Learned</div></div>
+          </div>
+        </div>
+
+        <!-- CHEAT SHEET -->
+        <h2>The 12 Principles — Cheat Sheet</h2>
+        <div class="cheat-grid">
+          <div class="cheat-card"><div class="cheat-num">01</div><div class="cheat-name">Squash & Stretch</div><div class="cheat-desc">Deform to show weight and elasticity. Volume must stay constant.</div><div class="cheat-keyword">Volume conservation</div></div>
+          <div class="cheat-card"><div class="cheat-num">02</div><div class="cheat-name">Anticipation</div><div class="cheat-desc">Prep movement before main action. Signals intent and builds energy.</div><div class="cheat-keyword">Wind-up before action</div></div>
+          <div class="cheat-card"><div class="cheat-num">03</div><div class="cheat-name">Staging</div><div class="cheat-desc">Present ideas clearly. Silhouette test: is the pose readable as solid black?</div><div class="cheat-keyword">Silhouette test</div></div>
+          <div class="cheat-card"><div class="cheat-num">04</div><div class="cheat-name">Straight-Ahead vs Pose-to-Pose</div><div class="cheat-desc">Spontaneous vs structured. Use both depending on the type of action.</div><div class="cheat-keyword">Method choice</div></div>
+          <div class="cheat-card"><div class="cheat-num">05</div><div class="cheat-name">Follow-Through</div><div class="cheat-desc">Lighter parts continue past stopping point then settle. Adds inertia.</div><div class="cheat-keyword">Overshoot & settle</div></div>
+          <div class="cheat-card"><div class="cheat-num">06</div><div class="cheat-name">Slow In & Slow Out</div><div class="cheat-desc">Accelerate at start, decelerate at end. Linear = robotic.</div><div class="cheat-keyword">Ease in/out</div></div>
+          <div class="cheat-card"><div class="cheat-num">07</div><div class="cheat-name">Arcs</div><div class="cheat-desc">All organic motion follows curved paths — never straight lines.</div><div class="cheat-keyword">Curved trajectories</div></div>
+          <div class="cheat-card"><div class="cheat-num">08</div><div class="cheat-name">Secondary Action</div><div class="cheat-desc">Supporting actions that enrich but never compete with the primary action.</div><div class="cheat-keyword">Support, don't compete</div></div>
+          <div class="cheat-card"><div class="cheat-num">09</div><div class="cheat-name">Timing</div><div class="cheat-desc">Number of frames = weight, mood, personality. Fast = light; slow = heavy.</div><div class="cheat-keyword">Frames = weight</div></div>
+          <div class="cheat-card"><div class="cheat-num">10</div><div class="cheat-name">Exaggeration</div><div class="cheat-desc">Amplify the essence of an action. Too subtle = dead. Push further than feels comfortable.</div><div class="cheat-keyword">Amplify the truth</div></div>
+          <div class="cheat-card"><div class="cheat-num">11</div><div class="cheat-name">Solid Drawing</div><div class="cheat-desc">Characters feel 3D, weighted, and grounded. Avoid twinning at all costs.</div><div class="cheat-keyword">No twinning</div></div>
+          <div class="cheat-card"><div class="cheat-num">12</div><div class="cheat-name">Appeal</div><div class="cheat-desc">Charisma through shape clarity, specificity, and committed performance. Not just cuteness.</div><div class="cheat-keyword">Charisma & specificity</div></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- CONTINUE LEARNING -->
+        <h2>📚 Continue Learning</h2>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'books')">Books</div>
+          <div class="tab" onclick="switchTab(this,'platforms')">Platforms</div>
+          <div class="tab" onclick="switchTab(this,'communities')">Communities</div>
+          <div class="tab" onclick="switchTab(this,'prompts')">AI Prompts</div>
+        </div>
+
+        <div class="tab-content active" id="tab-books">
+          <div class="resource-list">
+            <div class="resource-item"><div class="resource-icon">📖</div><div><div class="resource-name">The Illusion of Life: Disney Animation</div><div class="resource-desc">Ollie Johnston & Frank Thomas (1981) — The original source of the 12 Principles. Essential reading for every animator.</div><div class="resource-badge">Essential</div></div></div>
+            <div class="resource-item"><div class="resource-icon">📖</div><div><div class="resource-name">The Animator's Survival Kit</div><div class="resource-desc">Richard Williams (2009) — Comprehensive technical guide to traditional animation from the director of Who Framed Roger Rabbit.</div><div class="resource-badge">Essential</div></div></div>
+            <div class="resource-item"><div class="resource-icon">📖</div><div><div class="resource-name">Cartoon Animation</div><div class="resource-desc">Preston Blair — Foundational guide to character design and movement, used in Disney studios for decades.</div><div class="resource-badge">Classic</div></div></div>
+            <div class="resource-item"><div class="resource-icon">📖</div><div><div class="resource-name">Acting for Animators</div><div class="resource-desc">Ed Hooks — Applies acting theory to animation. Essential for understanding performance, appeal, and character psychology.</div><div class="resource-badge">Performance</div></div></div>
+            <div class="resource-item"><div class="resource-icon">📖</div><div><div class="resource-name">How to Cheat in After Effects</div><div class="resource-desc">Chad Perkins — Practical technical guide to motion graphics and animation in After Effects.</div><div class="resource-badge">Technical</div></div></div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-platforms">
+          <div class="resource-list">
+            <div class="resource-item"><div class="resource-icon">🎓</div><div><div class="resource-name">Animation Mentor</div><div class="resource-desc">Online animation school founded by Pixar and DreamWorks veterans. Industry-recognized certificates.</div><div class="resource-badge">Professional School</div></div></div>
+            <div class="resource-item"><div class="resource-icon">🎓</div><div><div class="resource-name">School of Motion</div><div class="resource-desc">Motion design and animation courses covering After Effects, Cinema 4D, and character animation.</div><div class="resource-badge">Motion Design</div></div></div>
+            <div class="resource-item"><div class="resource-icon">🎓</div><div><div class="resource-name">Skillshare / Udemy</div><div class="resource-desc">Thousands of animation courses covering every tool and level. Look for courses by instructors with production credits.</div><div class="resource-badge">Self-Paced</div></div></div>
+            <div class="resource-item"><div class="resource-icon">🎓</div><div><div class="resource-name">YouTube: Animation Friendly</div><div class="resource-desc">Alan Becker's animation tutorials and principle breakdowns — high quality, free, and comprehensive.</div><div class="resource-badge">Free</div></div></div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-communities">
+          <div class="resource-list">
+            <div class="resource-item"><div class="resource-icon">👥</div><div><div class="resource-name">r/animation & r/animationcareer</div><div class="resource-desc">Reddit communities for animation discussion, feedback, and career advice. Active daily posts and critiques.</div><div class="resource-badge">Reddit</div></div></div>
+            <div class="resource-item"><div class="resource-icon">👥</div><div><div class="resource-name">11 Second Club</div><div class="resource-desc">Monthly character animation competition with community feedback. One of the most valuable practice environments for animators.</div><div class="resource-badge">Competition</div></div></div>
+            <div class="resource-item"><div class="resource-icon">👥</div><div><div class="resource-name">Animation Career Review Forums</div><div class="resource-desc">Industry-focused discussion about studios, programs, and portfolio feedback.</div><div class="resource-badge">Career</div></div></div>
+            <div class="resource-item"><div class="resource-icon">👥</div><div><div class="resource-name">AWN (Animation World Network)</div><div class="resource-desc">Professional animation industry news, tutorials, and community events.</div><div class="resource-badge">Industry</div></div></div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-prompts">
+          <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">Use these prompts with any AI assistant to deepen your understanding:</p>
+          <div class="prompt-card">Explain how squash and stretch would be applied differently for a rubber ball versus a glass sphere falling from the same height. What does each deformation communicate about the material?</div>
+          <div class="prompt-card">Give me a step-by-step breakdown of how all 12 animation principles would be applied to a single action: a character picking up a heavy box off the floor.</div>
+          <div class="prompt-card">What's the difference between follow-through and overlapping action? Create three examples where each one applies but the other doesn't.</div>
+          <div class="prompt-card">How do Pixar animators apply the principle of exaggeration in films that are considered "realistic"? Give specific examples from Ratatouille or Up.</div>
+          <div class="prompt-card">Design a practice schedule for mastering all 12 animation principles over 3 months, starting with zero experience in any animation software.</div>
+          <div class="prompt-card">Explain how easing curves (bezier curves in a graph editor) map to the principle of Slow In and Slow Out. What does the curve shape tell you about the motion?</div>
+        </div>
+
+        <div class="divider"></div>
+        <h2>🔍 Search Keywords</h2>
+        <div class="keyword-cloud">
+          <div class="keyword">12 principles of animation</div>
+          <div class="keyword">Disney animation principles</div>
+          <div class="keyword">squash and stretch animation</div>
+          <div class="keyword">animation timing and spacing</div>
+          <div class="keyword">easing curves animation</div>
+          <div class="keyword">character animation fundamentals</div>
+          <div class="keyword">anticipation animation technique</div>
+          <div class="keyword">follow through overlapping action</div>
+          <div class="keyword">bouncing ball animation tutorial</div>
+          <div class="keyword">appeal character design</div>
+          <div class="keyword">solid drawing 3D animation</div>
+          <div class="keyword">staging composition animation</div>
+          <div class="keyword">Ollie Johnston Frank Thomas</div>
+          <div class="keyword">The Illusion of Life Disney</div>
+          <div class="keyword">motion graphics easing</div>
+          <div class="keyword">secondary action animation</div>
+          <div class="keyword">arc motion path animation</div>
+          <div class="keyword">exaggeration cartoon animation</div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">Progress saved!</span>
+</div>
+
+<script>
+// ══ STATE ══
+const state = {
+  currentSection: 'intro',
+  xp: 0,
+  completed: [],
+  quizScores: {},
+  quizAnswers: { q1: {}, q2: {}, q3: {}, q4: {} },
+  quizCurrentQ: { q1: 1, q2: 1, q3: 1, q4: 1 },
+  unlocked: ['intro','m1','q1'],
+  badges: []
+};
+
+// ══ NAVIGATION ══
+function navigate(id) {
+  if (!state.unlocked.includes(id)) {
+    showToast('🔒 Complete the previous section to unlock this!', false);
+    return;
+  }
+  // Hide all
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  // Show target
+  document.getElementById('section-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  state.currentSection = id;
+  // Breadcrumb
+  const names = {
+    intro: 'Introduction',
+    m1: 'Module 1: The Physical Laws',
+    q1: 'Module 1 Quiz',
+    m2: 'Module 2: Character & Staging',
+    q2: 'Module 2 Quiz',
+    m3: 'Module 3: Motion Quality',
+    q3: 'Module 3 Quiz',
+    m4: 'Module 4: Art & Appeal',
+    q4: 'Module 4 Quiz',
+    final: 'Final Challenge',
+    resources: 'Resources & Cheatsheet'
+  };
+  document.getElementById('breadcrumb').innerHTML = `<span>${names[id] || id}</span>`;
+  window.scrollTo(0, 0);
+  // Close sidebar on mobile
+  if (window.innerWidth <= 900) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function startCourse() {
+  earnXP(50, '🎬 Animator\'s Spark badge earned!');
+  earnBadge('badge-starter');
+  navigate('m1');
+}
+
+// ══ MODULE COMPLETION ══
+function completeModule(moduleId) {
+  const quizId = moduleId.replace('m','q');
+  navigate(quizId);
+}
+
+function unlockItems(items) {
+  items.forEach(item => {
+    if (!state.unlocked.includes(item)) {
+      state.unlocked.push(item);
+      const navEl = document.getElementById('nav-' + item);
+      if (navEl) navEl.classList.remove('locked');
+    }
+  });
+}
+
+// ══ QUIZ LOGIC ══
+function selectOption(el, quizId, qNum, isCorrect) {
+  // Already answered?
+  const block = el.closest('.question-block');
+  if (block.dataset.answered) return;
+  block.dataset.answered = '1';
+
+  // Mark all options
+  block.querySelectorAll('.option').forEach(opt => {
+    opt.style.pointerEvents = 'none';
+  });
+  if (isCorrect) {
+    el.classList.add('correct');
+    state.quizAnswers[quizId][qNum] = true;
+  } else {
+    el.classList.add('wrong');
+    state.quizAnswers[quizId][qNum] = false;
+    // Highlight correct
+    block.querySelectorAll('.option').forEach(opt => {
+      if (opt.onclick && opt.onclick.toString().includes('true')) {
+        opt.classList.add('correct');
+      }
+    });
+  }
+  // Show explanation
+  const exp = document.getElementById('exp-' + quizId + '-' + qNum);
+  if (exp) exp.classList.add('show');
+
+  // Update pip
+  const pip = document.getElementById(quizId + 'p' + qNum);
+  if (pip) pip.classList.add('done');
+
+  // Auto-advance after 1.8s
+  setTimeout(() => {
+    const nextQ = qNum + 1;
+    const nextBlock = document.getElementById(quizId + '-q' + nextQ);
+    if (nextBlock) {
+      block.style.display = 'none';
+      nextBlock.style.display = 'block';
+      const nextPip = document.getElementById(quizId + 'p' + nextQ);
+      if (nextPip) { nextPip.classList.add('current'); }
+    } else {
+      // Show score
+      showQuizScore(quizId);
+    }
+  }, 1800);
+}
+
+function showQuizScore(quizId) {
+  const answers = state.quizAnswers[quizId];
+  const correct = Object.values(answers).filter(Boolean).length;
+  const total = 4;
+  state.quizScores[quizId] = correct;
+
+  const scoreEl = document.getElementById('score-' + quizId);
+  scoreEl.style.display = 'block';
+  document.getElementById('scoreCircle-' + quizId).textContent = correct + '/' + total;
+
+  let title, desc;
+  if (correct === 4) { title = '🌟 Perfect Score!'; desc = 'You\'ve mastered this module completely. Outstanding work!'; earnXP(150, 'Perfect score! +150 XP'); }
+  else if (correct === 3) { title = '🎉 Excellent!'; desc = 'Strong understanding — review the one you missed before moving on.'; earnXP(100, 'Quiz complete! +100 XP'); }
+  else if (correct === 2) { title = '👍 Good effort!'; desc = 'Solid foundation. Consider re-reading the module before continuing.'; earnXP(60, 'Quiz complete! +60 XP'); }
+  else { title = '📚 Keep studying!'; desc = 'Review the module content and try again — the concepts will click.'; earnXP(30, 'Quiz attempted! +30 XP'); }
+
+  document.getElementById('scoreTitle-' + quizId).textContent = title;
+  document.getElementById('scoreDesc-' + quizId).textContent = desc;
+
+  // Mark nav complete
+  const navEl = document.getElementById('nav-' + quizId);
+  if (navEl) {
+    navEl.classList.add('completed');
+    const chk = document.getElementById('chk-' + quizId);
+    if (chk) chk.textContent = '✓';
+  }
+  state.completed.push(quizId);
+  updateProgress();
+}
+
+function unlockNext(nextId, name) {
+  const quizToModule = { m2: 'm1', m3: 'm2', m4: 'm3', final: 'm4' };
+  const moduleForBadge = Object.entries(quizToModule).find(([k]) => k === nextId);
+
+  if (nextId === 'm2') { unlockItems(['m2','q2']); earnBadge('badge-m1'); }
+  else if (nextId === 'm3') { unlockItems(['m3','q3']); earnBadge('badge-m2'); }
+  else if (nextId === 'm4') { unlockItems(['m4','q4']); earnBadge('badge-m3'); }
+  else if (nextId === 'final') { unlockItems(['final']); earnBadge('badge-m4'); }
+  else if (nextId === 'resources') { unlockItems(['resources']); }
+
+  showToast('🔓 ' + name + ' unlocked!');
+  navigate(nextId);
+}
+
+// ══ FINAL CHALLENGE ══
+function completeFinal() {
+  earnXP(200, '🏆 Master Animator badge earned!');
+  earnBadge('badge-complete');
+  unlockItems(['resources']);
+  state.completed.push('final');
+  const navFinal = document.getElementById('nav-final');
+  if (navFinal) { navFinal.classList.add('completed'); document.getElementById('chk-final').textContent = '✓'; }
+  updateProgress();
+  launchConfetti();
+  setTimeout(() => navigate('resources'), 800);
+}
+
+// ══ XP & BADGES ══
+function earnXP(amount, message) {
+  state.xp += amount;
+  document.getElementById('xpDisplay').textContent = state.xp + ' XP';
+  document.getElementById('finalXP').textContent = state.xp;
+  if (message) showToast('⚡ ' + message);
+}
+
+function earnBadge(badgeId) {
+  if (state.badges.includes(badgeId)) return;
+  state.badges.push(badgeId);
+  const badge = document.getElementById(badgeId);
+  if (badge) badge.classList.add('earned');
+}
+
+// ══ PROGRESS ══
+function updateProgress() {
+  const total = ['m1','q1','m2','q2','m3','q3','m4','q4','final','resources'];
+  const done = state.completed.filter(c => total.includes(c)).length;
+  const pct = Math.round((done / total.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  // Update quiz average
+  const scores = Object.values(state.quizScores);
+  if (scores.length > 0) {
+    const avg = Math.round((scores.reduce((a,b)=>a+b,0) / (scores.length * 4)) * 100);
+    document.getElementById('finalQuizScore').textContent = avg + '%';
+  }
+}
+
+// ══ TABS ══
+function switchTab(el, tabId) {
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
+// ══ TOAST ══
+function showToast(msg, success = true) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ══ CONFETTI ══
+function launchConfetti() {
+  const colors = ['#c97fff','#7fc4ff','#ff8c69','#5dffa0','#ffd166','#fff'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `
+        left:${Math.random()*100}vw;
+        top:0;
+        width:${6+Math.random()*8}px;
+        height:${6+Math.random()*8}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        animation-delay:${Math.random()*0.5}s;
+        animation-duration:${1.5+Math.random()}s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }, i * 30);
+  }
+}
+
+// ══ INIT ══
+document.addEventListener('DOMContentLoaded', () => {
+  // Unlock initial navs
+  unlockItems(['intro','m1','q1']);
+  navigate('intro');
+  // Mark intro complete on load
+  if (!state.completed.includes('intro')) {
+    state.completed.push('intro');
+    document.getElementById('chk-intro').textContent = '✓';
+    document.getElementById('nav-intro').classList.add('completed');
+    updateProgress();
+  }
+});
+</script>
+</body>
+</html>
