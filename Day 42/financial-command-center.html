@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Financial Command Center</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --bg4: #252d42;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8ecf4;
+    --text2: #8b95a8;
+    --text3: #5a6478;
+    --accent: #6c63ff;
+    --accent2: #8b83ff;
+    --teal: #00d4aa;
+    --teal2: #00b894;
+    --amber: #f0a500;
+    --amber2: #ffb830;
+    --red: #ff6b6b;
+    --red2: #ff8e8e;
+    --green: #00c48c;
+    --green2: #00e5a5;
+    --purple: #a78bfa;
+    --card-radius: 16px;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.35);
+  }
+  [data-theme="light"] {
+    --bg: #f0f2f8;
+    --bg2: #ffffff;
+    --bg3: #f7f8fc;
+    --bg4: #eef0f7;
+    --border: rgba(0,0,0,0.07);
+    --border2: rgba(0,0,0,0.13);
+    --text: #1a1f2e;
+    --text2: #4a5568;
+    --text3: #8a97ab;
+    --accent: #5b52e8;
+    --accent2: #7c74f4;
+    --teal: #00a889;
+    --teal2: #007a64;
+    --amber: #d4900a;
+    --amber2: #e8a000;
+    --red: #e05252;
+    --red2: #c93e3e;
+    --green: #00a876;
+    --green2: #00c48c;
+    --purple: #7c5ce8;
+    --shadow: 0 4px 24px rgba(0,0,0,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  /* NAV */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; height: 60px;
+    backdrop-filter: blur(12px);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; color: var(--text); text-decoration: none; }
+  .logo-dot { width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent), var(--purple)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .logo span { color: var(--text2); font-weight: 400; font-size: 13px; margin-left: 2px; }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+  .btn-icon { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: var(--radius-sm); width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s; }
+  .btn-icon:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+  .btn-primary { background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .health-badge { display: flex; align-items: center; gap: 6px; background: rgba(0,196,140,0.12); border: 1px solid rgba(0,196,140,0.25); color: var(--green); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; }
+  .health-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  /* SIDEBAR */
+  .layout { display: flex; min-height: calc(100vh - 60px); }
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: sticky; top: 60px; height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  .nav-section { padding: 0 16px; margin-bottom: 8px; }
+  .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--text3); text-transform: uppercase; padding: 8px 8px 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    color: var(--text2); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s; text-decoration: none; border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent2); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  /* MAIN */
+  .main { flex: 1; padding: 32px 36px; max-width: 1100px; }
+  .section { margin-bottom: 40px; scroll-margin-top: 80px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-size: 18px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .section-title .icon { font-size: 20px; }
+  .section-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+  /* CARDS */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 22px 24px; }
+  .card-sm { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  /* STAT CARDS */
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; }
+  .stat-card::before { content:''; position:absolute; top:0;right:0; width:60px; height:60px; border-radius: 0 var(--radius) 0 60px; opacity:0.08; }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-card.amber::before { background: var(--amber); }
+  .stat-card.accent::before { background: var(--accent); }
+  .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .stat-value { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-delta { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--red); }
+  /* HEALTH SCORE */
+  .health-ring { position: relative; width: 160px; height: 160px; }
+  .health-ring svg { transform: rotate(-90deg); }
+  .health-ring-label { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+  .health-score-num { font-size: 36px; font-weight: 800; color: var(--text); }
+  .health-score-text { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  /* INPUTS */
+  input[type=text], input[type=number], select, textarea {
+    background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    color: var(--text); padding: 9px 12px; font-size: 13px; width: 100%; outline: none;
+    transition: border 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.15); }
+  input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  label { font-size: 12px; color: var(--text2); font-weight: 600; display: block; margin-bottom: 5px; }
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .btn { border-radius: var(--radius-sm); padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { opacity: 0.85; }
+  .btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--bg4); color: var(--text); }
+  .btn-danger { background: rgba(255,107,107,0.12); color: var(--red); border: 1px solid rgba(255,107,107,0.2); }
+  .btn-danger:hover { background: rgba(255,107,107,0.2); }
+  /* PROGRESS */
+  .progress-bar { height: 8px; background: var(--bg4); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text2); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--bg3); }
+  /* PILLS */
+  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill-green { background: rgba(0,196,140,0.12); color: var(--green); }
+  .pill-red { background: rgba(255,107,107,0.12); color: var(--red); }
+  .pill-amber { background: rgba(240,165,0,0.12); color: var(--amber); }
+  .pill-accent { background: rgba(108,99,255,0.12); color: var(--accent2); }
+  .pill-teal { background: rgba(0,212,170,0.12); color: var(--teal); }
+  /* AI TIPS */
+  .tip-card { background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(167,139,250,0.05)); border: 1px solid rgba(108,99,255,0.2); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; position: relative; }
+  .tip-number { position: absolute; top: -10px; left: 16px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .tip-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+  .tip-body { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  /* CHARTS */
+  .chart-wrap { position: relative; width: 100%; }
+  /* TABS */
+  .tabs { display: flex; gap: 4px; background: var(--bg3); border-radius: var(--radius-sm); padding: 4px; width: fit-content; margin-bottom: 20px; }
+  .tab { padding: 7px 18px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text2); transition: all 0.2s; background: none; border: none; }
+  .tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg2); border-radius: var(--card-radius); padding: 28px 32px; width: 480px; max-width: 95vw; border: 1px solid var(--border2); }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  /* TOAST */
+  .toast { position: fixed; bottom: 28px; right: 28px; background: var(--bg2); border: 1px solid var(--border2); color: var(--text); border-radius: var(--radius); padding: 14px 20px; font-size: 13px; font-weight: 500; z-index: 300; box-shadow: var(--shadow); transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; display: flex; align-items: center; gap: 10px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  /* ANIMATIONS */
+  @keyframes fadeIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  .fade-in { animation: fadeIn 0.4s ease forwards; }
+  /* SCORE BREAKDOWN */
+  .score-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .score-item:last-child { border-bottom: none; }
+  .score-label { flex: 1; font-size: 13px; color: var(--text2); }
+  .score-bar { flex: 2; }
+  .score-num { font-size: 13px; font-weight: 700; width: 40px; text-align: right; }
+  /* WHATIF */
+  .whatif-result { background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.2); border-radius: var(--radius); padding: 16px 18px; margin-top: 16px; }
+  /* CHECKLIST */
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .check-item:last-child { border-bottom: none; }
+  .check-box { width: 20px; height: 20px; border: 2px solid var(--border2); border-radius: 5px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .check-item.checked .check-box { background: var(--green); border-color: var(--green); }
+  .check-item.checked .check-text { text-decoration: line-through; color: var(--text3); }
+  /* MOBILE */
+  @media(max-width:768px) {
+    .sidebar { display: none; }
+    .main { padding: 20px 16px; }
+    .grid-4 { grid-template-columns: repeat(2,1fr); }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  /* PRINT */
+  @media print {
+    .topbar, .sidebar, .btn, .tabs, .modal-overlay { display: none !important; }
+    .main { padding: 0; }
+    .card, .stat-card { break-inside: avoid; }
+    body { background: #fff; color: #000; }
+  }
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 32px 0; }
+  /* SELECT CATEGORY CHIP */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); color: var(--text2); background: var(--bg3); transition: all 0.18s; }
+  .chip.active, .chip:hover { border-color: var(--accent); color: var(--accent2); background: rgba(108,99,255,0.1); }
+  /* BANNER */
+  .banner { background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(0,212,170,0.08)); border: 1px solid rgba(108,99,255,0.2); border-radius: var(--card-radius); padding: 24px 28px; display: flex; align-items: center; gap: 20px; }
+  .banner-text h2 { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+  .banner-text p { font-size: 13px; color: var(--text2); }
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-dot">💰</div>
+    FreelanceFinance <span>Command Center</span>
+  </a>
+  <div class="topbar-actions">
+    <div class="health-badge"><div class="dot"></div> <span id="top-score">Score: 62</span></div>
+    <button class="btn-icon" onclick="toggleTheme()" title="Toggle light/dark">🌓</button>
+    <button class="btn-icon" onclick="window.print()" title="Print report">🖨️</button>
+    <button class="btn-primary" onclick="openModal('income-modal')">+ Log Income</button>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <button class="nav-item active" onclick="scrollTo('overview')">
+      <span class="nav-icon">📊</span> Dashboard
+    </button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Modules</div>
+    <button class="nav-item" onclick="scrollTo('income')">
+      <span class="nav-icon">💵</span> Income Log
+    </button>
+    <button class="nav-item" onclick="scrollTo('expenses')">
+      <span class="nav-icon">📋</span> Expense Tracker
+    </button>
+    <button class="nav-item" onclick="scrollTo('budget')">
+      <span class="nav-icon">🎯</span> Budget Planner
+    </button>
+    <button class="nav-item" onclick="scrollTo('tax')">
+      <span class="nav-icon">📑</span> Tax Estimator
+    </button>
+    <button class="nav-item" onclick="scrollTo('health')">
+      <span class="nav-icon">❤️</span> Financial Health
+    </button>
+    <button class="nav-item" onclick="scrollTo('ai-tips')">
+      <span class="nav-icon">🤖</span> AI Insights
+    </button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Tools</div>
+    <button class="nav-item" onclick="scrollTo('whatif')">
+      <span class="nav-icon">🔮</span> What-If Sim
+    </button>
+    <button class="nav-item" onclick="scrollTo('checklist')">
+      <span class="nav-icon">✅</span> Checklist
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- BANNER -->
+<div class="banner fade-in" style="margin-bottom:32px">
+  <div style="font-size:48px">🚀</div>
+  <div class="banner-text">
+    <h2>Welcome, Freelancer!</h2>
+    <p>Your personalized financial command center. Log income, track expenses, plan your budget and stay on top of tax obligations — all in one place.</p>
+  </div>
+</div>
+
+<!-- OVERVIEW STATS -->
+<section class="section fade-in" id="overview">
+  <div class="section-header">
+    <div>
+      <div class="section-title">📊 Dashboard Overview</div>
+      <div class="section-sub">This month at a glance</div>
+    </div>
+    <span class="pill pill-accent" id="month-label">July 2026</span>
+  </div>
+  <div class="grid-4" style="margin-bottom:20px">
+    <div class="stat-card green">
+      <div class="stat-label">Total Income</div>
+      <div class="stat-value green" id="ov-income">₹0</div>
+      <div class="stat-delta" id="ov-income-d">No entries yet</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Total Expenses</div>
+      <div class="stat-value red" id="ov-expenses">₹0</div>
+      <div class="stat-delta" id="ov-expenses-d">No entries yet</div>
+    </div>
+    <div class="stat-card accent">
+      <div class="stat-label">Net Savings</div>
+      <div class="stat-value" id="ov-savings">₹0</div>
+      <div class="stat-delta" id="ov-savings-d">Income − Expenses</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Tax Set Aside</div>
+      <div class="stat-value amber" id="ov-tax">₹0</div>
+      <div class="stat-delta">~30% of income</div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="grid-2">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Income vs Expenses (6 months)</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="overviewChart" role="img" aria-label="Bar chart comparing income and expenses over 6 months"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Expense Breakdown</div>
+      <div id="pie-legend" class="chips" style="flex-wrap:wrap"></div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="pieChart" role="img" aria-label="Doughnut chart of expense categories"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INCOME LOG -->
+<section class="section fade-in" id="income">
+  <div class="section-header">
+    <div>
+      <div class="section-title">💵 Income Log</div>
+      <div class="section-sub">Track all sources of freelance income</div>
+    </div>
+    <button class="btn btn-accent" onclick="openModal('income-modal')">+ Add Income</button>
+  </div>
+  <div class="card">
+    <table class="data-table" id="income-table">
+      <thead><tr>
+        <th>Date</th><th>Client / Source</th><th>Project</th><th>Amount</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody id="income-body">
+        <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">No income logged yet. Click <strong>+ Add Income</strong> to start.</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--text3)">All entries stored locally on your device</span>
+      <div style="font-size:14px;font-weight:700;color:var(--green)">Total: <span id="income-total">₹0</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EXPENSE TRACKER -->
+<section class="section fade-in" id="expenses">
+  <div class="section-header">
+    <div>
+      <div class="section-title">📋 Expense Tracker</div>
+      <div class="section-sub">Categorize and monitor where money goes</div>
+    </div>
+    <button class="btn btn-accent" onclick="openModal('expense-modal')">+ Add Expense</button>
+  </div>
+
+  <!-- Category filter -->
+  <div class="chips" id="cat-filter">
+    <div class="chip active" onclick="filterExpenses('all',this)">All</div>
+    <div class="chip" onclick="filterExpenses('Housing',this)">🏠 Housing</div>
+    <div class="chip" onclick="filterExpenses('Food',this)">🍔 Food</div>
+    <div class="chip" onclick="filterExpenses('Transport',this)">🚗 Transport</div>
+    <div class="chip" onclick="filterExpenses('Tech',this)">💻 Tech / Tools</div>
+    <div class="chip" onclick="filterExpenses('Health',this)">🏥 Health</div>
+    <div class="chip" onclick="filterExpenses('Entertainment',this)">🎬 Entertainment</div>
+    <div class="chip" onclick="filterExpenses('Other',this)">📦 Other</div>
+  </div>
+
+  <div class="card">
+    <table class="data-table">
+      <thead><tr>
+        <th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th></th>
+      </tr></thead>
+      <tbody id="expense-body">
+        <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">No expenses logged yet. Click <strong>+ Add Expense</strong> to start.</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--text3)">Tip: Categorizing expenses helps identify savings opportunities</span>
+      <div style="font-size:14px;font-weight:700;color:var(--red)">Total: <span id="expense-total">₹0</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BUDGET PLANNER -->
+<section class="section fade-in" id="budget">
+  <div class="section-header">
+    <div>
+      <div class="section-title">🎯 Budget Planner</div>
+      <div class="section-sub">Set monthly limits for each category</div>
+    </div>
+    <button class="btn btn-ghost" onclick="saveBudgets()">Save Budget</button>
+  </div>
+  <div class="card">
+    <div style="margin-bottom:16px;font-size:12px;color:var(--text2)">
+      <strong>50/30/20 Rule:</strong> Aim for ~50% needs, 30% wants, 20% savings. As a freelancer, always save first!
+    </div>
+    <div id="budget-rows"></div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="section-title" style="font-size:14px;margin-bottom:12px">Monthly Income Target</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Target Monthly Income (₹)</label>
+          <input type="number" id="income-target" value="50000" oninput="recalcBudget()">
+        </div>
+        <div class="form-group" style="align-self:end">
+          <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--text2)">
+            💡 Set 30% aside for tax: <strong id="tax-amount" style="color:var(--amber)">₹15,000</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TAX ESTIMATOR -->
+<section class="section fade-in" id="tax">
+  <div class="section-header">
+    <div>
+      <div class="section-title">📑 Tax Savings Estimator</div>
+      <div class="section-sub">Stay prepared for self-employment taxes (India)</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px">Calculate Your Tax Obligation</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Annual Gross Income (₹)</label>
+        <input type="number" id="tax-income" value="600000" oninput="calcTax()">
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Business Expenses (₹) — deductible</label>
+        <input type="number" id="tax-expenses" value="100000" oninput="calcTax()">
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Regime</label>
+        <select id="tax-regime" onchange="calcTax()">
+          <option value="new">New Tax Regime (default 2024)</option>
+          <option value="old">Old Tax Regime</option>
+        </select>
+      </div>
+      <button class="btn btn-accent" style="width:100%" onclick="calcTax()">Calculate Tax</button>
+    </div>
+    <div class="card" id="tax-results">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px">Tax Breakdown</div>
+      <div id="tax-output">
+        <div style="text-align:center;color:var(--text3);padding:24px">Enter your income and click Calculate Tax</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;background:rgba(240,165,0,0.04);border-color:rgba(240,165,0,0.2)">
+    <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:10px">⚠️ Freelancer Tax Reminders</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--text2)">
+      <div>✅ File ITR-4 (Presumptive Taxation) if income &lt; ₹50L</div>
+      <div>✅ Pay Advance Tax quarterly if liability &gt; ₹10,000</div>
+      <div>✅ Claim deductions: internet, equipment, home office</div>
+      <div>✅ Keep invoices and receipts for all business expenses</div>
+      <div>✅ GST registration required if turnover &gt; ₹20L</div>
+      <div>✅ Section 80C investments can reduce tax up to ₹1.5L</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FINANCIAL HEALTH SCORE -->
+<section class="section fade-in" id="health">
+  <div class="section-header">
+    <div>
+      <div class="section-title">❤️ Financial Health Score</div>
+      <div class="section-sub">Your overall financial wellness rating (updated in real time)</div>
+    </div>
+    <button class="btn btn-ghost" onclick="updateHealthScore()">Recalculate</button>
+  </div>
+  <div class="grid-2">
+    <div class="card" style="display:flex;align-items:center;gap:28px">
+      <div class="health-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="62" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+          <circle cx="80" cy="80" r="62" fill="none" stroke="url(#scoreGrad)" stroke-width="12"
+                  stroke-dasharray="389.56" stroke-dashoffset="148" stroke-linecap="round"
+                  id="score-arc"/>
+          <defs>
+            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#6c63ff"/>
+              <stop offset="100%" stop-color="#00d4aa"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="health-ring-label">
+          <div class="health-score-num" id="health-score-num">62</div>
+          <div class="health-score-text">/ 100</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:22px;font-weight:800;color:var(--amber);margin-bottom:6px" id="health-label">Developing 🌱</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;max-width:220px" id="health-desc">You're building solid foundations. Focus on consistent income logging and expense control.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Score Breakdown</div>
+      <div id="score-breakdown"></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- AI TIPS -->
+<section class="section fade-in" id="ai-tips">
+  <div class="section-header">
+    <div>
+      <div class="section-title">🤖 AI Financial Insights</div>
+      <div class="section-sub">Personalized recommendations based on your profile</div>
+    </div>
+    <button class="btn btn-ghost" onclick="generateTips()">Refresh Tips</button>
+  </div>
+  <div id="tips-container"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WHAT-IF SIMULATOR -->
+<section class="section fade-in" id="whatif">
+  <div class="section-header">
+    <div>
+      <div class="section-title">🔮 What-If Simulator</div>
+      <div class="section-sub">See how small changes create big financial impact</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="form-group">
+        <label>Current Monthly Income (₹)</label>
+        <input type="number" id="wi-income" value="40000" oninput="runWhatIf()">
+      </div>
+      <div class="form-group">
+        <label>Current Monthly Expenses (₹)</label>
+        <input type="number" id="wi-expenses" value="32000" oninput="runWhatIf()">
+      </div>
+      <div class="form-group">
+        <label>Months to Simulate</label>
+        <input type="number" id="wi-months" value="12" min="1" max="120" oninput="runWhatIf()">
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px">Adjust levers:</div>
+    <div class="grid-3" style="margin-bottom:8px">
+      <div class="form-group">
+        <label>Income growth / month (%): <strong id="wi-ig-val" style="color:var(--green)">3%</strong></label>
+        <input type="range" id="wi-income-growth" min="0" max="20" value="3" step="1" oninput="document.getElementById('wi-ig-val').textContent=this.value+'%';runWhatIf()">
+      </div>
+      <div class="form-group">
+        <label>Expense reduction (%): <strong id="wi-er-val" style="color:var(--teal)">5%</strong></label>
+        <input type="range" id="wi-expense-red" min="0" max="30" value="5" step="1" oninput="document.getElementById('wi-er-val').textContent=this.value+'%';runWhatIf()">
+      </div>
+      <div class="form-group">
+        <label>Tax set-aside (%): <strong id="wi-tax-val" style="color:var(--amber)">30%</strong></label>
+        <input type="range" id="wi-tax-pct" min="10" max="40" value="30" step="1" oninput="document.getElementById('wi-tax-val').textContent=this.value+'%';runWhatIf()">
+      </div>
+    </div>
+    <div id="whatif-result" class="whatif-result" style="display:none"></div>
+    <div class="chart-wrap" style="height:220px;margin-top:16px">
+      <canvas id="whatifChart" role="img" aria-label="Line chart showing projected savings over time"></canvas>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CHECKLIST -->
+<section class="section fade-in" id="checklist">
+  <div class="section-header">
+    <div>
+      <div class="section-title">✅ Freelancer Financial Checklist</div>
+      <div class="section-sub">Essential steps to build a solid financial foundation</div>
+    </div>
+    <span class="pill pill-teal" id="checklist-progress">0 / 12 done</span>
+  </div>
+  <div class="card">
+    <div id="checklist-items"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESOURCES -->
+<section class="section fade-in">
+  <div class="section-title" style="margin-bottom:16px">📚 Useful Resources</div>
+  <div class="grid-3">
+    <div class="card-sm">
+      <div style="font-size:18px;margin-bottom:8px">🏛️</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Income Tax India</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">File ITR, check refund status, pay advance tax</div>
+      <a href="https://incometax.gov.in" style="color:var(--accent2);font-size:12px;font-weight:600">incometax.gov.in →</a>
+    </div>
+    <div class="card-sm">
+      <div style="font-size:18px;margin-bottom:8px">📊</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">GST Portal</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Register for GST, file returns, check compliance</div>
+      <a href="https://gst.gov.in" style="color:var(--accent2);font-size:12px;font-weight:600">gst.gov.in →</a>
+    </div>
+    <div class="card-sm">
+      <div style="font-size:18px;margin-bottom:8px">💰</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">ClearTax</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Simple tax filing for freelancers and self-employed</div>
+      <a href="https://cleartax.in" style="color:var(--accent2);font-size:12px;font-weight:600">cleartax.in →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:40px 0 20px;color:var(--text3);font-size:12px">
+  FreelanceFinance Command Center · All data stored locally on your device · No data is sent to any server
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="income-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="modal-title">💵 Log Income</div>
+      <button class="btn-icon" onclick="closeModal('income-modal')">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Date</label>
+      <input type="text" id="i-date" placeholder="YYYY-MM-DD">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Client / Source</label>
+      <input type="text" id="i-client" placeholder="e.g. Acme Corp, Upwork">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Project / Description</label>
+      <input type="text" id="i-project" placeholder="e.g. Logo Design, Web Dev">
+    </div>
+    <div class="form-row" style="margin-bottom:16px">
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="i-amount" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="i-status">
+          <option value="Received">Received</option>
+          <option value="Pending">Pending</option>
+          <option value="Invoiced">Invoiced</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-accent" style="flex:1" onclick="addIncome()">Add Income</button>
+      <button class="btn btn-ghost" onclick="closeModal('income-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="expense-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="modal-title">📋 Log Expense</div>
+      <button class="btn-icon" onclick="closeModal('expense-modal')">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Date</label>
+      <input type="text" id="e-date" placeholder="YYYY-MM-DD">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Description</label>
+      <input type="text" id="e-desc" placeholder="e.g. Electricity bill, Adobe CC">
+    </div>
+    <div class="form-row" style="margin-bottom:16px">
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="e-amount" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="e-cat">
+          <option>Housing</option>
+          <option>Food</option>
+          <option>Transport</option>
+          <option>Tech</option>
+          <option>Health</option>
+          <option>Entertainment</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-accent" style="flex:1" onclick="addExpense()">Add Expense</button>
+      <button class="btn btn-ghost" onclick="closeModal('expense-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg">Saved!</span>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── STATE ──────────────────────────────────────────────
+const KEY = 'ffc_data_v1';
+let state = {
+  income: [],
+  expenses: [],
+  budgets: { Housing:12000, Food:8000, Transport:3000, Tech:4000, Health:2000, Entertainment:2000, Other:2000 },
+  checklist: {},
+  incomeTarget: 50000,
+  theme: 'dark'
+};
+
+function load() {
+  try { const s = localStorage.getItem(KEY); if(s) state = {...state, ...JSON.parse(s)}; } catch(e){}
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+}
+load();
+
+// ── THEME ───────────────────────────────────────────────
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(); save();
+}
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', state.theme === 'light' ? 'light' : '');
+}
+applyTheme();
+
+// ── UTILS ───────────────────────────────────────────────
+function fmt(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function today() { return new Date().toISOString().slice(0,10); }
+function showToast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  const di = document.getElementById(id.replace('-modal','').slice(0,1) + '-date');
+  if(di) di.value = today();
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+}
+
+// ── OVERVIEW ─────────────────────────────────────────────
+function updateOverview() {
+  const totalIncome = state.income.filter(i=>i.status==='Received').reduce((s,i)=>s+i.amount,0);
+  const totalExpenses = state.expenses.reduce((s,e)=>s+e.amount,0);
+  const net = totalIncome - totalExpenses;
+  const tax = totalIncome * 0.30;
+  document.getElementById('ov-income').textContent = fmt(totalIncome);
+  document.getElementById('ov-expenses').textContent = fmt(totalExpenses);
+  document.getElementById('ov-savings').textContent = fmt(net);
+  document.getElementById('ov-tax').textContent = fmt(tax);
+  document.getElementById('ov-income-d').textContent = state.income.length + ' entries this month';
+  document.getElementById('ov-expenses-d').textContent = state.expenses.length + ' entries this month';
+  document.getElementById('ov-savings-d').className = 'stat-delta ' + (net >= 0 ? 'up' : 'down');
+  document.getElementById('ov-savings-d').textContent = net >= 0 ? '▲ Positive cash flow' : '▼ Spending exceeds income';
+  document.getElementById('month-label').textContent = new Date().toLocaleString('default',{month:'long',year:'numeric'});
+  document.getElementById('top-score').textContent = 'Score: ' + calcScore();
+  updateCharts();
+  updateHealthScore();
+}
+
+// ── CHARTS ────────────────────────────────────────────────
+let overviewChartInst, pieChartInst, whatifChartInst;
+
+function getColors(n) {
+  const c = ['#6c63ff','#00d4aa','#f0a500','#ff6b6b','#a78bfa','#00c48c','#ff9f43'];
+  return c.slice(0,n);
+}
+
+function updateCharts() {
+  // Overview bar chart - last 6 months placeholder + real data
+  const months = [];
+  const incomeData = [];
+  const expData = [];
+  for(let i=5;i>=0;i--) {
+    const d = new Date(); d.setMonth(d.getMonth()-i);
+    const m = d.toLocaleString('default',{month:'short'});
+    const y = d.getFullYear(); const mo = d.getMonth();
+    months.push(m);
+    const mInc = state.income.filter(e=>{ const dd=new Date(e.date); return dd.getMonth()===mo && dd.getFullYear()===y && e.status==='Received'; }).reduce((s,e)=>s+e.amount,0);
+    const mExp = state.expenses.filter(e=>{ const dd=new Date(e.date); return dd.getMonth()===mo && dd.getFullYear()===y; }).reduce((s,e)=>s+e.amount,0);
+    incomeData.push(mInc || (i===0?0:Math.floor(Math.random()*20000+20000)));
+    expData.push(mExp || (i===0?0:Math.floor(Math.random()*15000+12000)));
+  }
+
+  if(overviewChartInst) overviewChartInst.destroy();
+  overviewChartInst = new Chart(document.getElementById('overviewChart'), {
+    type:'bar',
+    data:{
+      labels: months,
+      datasets:[
+        {label:'Income',data:incomeData,backgroundColor:'rgba(0,196,140,0.7)',borderRadius:4},
+        {label:'Expenses',data:expData,backgroundColor:'rgba(255,107,107,0.7)',borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#8b95a8',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#8b95a8',font:{size:11},callback:v=>'₹'+Math.round(v/1000)+'k'},grid:{color:'rgba(255,255,255,0.04)'}}
+      }
+    }
+  });
+
+  // PIE chart
+  const cats = {};
+  state.expenses.forEach(e=>{ cats[e.category]=(cats[e.category]||0)+e.amount; });
+  const catKeys = Object.keys(cats);
+  const catVals = catKeys.map(k=>cats[k]);
+  const pieColors = getColors(catKeys.length || 1);
+
+  if(pieChartInst) pieChartInst.destroy();
+  const pieLegend = document.getElementById('pie-legend');
+  pieLegend.innerHTML = '';
+  if(catKeys.length === 0) {
+    pieLegend.innerHTML = '<span style="color:var(--text3);font-size:12px">Add expenses to see breakdown</span>';
+    pieChartInst = new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:['No data'],datasets:[{data:[1],backgroundColor:['#2a2d3e']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  } else {
+    catKeys.forEach((k,i) => {
+      const pct = Math.round(catVals[i]/catVals.reduce((a,b)=>a+b,0)*100);
+      pieLegend.innerHTML += `<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)"><span style="width:9px;height:9px;border-radius:2px;background:${pieColors[i]};display:inline-block"></span>${k} ${pct}%</span>`;
+    });
+    pieChartInst = new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:catKeys,datasets:[{data:catVals,backgroundColor:pieColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+  }
+}
+
+// ── INCOME ────────────────────────────────────────────────
+function addIncome() {
+  const date=document.getElementById('i-date').value;
+  const client=document.getElementById('i-client').value.trim();
+  const project=document.getElementById('i-project').value.trim();
+  const amount=parseFloat(document.getElementById('i-amount').value)||0;
+  const status=document.getElementById('i-status').value;
+  if(!client||amount<=0){showToast('Please fill in client and amount','⚠️');return;}
+  state.income.push({id:Date.now(),date:date||today(),client,project,amount,status});
+  save(); closeModal('income-modal'); renderIncome(); updateOverview();
+  showToast('Income logged: '+fmt(amount));
+}
+
+function renderIncome() {
+  const tbody = document.getElementById('income-body');
+  if(state.income.length===0){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">No income logged yet.</td></tr>';
+    document.getElementById('income-total').textContent='₹0';
+    return;
+  }
+  let total=0;
+  tbody.innerHTML = state.income.slice().reverse().map(i=>{
+    total+=i.status==='Received'?i.amount:0;
+    const pill = i.status==='Received'?'pill-green':i.status==='Pending'?'pill-amber':'pill-teal';
+    return `<tr>
+      <td>${i.date}</td>
+      <td style="font-weight:600;color:var(--text)">${i.client}</td>
+      <td>${i.project||'—'}</td>
+      <td style="font-weight:700;color:var(--green)">${fmt(i.amount)}</td>
+      <td><span class="pill ${pill}">${i.status}</span></td>
+      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteIncome(${i.id})">Delete</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('income-total').textContent=fmt(total);
+}
+
+function deleteIncome(id) {
+  state.income=state.income.filter(i=>i.id!==id);
+  save(); renderIncome(); updateOverview(); showToast('Entry deleted','🗑️');
+}
+
+// ── EXPENSES ──────────────────────────────────────────────
+let activeFilter = 'all';
+function addExpense() {
+  const date=document.getElementById('e-date').value;
+  const desc=document.getElementById('e-desc').value.trim();
+  const amount=parseFloat(document.getElementById('e-amount').value)||0;
+  const category=document.getElementById('e-cat').value;
+  if(!desc||amount<=0){showToast('Please fill in description and amount','⚠️');return;}
+  state.expenses.push({id:Date.now(),date:date||today(),desc,amount,category});
+  save(); closeModal('expense-modal'); renderExpenses(); updateOverview();
+  showToast('Expense logged: '+fmt(amount));
+}
+
+function filterExpenses(cat, el) {
+  activeFilter=cat;
+  document.querySelectorAll('#cat-filter .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderExpenses();
+}
+
+function renderExpenses() {
+  const tbody = document.getElementById('expense-body');
+  const filtered = activeFilter==='all'?state.expenses:state.expenses.filter(e=>e.category===activeFilter);
+  if(filtered.length===0){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">No expenses found.</td></tr>';
+    document.getElementById('expense-total').textContent='₹0';
+    return;
+  }
+  const catColors={Housing:'pill-accent',Food:'pill-green',Transport:'pill-teal',Tech:'pill-amber',Health:'pill-red',Entertainment:'pill-teal',Other:'pill-accent'};
+  let total=0;
+  tbody.innerHTML = filtered.slice().reverse().map(e=>{
+    total+=e.amount;
+    return `<tr>
+      <td>${e.date}</td>
+      <td style="font-weight:600;color:var(--text)">${e.desc}</td>
+      <td><span class="pill ${catColors[e.category]||'pill-accent'}">${e.category}</span></td>
+      <td style="font-weight:700;color:var(--red)">${fmt(e.amount)}</td>
+      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteExpense(${e.id})">Delete</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('expense-total').textContent=fmt(total);
+}
+
+function deleteExpense(id) {
+  state.expenses=state.expenses.filter(e=>e.id!==id);
+  save(); renderExpenses(); updateOverview(); showToast('Expense deleted','🗑️');
+}
+
+// ── BUDGET ─────────────────────────────────────────────────
+const catEmoji={Housing:'🏠',Food:'🍔',Transport:'🚗',Tech:'💻',Health:'🏥',Entertainment:'🎬',Other:'📦'};
+function renderBudget() {
+  const rows=document.getElementById('budget-rows');
+  rows.innerHTML = Object.entries(state.budgets).map(([cat,limit])=>{
+    const spent=state.expenses.filter(e=>e.category===cat).reduce((s,e)=>s+e.amount,0);
+    const pct=Math.min(Math.round(spent/limit*100),100);
+    const color=pct>90?'#ff6b6b':pct>70?'#f0a500':'#00c48c';
+    return `<div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${catEmoji[cat]||''} ${cat}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text3)">${fmt(spent)} of <input type="number" value="${limit}" style="width:80px;display:inline;padding:3px 6px;font-size:11px" onchange="state.budgets['${cat}']=parseFloat(this.value)||0;save();renderBudget()" /></span>
+          <span style="font-size:11px;font-weight:700;color:${color}">${pct}%</span>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('income-target').value=state.incomeTarget;
+  recalcBudget();
+}
+function saveBudgets(){save();showToast('Budget saved ✓');}
+function recalcBudget(){
+  const t=parseFloat(document.getElementById('income-target').value)||0;
+  state.incomeTarget=t;
+  document.getElementById('tax-amount').textContent=fmt(t*0.30);
+}
+
+// ── TAX ────────────────────────────────────────────────────
+function calcTax() {
+  const gross=parseFloat(document.getElementById('tax-income').value)||0;
+  const expenses=parseFloat(document.getElementById('tax-expenses').value)||0;
+  const regime=document.getElementById('tax-regime').value;
+  const net=Math.max(0,gross-expenses);
+  let tax=0;
+  if(regime==='new'){
+    if(net<=300000) tax=0;
+    else if(net<=700000) tax=(net-300000)*0.05;
+    else if(net<=1000000) tax=20000+(net-700000)*0.10;
+    else if(net<=1200000) tax=50000+(net-1000000)*0.15;
+    else if(net<=1500000) tax=80000+(net-1200000)*0.20;
+    else tax=140000+(net-1500000)*0.30;
+  } else {
+    if(net<=250000) tax=0;
+    else if(net<=500000) tax=(net-250000)*0.05;
+    else if(net<=1000000) tax=12500+(net-500000)*0.20;
+    else tax=112500+(net-1000000)*0.30;
+  }
+  const cess=tax*0.04;
+  const total=tax+cess;
+  const monthly=total/12;
+  const effective=gross>0?(total/gross*100).toFixed(1):0;
+  document.getElementById('tax-output').innerHTML=`
+    <div class="grid-2" style="gap:10px;margin-bottom:16px">
+      <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">GROSS INCOME</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text)">${fmt(gross)}</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">TAXABLE INCOME</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text)">${fmt(net)}</div>
+      </div>
+      <div style="background:rgba(240,165,0,0.08);border-radius:var(--radius-sm);padding:14px;border:1px solid rgba(240,165,0,0.2)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">INCOME TAX</div>
+        <div style="font-size:18px;font-weight:800;color:var(--amber)">${fmt(tax)}</div>
+      </div>
+      <div style="background:rgba(255,107,107,0.08);border-radius:var(--radius-sm);padding:14px;border:1px solid rgba(255,107,107,0.2)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">TOTAL (WITH CESS)</div>
+        <div style="font-size:18px;font-weight:800;color:var(--red)">${fmt(total)}</div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text2)">
+      <div style="margin-bottom:6px">📅 <strong>Set aside monthly:</strong> <span style="color:var(--amber);font-weight:700">${fmt(monthly)}</span></div>
+      <div>📊 <strong>Effective Tax Rate:</strong> <span style="color:var(--text)">${effective}%</span></div>
+    </div>
+  `;
+}
+
+// ── HEALTH SCORE ─────────────────────────────────────────
+function calcScore() {
+  let score=50;
+  const totalInc=state.income.filter(i=>i.status==='Received').reduce((s,i)=>s+i.amount,0);
+  const totalExp=state.expenses.reduce((s,e)=>s+e.amount,0);
+  if(state.income.length>0) score+=10;
+  if(state.expenses.length>0) score+=5;
+  if(totalInc>0 && totalExp<totalInc) score+=15;
+  if(totalInc>0 && totalExp/totalInc<0.7) score+=10;
+  if(totalInc>0 && totalExp/totalInc<0.5) score+=10;
+  const chk=Object.values(state.checklist).filter(Boolean).length;
+  score += Math.floor(chk/2)*2;
+  return Math.min(100,Math.max(20,score));
+}
+
+function updateHealthScore() {
+  const s=calcScore();
+  document.getElementById('health-score-num').textContent=s;
+  document.getElementById('top-score').textContent='Score: '+s;
+  const arc=document.getElementById('score-arc');
+  const circumference=389.56;
+  const offset=circumference-(circumference*s/100);
+  arc.setAttribute('stroke-dashoffset', Math.round(offset));
+
+  let label,desc,color;
+  if(s>=80){label='Thriving 🌟';color='var(--green)';desc='Excellent financial habits! Keep building emergency fund and investing.';}
+  else if(s>=65){label='Growing 📈';color='var(--teal)';desc='Good progress. Focus on reducing expenses and building consistency.';}
+  else if(s>=50){label='Developing 🌱';color='var(--amber)';desc='Solid foundations. Consistent tracking and expense control will boost your score.';}
+  else{label='Starting Out 🚀';color='var(--red)';desc='Every journey starts here. Begin by logging income and cutting unnecessary expenses.';}
+
+  document.getElementById('health-label').textContent=label;
+  document.getElementById('health-label').style.color=color;
+  document.getElementById('health-desc').textContent=desc;
+
+  const totalInc=state.income.filter(i=>i.status==='Received').reduce((s,i)=>s+i.amount,0);
+  const totalExp=state.expenses.reduce((s,e)=>s+e.amount,0);
+  const savingsRate=totalInc>0?Math.round((1-totalExp/totalInc)*100):0;
+  const items=[
+    {label:'Income logged',score:state.income.length>0?25:0,max:25,color:'#00c48c'},
+    {label:'Expenses tracked',score:state.expenses.length>0?20:0,max:20,color:'#6c63ff'},
+    {label:'Savings rate',score:Math.min(25,Math.max(0,savingsRate/2)),max:25,color:'#00d4aa'},
+    {label:'Checklist progress',score:Math.min(30,Object.values(state.checklist).filter(Boolean).length*2.5),max:30,color:'#f0a500'},
+  ];
+  document.getElementById('score-breakdown').innerHTML=items.map(it=>`
+    <div class="score-item">
+      <div class="score-label">${it.label}</div>
+      <div class="score-bar"><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(it.score/it.max*100)}%;background:${it.color}"></div></div></div>
+      <div class="score-num" style="color:${it.color}">${Math.round(it.score)}</div>
+    </div>
+  `).join('');
+}
+
+// ── AI TIPS ────────────────────────────────────────────────
+const allTips=[
+  {title:'Start with a "Pay Yourself First" rule',body:'Set up a separate savings account and transfer at least 20% of every payment you receive — before spending on anything else. This builds discipline when income is irregular.'},
+  {title:'Track every rupee for 30 days',body:'New freelancers often underestimate small recurring costs. Use this dashboard daily for 30 days and you\'ll spot 2-3 categories where you can cut 15-25% without impacting your lifestyle.'},
+  {title:'Build a 3-month emergency buffer first',body:'Before investing or upgrading anything, aim to have 3 months of expenses saved. This is your runway if clients delay payments or work dries up for a month.'},
+  {title:'Set aside 30% of every payment for tax',body:'The biggest financial shock for new freelancers is a surprise tax bill. Create a separate "Tax" account and move 30% of each payment into it immediately. Treat it as untouchable.'},
+  {title:'Invoice promptly — cash flow is king',body:'The moment a project wraps, send the invoice. Late invoicing is the #1 cause of cash flow problems. Consider adding a 1.5% monthly late fee clause to motivate clients.'},
+  {title:'Track your effective hourly rate',body:'Divide last month\'s income by hours worked. If it\'s below your target, you either need to raise rates or find higher-value projects. Review this monthly.'},
+  {title:'Deduplicate your software subscriptions',body:'Freelancers often accumulate SaaS tools quickly. Audit subscriptions quarterly. Unused tools could be costing ₹3,000-10,000/month that could go into your emergency fund.'},
+  {title:'Create a simple client income spreadsheet',body:'Know which clients bring 80% of your income (Pareto principle). These deserve more attention and loyalty programs. Diversify if one client represents over 50% of income.'},
+];
+
+function generateTips() {
+  const shuffled=[...allTips].sort(()=>Math.random()-0.5).slice(0,5);
+  document.getElementById('tips-container').innerHTML=shuffled.map((t,i)=>`
+    <div class="tip-card" style="margin-top:${i===0?0:12}px">
+      <div class="tip-number">Tip ${i+1}</div>
+      <div class="tip-title" style="margin-top:8px">${t.title}</div>
+      <div class="tip-body">${t.body}</div>
+    </div>
+  `).join('');
+}
+
+// ── WHAT-IF ───────────────────────────────────────────────
+function runWhatIf() {
+  let income=parseFloat(document.getElementById('wi-income').value)||0;
+  let expenses=parseFloat(document.getElementById('wi-expenses').value)||0;
+  const months=parseInt(document.getElementById('wi-months').value)||12;
+  const ig=parseFloat(document.getElementById('wi-income-growth').value)/100;
+  const er=parseFloat(document.getElementById('wi-expense-red').value)/100;
+  const taxPct=parseFloat(document.getElementById('wi-tax-pct').value)/100;
+
+  expenses = expenses*(1-er);
+  const labels=[];const savData=[];const incData=[];const expData=[];
+  let cumSav=0;
+  for(let m=1;m<=months;m++){
+    const curInc=income*Math.pow(1+ig,m-1);
+    const taxed=curInc*taxPct;
+    const sav=Math.max(0,curInc-taxed-expenses);
+    cumSav+=sav;
+    labels.push('M'+m);
+    savData.push(Math.round(cumSav));
+    incData.push(Math.round(curInc));
+    expData.push(Math.round(expenses+taxed));
+  }
+
+  const finalInc=incData[incData.length-1];
+  const finalSav=savData[savData.length-1];
+  document.getElementById('whatif-result').style.display='block';
+  document.getElementById('whatif-result').innerHTML=`
+    <div class="grid-3" style="gap:12px">
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">PROJECTED INCOME (Month ${months})</div>
+        <div style="font-size:20px;font-weight:800;color:var(--green)">${fmt(finalInc)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">CUMULATIVE SAVINGS</div>
+        <div style="font-size:20px;font-weight:800;color:var(--teal)">${fmt(finalSav)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">MONTHLY SAVINGS (Month ${months})</div>
+        <div style="font-size:20px;font-weight:800;color:var(--accent2)">${fmt(savData[savData.length-1]-savData[Math.max(0,savData.length-2)])}</div>
+      </div>
+    </div>
+  `;
+
+  if(whatifChartInst) whatifChartInst.destroy();
+  whatifChartInst=new Chart(document.getElementById('whatifChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Cumulative Savings',data:savData,borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,0.08)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
+      {label:'Monthly Income',data:incData,borderColor:'#6c63ff',backgroundColor:'transparent',tension:0.4,borderWidth:2,borderDash:[5,5],pointRadius:0}
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#8b95a8',font:{size:10},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#8b95a8',font:{size:10},callback:v=>'₹'+Math.round(v/1000)+'k'},grid:{color:'rgba(255,255,255,0.04)'}}
+      }
+    }
+  });
+}
+
+// ── CHECKLIST ─────────────────────────────────────────────
+const checkItems=[
+  'Open a dedicated business bank account',
+  'Set up a separate savings account for taxes (30% rule)',
+  'Create invoice templates with payment terms',
+  'Register for GST if expecting turnover > ₹20L',
+  'Start tracking income & expenses in this dashboard',
+  'Build 1 month of expenses in emergency fund',
+  'Build 3 months of expenses in emergency fund',
+  'Set monthly income target and budget',
+  'File advance tax if annual liability > ₹10,000',
+  'Review subscriptions and cancel unused ones',
+  'Audit your hourly rate vs market rates',
+  'Start any SIP or recurring investment (even ₹500/month)',
+];
+
+function renderChecklist(){
+  const done=checkItems.filter((_,i)=>state.checklist[i]).length;
+  document.getElementById('checklist-progress').textContent=done+' / '+checkItems.length+' done';
+  document.getElementById('checklist-items').innerHTML=checkItems.map((t,i)=>`
+    <div class="check-item ${state.checklist[i]?'checked':''}" onclick="toggleCheck(${i})">
+      <div class="check-box">${state.checklist[i]?'<span style="color:#fff;font-size:12px">✓</span>':''}</div>
+      <div class="check-text" style="font-size:13px;color:var(--text2)">${t}</div>
+    </div>
+  `).join('');
+}
+
+function toggleCheck(i){
+  state.checklist[i]=!state.checklist[i];
+  save(); renderChecklist(); updateHealthScore();
+}
+
+// ── INIT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  renderIncome();
+  renderExpenses();
+  renderBudget();
+  renderChecklist();
+  generateTips();
+  updateOverview();
+  calcTax();
+  runWhatIf();
+});
+</script>
+</body>
+</html>
