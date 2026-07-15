@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workflow Architect — Angular + Spring Boot Enterprise</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --surface3: #212d42;
+    --border: #2a3a55;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --accent3: #8b5cf6;
+    --accent4: #10b981;
+    --accent5: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --mono: 'Courier New', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --glow: 0 0 40px rgba(59,130,246,0.15);
+  }
+  .light-mode {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+    --surface3: #e2e8f0;
+    --border: #cbd5e1;
+    --text: #0f172a;
+    --text2: #475569;
+    --text3: #94a3b8;
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+    --glow: 0 0 40px rgba(59,130,246,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,15,26,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    transition: background 0.3s;
+  }
+  .light-mode .header { background: rgba(240,244,248,0.92); }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .header-logo {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+  .header-subtitle { font-size: 0.7rem; color: var(--text3); font-family: var(--mono); }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-icon {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text2); border-radius: var(--radius-sm);
+    width: 36px; height: 36px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all 0.2s;
+  }
+  .btn-icon:hover { background: var(--surface3); color: var(--text); }
+  .progress-pill {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 0.72rem; color: var(--text2); font-family: var(--mono);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .progress-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent4); animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 4rem 2rem 2rem;
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+  }
+  @media(max-width:768px){.hero{grid-template-columns:1fr; padding:2rem 1rem;}}
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--accent2); letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+  }
+  .hero-eyebrow::before { content:''; width:24px; height:1px; background:var(--accent2); }
+  .hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--text2); font-size: 1rem; margin-bottom: 1.5rem; max-width: 480px; }
+  .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2rem; }
+  .tag {
+    padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+    border: 1px solid; font-family: var(--mono);
+  }
+  .tag-blue { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.08); }
+  .tag-cyan { border-color: var(--accent2); color: var(--accent2); background: rgba(6,182,212,0.08); }
+  .tag-purple { border-color: var(--accent3); color: var(--accent3); background: rgba(139,92,246,0.08); }
+  .tag-green { border-color: var(--accent4); color: var(--accent4); background: rgba(16,185,129,0.08); }
+  .tag-amber { border-color: var(--accent5); color: var(--accent5); background: rgba(245,158,11,0.08); }
+  .hero-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem; text-align: center;
+  }
+  .stat-num { font-size: 1.8rem; font-weight: 800; color: var(--accent); letter-spacing: -0.04em; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); margin-top: 2px; }
+  .hero-diagram { position: relative; }
+  .arch-diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+    box-shadow: var(--glow);
+  }
+  .arch-layer {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0.6rem 1rem; border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600;
+    position: relative;
+  }
+  .arch-arrow { text-align: center; color: var(--text3); font-size: 1.2rem; margin: 2px 0; }
+  .layer-fe { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: var(--accent); }
+  .layer-api { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: var(--accent3); }
+  .layer-svc { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent4); }
+  .layer-db { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: var(--accent5); }
+  .layer-infra { background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); color: var(--accent2); }
+
+  /* ─── NAV ─── */
+  .stage-nav {
+    position: sticky; top: 64px; z-index: 90;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    overflow-x: auto; white-space: nowrap;
+    padding: 0 2rem;
+    scrollbar-width: none;
+  }
+  .stage-nav::-webkit-scrollbar { display: none; }
+  .stage-nav-inner { display: inline-flex; gap: 0; }
+  .nav-btn {
+    padding: 0.9rem 1.2rem; font-size: 0.78rem; font-weight: 600;
+    color: var(--text3); background: none; border: none;
+    border-bottom: 2px solid transparent; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--surface3); font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+  }
+  .nav-btn.active .nav-num { background: var(--accent); color: white; }
+
+  /* ─── MAIN ─── */
+  .main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  @media(max-width:768px){.main{padding:1rem;}}
+
+  /* ─── STAGE SECTION ─── */
+  .stage-section { display: none; animation: fadeIn 0.3s ease; }
+  .stage-section.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .stage-header {
+    display: flex; align-items: flex-start; gap: 1.5rem;
+    margin-bottom: 2rem; padding: 2rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+  }
+  .stage-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+  }
+  .stage-meta { flex: 1; }
+  .stage-number { font-family: var(--mono); font-size: 0.7rem; color: var(--text3); margin-bottom: 4px; }
+  .stage-name { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+  .stage-desc { color: var(--text2); font-size: 0.9rem; max-width: 600px; }
+  .stage-badges { display: flex; gap: 8px; margin-top: 0.75rem; flex-wrap: wrap; }
+  .badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;
+    font-family: var(--mono);
+  }
+  .badge-time { background: rgba(245,158,11,0.15); color: var(--accent5); border: 1px solid rgba(245,158,11,0.3); }
+  .badge-team { background: rgba(59,130,246,0.15); color: var(--accent); border: 1px solid rgba(59,130,246,0.3); }
+  .badge-phase { background: rgba(16,185,129,0.15); color: var(--accent4); border: 1px solid rgba(16,185,129,0.3); }
+
+  /* ─── GRID LAYOUTS ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media(max-width:900px){ .grid-2,.grid-3 { grid-template-columns: 1fr; } }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+    box-shadow: var(--shadow); transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-title {
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text3); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title-icon { font-size: 14px; }
+
+  /* ─── TASK LIST ─── */
+  .task-list { list-style: none; }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+    font-size: 0.88rem; cursor: pointer;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 2px solid var(--border); flex-shrink: 0; margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; cursor: pointer;
+  }
+  .task-item.done .task-check { background: var(--accent4); border-color: var(--accent4); }
+  .task-item.done .task-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+  .task-item.done .task-text { text-decoration: line-through; color: var(--text3); }
+  .task-text { flex: 1; }
+
+  /* ─── TOOL CARDS ─── */
+  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media(max-width:600px){ .tool-grid { grid-template-columns: 1fr; } }
+  .tool-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1rem;
+    transition: all 0.2s; cursor: default;
+  }
+  .tool-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .tool-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .tool-emoji { font-size: 20px; }
+  .tool-name { font-weight: 700; font-size: 0.88rem; }
+  .tool-category { font-size: 0.65rem; font-family: var(--mono); color: var(--text3); }
+  .tool-why { font-size: 0.8rem; color: var(--text2); margin-bottom: 8px; }
+  .tool-alts { font-size: 0.72rem; color: var(--text3); font-family: var(--mono); }
+  .tool-alts span { color: var(--accent3); }
+  .tool-rating { display: flex; gap: 2px; margin-bottom: 6px; }
+  .star { color: var(--accent5); font-size: 11px; }
+
+  /* ─── PROMPT BLOCK ─── */
+  .prompt-block {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+  }
+  .prompt-header {
+    padding: 0.6rem 1rem; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.72rem; font-family: var(--mono); color: var(--text3);
+  }
+  .prompt-copy {
+    background: var(--surface3); border: 1px solid var(--border);
+    color: var(--text2); border-radius: 4px; padding: 2px 8px;
+    font-size: 0.68rem; cursor: pointer; transition: all 0.2s;
+  }
+  .prompt-copy:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .prompt-body { padding: 0.9rem 1rem; font-family: var(--mono); font-size: 0.78rem; line-height: 1.7; color: var(--text); }
+
+  /* ─── BEST PRACTICES ─── */
+  .practices-list { list-style: none; }
+  .practice-item {
+    display: flex; gap: 10px; padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border); font-size: 0.85rem;
+  }
+  .practice-item:last-child { border-bottom: none; }
+  .practice-icon { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+
+  /* ─── MISTAKES ─── */
+  .mistake-item {
+    background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--radius-sm); padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem; font-size: 0.84rem;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .mistake-icon { color: var(--danger); flex-shrink: 0; font-size: 16px; }
+
+  /* ─── OUTPUTS ─── */
+  .output-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.5rem 0; font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .output-item:last-child { border-bottom: none; }
+  .output-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent4); flex-shrink: 0; }
+
+  /* ─── TIPS ─── */
+  .tip-item {
+    background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+    border-radius: var(--radius-sm); padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem; font-size: 0.84rem;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .tip-icon { color: var(--accent4); flex-shrink: 0; }
+
+  /* ─── DECISION TREE ─── */
+  .decision-tree { overflow-x: auto; }
+  .dt-node {
+    display: inline-flex; flex-direction: column; align-items: center;
+    margin: 0.5rem;
+  }
+  .dt-box {
+    padding: 0.5rem 1rem; border-radius: var(--radius-sm);
+    font-size: 0.78rem; text-align: center; min-width: 140px; max-width: 200px;
+  }
+  .dt-root { background: rgba(59,130,246,0.15); border: 2px solid var(--accent); color: var(--accent); font-weight: 700; }
+  .dt-branch { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+  .dt-leaf { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--accent4); font-size: 0.72rem; }
+  .dt-row { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .dt-connector { color: var(--text3); text-align: center; font-size: 1.2rem; }
+
+  /* ─── PROGRESS TRACKER ─── */
+  .progress-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2rem;
+  }
+  .progress-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 1rem; }
+  .progress-stages { display: flex; gap: 0; overflow-x: auto; }
+  .progress-stage { flex: 1; min-width: 80px; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
+  .progress-stage:not(:last-child)::after {
+    content: ''; position: absolute; top: 14px; left: 50%; width: 100%;
+    height: 2px; background: var(--border); z-index: 0;
+  }
+  .progress-stage.done:not(:last-child)::after { background: var(--accent4); }
+  .progress-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--surface3); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-family: var(--mono); z-index: 1;
+    transition: all 0.3s;
+  }
+  .progress-stage.active .progress-circle { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.1); }
+  .progress-stage.done .progress-circle { background: var(--accent4); border-color: var(--accent4); color: white; }
+  .progress-stage-label { font-size: 0.62rem; color: var(--text3); text-align: center; font-family: var(--mono); }
+  .progress-stage.active .progress-stage-label { color: var(--accent); }
+
+  /* ─── NOTES ─── */
+  .notes-area {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.75rem; color: var(--text);
+    font-family: var(--sans); font-size: 0.85rem; resize: vertical;
+    min-height: 100px; margin-top: 0.75rem;
+    transition: border-color 0.2s;
+  }
+  .notes-area:focus { outline: none; border-color: var(--accent); }
+  .notes-save {
+    margin-top: 8px; padding: 6px 16px; background: var(--accent);
+    color: white; border: none; border-radius: var(--radius-sm);
+    font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .notes-save:hover { background: #2563eb; }
+
+  /* ─── SUMMARY SECTION ─── */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  @media(max-width:900px){ .summary-grid { grid-template-columns: 1fr; } }
+  .stack-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.75rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 0.75rem;
+  }
+  .stack-icon { font-size: 22px; flex-shrink: 0; }
+  .stack-name { font-weight: 700; font-size: 0.85rem; }
+  .stack-role { font-size: 0.72rem; color: var(--text3); font-family: var(--mono); }
+  .resource-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 0.75rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 0.75rem; font-size: 0.84rem;
+  }
+  .resource-type { font-family: var(--mono); font-size: 0.68rem; color: var(--accent3); margin-top: 2px; flex-shrink: 0; }
+  .keyword-pill {
+    display: inline-block; padding: 4px 12px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; font-size: 0.75rem; font-family: var(--mono);
+    margin: 4px; color: var(--text2); cursor: pointer; transition: all 0.2s;
+  }
+  .keyword-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .future-item {
+    background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.2);
+    border-radius: var(--radius-sm); padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem; display: flex; gap: 10px;
+    font-size: 0.84rem; align-items: flex-start;
+  }
+  .future-icon { color: var(--accent3); flex-shrink: 0; }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+    background: var(--surface3); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent4);
+    border-radius: var(--radius-sm); padding: 0.75rem 1.25rem;
+    font-size: 0.82rem; opacity: 0; pointer-events: none;
+    transform: translateY(10px); transition: all 0.3s;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── DIVIDER ─── */
+  .section-divider { height: 1px; background: var(--border); margin: 2rem 0; }
+
+  /* ─── PRINT ─── */
+  @media print {
+    .header, .stage-nav, #toast { display: none; }
+    .stage-section { display: block !important; }
+    .card { break-inside: avoid; }
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ─── DIAGRAM SVG ─── */
+  .workflow-diagram { width: 100%; overflow-x: auto; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+  .wf-svg { min-width: 700px; width: 100%; }
+
+  .community-item {
+    display:flex; align-items:center; gap:10px;
+    padding:0.6rem; background:var(--surface2);
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    margin-bottom:0.5rem; font-size:0.84rem;
+  }
+  .community-icon { font-size:18px; flex-shrink:0; }
+  .section-subtitle { font-size:1rem; font-weight:700; margin-bottom:1rem; letter-spacing:-0.02em; }
+  .info-callout {
+    background: rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.2);
+    border-radius:var(--radius-sm); padding:0.75rem 1rem;
+    font-size:0.84rem; display:flex; gap:10px; align-items:flex-start;
+    margin-bottom:1rem;
+  }
+  .info-icon { color:var(--accent); flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">⚙</div>
+    <div>
+      <div class="header-title">AI Workflow Architect</div>
+      <div class="header-subtitle">Angular + Spring Boot — Enterprise</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="progress-pill">
+      <div class="progress-dot"></div>
+      <span id="overall-progress">0 / 48 tasks done</span>
+    </div>
+    <button class="btn-icon" onclick="toggleDark()" title="Toggle theme">🌙</button>
+    <button class="btn-icon" onclick="window.print()" title="Print workflow">🖨</button>
+  </div>
+</header>
+
+<!-- STAGE NAV -->
+<nav class="stage-nav">
+  <div class="stage-nav-inner">
+    <button class="nav-btn active" onclick="showStage(0,this)"><span class="nav-num">1</span> Discovery</button>
+    <button class="nav-btn" onclick="showStage(1,this)"><span class="nav-num">2</span> Architecture</button>
+    <button class="nav-btn" onclick="showStage(2,this)"><span class="nav-num">3</span> Dev Setup</button>
+    <button class="nav-btn" onclick="showStage(3,this)"><span class="nav-num">4</span> Frontend</button>
+    <button class="nav-btn" onclick="showStage(4,this)"><span class="nav-num">5</span> Backend</button>
+    <button class="nav-btn" onclick="showStage(5,this)"><span class="nav-num">6</span> Integration</button>
+    <button class="nav-btn" onclick="showStage(6,this)"><span class="nav-num">7</span> Testing</button>
+    <button class="nav-btn" onclick="showStage(7,this)"><span class="nav-num">8</span> Deployment</button>
+    <button class="nav-btn" onclick="showStage(8,this)"><span class="nav-num">★</span> Summary</button>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- HERO -->
+  <section class="hero" id="hero-section">
+    <div>
+      <div class="hero-eyebrow">Full-Stack Enterprise Workflow</div>
+      <h1>Build <span>Enterprise Products</span> with AI Precision</h1>
+      <p class="hero-desc">A complete end-to-end workflow for a small team building a new Angular + Spring Boot enterprise application — from discovery to production deployment.</p>
+      <div class="hero-tags">
+        <span class="tag tag-blue">Angular 17+</span>
+        <span class="tag tag-purple">Spring Boot 3</span>
+        <span class="tag tag-cyan">Java 21</span>
+        <span class="tag tag-green">Small Team</span>
+        <span class="tag tag-amber">AI-Augmented</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card"><div class="stat-num">8</div><div class="stat-label">Workflow Stages</div></div>
+        <div class="stat-card"><div class="stat-num">48</div><div class="stat-label">Tracked Tasks</div></div>
+        <div class="stat-card"><div class="stat-num">30+</div><div class="stat-label">AI Tools</div></div>
+      </div>
+    </div>
+    <div class="hero-diagram">
+      <div class="arch-diagram">
+        <div style="font-size:0.72rem;color:var(--text3);font-family:var(--mono);margin-bottom:1rem;">ARCHITECTURE OVERVIEW</div>
+        <div class="arch-layer layer-fe">🅰 Angular 17+ — Component-Driven SPA</div>
+        <div class="arch-arrow">↕ REST / GraphQL / WebSocket</div>
+        <div class="arch-layer layer-api">🌐 API Gateway — Spring Cloud Gateway</div>
+        <div class="arch-arrow">↕</div>
+        <div class="arch-layer layer-svc">☕ Spring Boot 3 — Business Services</div>
+        <div class="arch-arrow">↕ JPA / JDBC</div>
+        <div class="arch-layer layer-db">🗄 PostgreSQL + Redis Cache</div>
+        <div class="arch-arrow">↕</div>
+        <div class="arch-layer layer-infra">🐳 Docker + CI/CD Pipeline</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRESS TRACKER -->
+  <div class="progress-section" id="progress-tracker">
+    <div class="progress-title">📊 Workflow Progress</div>
+    <div class="progress-stages">
+      <div class="progress-stage active" id="ps-0"><div class="progress-circle">1</div><div class="progress-stage-label">Discovery</div></div>
+      <div class="progress-stage" id="ps-1"><div class="progress-circle">2</div><div class="progress-stage-label">Architecture</div></div>
+      <div class="progress-stage" id="ps-2"><div class="progress-circle">3</div><div class="progress-stage-label">Dev Setup</div></div>
+      <div class="progress-stage" id="ps-3"><div class="progress-circle">4</div><div class="progress-stage-label">Frontend</div></div>
+      <div class="progress-stage" id="ps-4"><div class="progress-circle">5</div><div class="progress-stage-label">Backend</div></div>
+      <div class="progress-stage" id="ps-5"><div class="progress-circle">6</div><div class="progress-stage-label">Integration</div></div>
+      <div class="progress-stage" id="ps-6"><div class="progress-circle">7</div><div class="progress-stage-label">Testing</div></div>
+      <div class="progress-stage" id="ps-7"><div class="progress-circle">8</div><div class="progress-stage-label">Deployment</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 1: DISCOVERY & PLANNING
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section active" id="stage-0">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(59,130,246,0.15)">🔍</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 01</div>
+        <div class="stage-name">Discovery & Planning</div>
+        <div class="stage-desc">Define the product scope, gather stakeholder requirements, establish technical constraints, and produce a clear project charter before writing a single line of code.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ 1–2 weeks</span>
+          <span class="badge badge-team">👥 Entire team + stakeholders</span>
+          <span class="badge badge-phase">Phase: Pre-development</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🎯</span> Objectives</div>
+        <ul class="practices-list">
+          <li class="practice-item"><span class="practice-icon">▸</span> Define product vision, goals, and success metrics (KPIs)</li>
+          <li class="practice-item"><span class="practice-icon">▸</span> Document functional and non-functional requirements</li>
+          <li class="practice-item"><span class="practice-icon">▸</span> Identify stakeholders, user personas, and user journeys</li>
+          <li class="practice-item"><span class="practice-icon">▸</span> Assess technical constraints and enterprise compliance needs</li>
+          <li class="practice-item"><span class="practice-icon">▸</span> Produce project charter and initial backlog</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks <small style="color:var(--text3);font-weight:400;">(click to complete)</small></div>
+        <ul class="task-list" id="tasks-stage0">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Conduct stakeholder interviews (min. 3 sessions)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Define and document user personas</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Write Software Requirements Specification (SRS)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Create initial user story backlog in Jira/Linear</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Map compliance requirements (GDPR, SOC2, etc.)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Establish Definition of Done (DoD) and coding standards</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🤖</span> Best AI Tools for This Stage</div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🤖</span><div><div class="tool-name">Claude / ChatGPT</div><div class="tool-category">REQUIREMENTS ANALYSIS</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Generate SRS documents, user stories, interview question sets, and requirement matrices in minutes. Excellent for gap analysis between stakeholder input and documented specs.</div>
+          <div class="tool-alts">Alts: <span>Gemini Advanced, Copilot</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📋</span><div><div class="tool-name">Notion AI</div><div class="tool-category">DOCUMENTATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">AI-assisted project wikis, meeting note summarization, and automatically structured spec documents. Keeps small teams aligned without a dedicated PM tool.</div>
+          <div class="tool-alts">Alts: <span>Confluence, Linear</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🗺</span><div><div class="tool-name">Miro AI</div><div class="tool-category">USER JOURNEY MAPPING</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Generates user journey maps, impact/effort matrices, and affinity diagrams from text. Collaborative diagramming with AI-powered clustering.</div>
+          <div class="tool-alts">Alts: <span>FigJam, Lucidchart</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📊</span><div><div class="tool-name">Linear + AI</div><div class="tool-category">BACKLOG MANAGEMENT</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">AI-powered issue creation, auto-classification, sprint planning, and effort estimation. Modern alternative to Jira for small fast-moving teams.</div>
+          <div class="tool-alts">Alts: <span>Jira, GitHub Issues</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>SRS Generation</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Write a Software Requirements Specification for an enterprise [product type] application. Include: functional requirements, non-functional requirements (performance, security, scalability), user roles, and a prioritization matrix using MoSCoW. The team is 2-5 developers using Angular 17 and Spring Boot 3.</div>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>User Story Generator</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Generate 10 detailed user stories for [feature/module] in Agile format. Include: persona, goal, acceptance criteria (Given/When/Then), effort estimate (S/M/L/XL), and dependencies. Focus on enterprise users with role-based access control.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🚫</span> Common Mistakes</div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Skipping non-functional requirements (security, performance SLAs) — these are critical in enterprise environments.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Gathering requirements from only one stakeholder group. Always include both business and technical representatives.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Creating an overloaded Phase 1 backlog. Small teams should scope MVP tightly — 6 core features maximum.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Ignoring enterprise compliance early. Retrofitting GDPR, SSO, or audit logging is extremely costly.</span></div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📤</span> Expected Outputs</div>
+        <div class="output-item"><div class="output-dot"></div>Software Requirements Specification (SRS)</div>
+        <div class="output-item"><div class="output-dot"></div>User Persona documents (3–5 personas)</div>
+        <div class="output-item"><div class="output-dot"></div>User journey maps</div>
+        <div class="output-item"><div class="output-dot"></div>Prioritized product backlog</div>
+        <div class="output-item"><div class="output-dot"></div>Project charter & timeline</div>
+        <div class="output-item"><div class="output-dot"></div>Compliance checklist</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✨</span> Best Practices</div>
+        <ul class="practices-list">
+          <li class="practice-item"><span class="practice-icon">✓</span>Use "Jobs to be Done" framework alongside user stories for deeper requirement insight.</li>
+          <li class="practice-item"><span class="practice-icon">✓</span>Record all stakeholder sessions and use AI to transcribe and extract action items.</li>
+          <li class="practice-item"><span class="practice-icon">✓</span>Version control your documentation from day 1 (Notion or Confluence).</li>
+          <li class="practice-item"><span class="practice-icon">✓</span>Hold a requirements sign-off meeting before architecture begins.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💡</span> Efficiency Tips</div>
+        <div class="tip-item"><span class="tip-icon">⚡</span>Use AI to convert recorded stakeholder meetings → structured requirements in under 10 minutes.</div>
+        <div class="tip-item"><span class="tip-icon">⚡</span>Template your user story format once in Linear and clone it for all future stories.</div>
+        <div class="tip-item"><span class="tip-icon">⚡</span>Run a single 2-hour "requirements workshop" with all stakeholders to compress 3 weeks of emails.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-0" placeholder="Add your discovery notes, decisions, and open questions here..."></textarea>
+      <button class="notes-save" onclick="saveNote(0)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 2: ARCHITECTURE & DESIGN
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-1">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(139,92,246,0.15)">🏛</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 02</div>
+        <div class="stage-name">Architecture & System Design</div>
+        <div class="stage-desc">Define the technical blueprint: system architecture, database schema, API contracts, and security model before any code is written.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ 1–2 weeks</span>
+          <span class="badge badge-team">👥 Tech lead + Senior devs</span>
+          <span class="badge badge-phase">Phase: Design</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📐</span> System Architecture Decision Tree</div>
+      <div class="decision-tree">
+        <div style="text-align:center;margin-bottom:0.5rem;">
+          <div class="dt-box dt-root" style="display:inline-block;">Should you use Microservices or Monolith?</div>
+        </div>
+        <div class="dt-connector">↙ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+        <div class="dt-row">
+          <div style="text-align:center;">
+            <div class="dt-box dt-branch">Team &lt; 5 devs<br>OR MVP / Prototype</div>
+            <div class="dt-connector">↓</div>
+            <div class="dt-box dt-leaf">✅ Modular Monolith<br>(Spring Boot Modules)</div>
+          </div>
+          <div style="text-align:center;">
+            <div class="dt-box dt-branch">Clear domain boundaries<br>AND 6+ months timeline</div>
+            <div class="dt-connector">↓</div>
+            <div class="dt-box dt-leaf">⚠ Microservices<br>(Spring Cloud)</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:1rem;font-size:0.78rem;color:var(--text3);font-family:var(--mono);">Recommendation for this workflow: Start with Modular Monolith → extract services later</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks</div>
+        <ul class="task-list" id="tasks-stage1">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Choose monolith vs microservices architecture pattern</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Design database schema (ERD) and data model</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Define REST API contracts using OpenAPI 3.0 (Swagger)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Define Angular module structure and routing strategy</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Design authentication flow (JWT + OAuth2 / SAML for SSO)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Create Architecture Decision Records (ADRs)</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🏗</span> Angular Module Structure</div>
+        <div style="font-family:var(--mono);font-size:0.75rem;color:var(--text2);line-height:2;">
+          <div style="color:var(--accent);">src/app/</div>
+          <div style="padding-left:1rem;">📦 <span style="color:var(--accent4);">core/</span> — singleton services, guards, interceptors</div>
+          <div style="padding-left:1rem;">📦 <span style="color:var(--accent3);">shared/</span> — reusable components, pipes, directives</div>
+          <div style="padding-left:1rem;">📦 <span style="color:var(--accent2);">features/</span> — lazy-loaded feature modules</div>
+          <div style="padding-left:2rem;">├─ dashboard/</div>
+          <div style="padding-left:2rem;">├─ user-management/</div>
+          <div style="padding-left:2rem;">└─ [domain-feature]/</div>
+          <div style="padding-left:1rem;">📦 <span style="color:var(--accent5);">store/</span> — NgRx state management</div>
+          <div style="padding-left:2rem;">├─ actions/ reducers/ effects/ selectors/</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🤖</span> Best AI Tools for This Stage</div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🐙</span><div><div class="tool-name">GitHub Copilot</div><div class="tool-category">SCHEMA GENERATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Generates JPA entity classes, repository interfaces, and Flyway migration scripts from natural language descriptions of your data model.</div>
+          <div class="tool-alts">Alts: <span>Claude, Cursor AI</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📄</span><div><div class="tool-name">Swagger / OpenAPI + AI</div><div class="tool-category">API DESIGN</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Use Claude to generate OpenAPI YAML specs from requirements, then import to Swagger Editor. Define contracts before any backend code is written.</div>
+          <div class="tool-alts">Alts: <span>Stoplight, Postman</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🖼</span><div><div class="tool-name">Mermaid + Claude</div><div class="tool-category">DIAGRAM GENERATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Ask Claude to produce ERDs, sequence diagrams, and component diagrams in Mermaid syntax. Commit diagrams as code in the repo.</div>
+          <div class="tool-alts">Alts: <span>draw.io, PlantUML</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🧠</span><div><div class="tool-name">ChatGPT-4o</div><div class="tool-category">ADR WRITING</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Generates Architecture Decision Records with context, decision, consequences, and alternatives in the standard MADR format.</div>
+          <div class="tool-alts">Alts: <span>Claude, Notion AI</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>ERD + JPA Entities</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Design a PostgreSQL database schema for [system description]. Generate: (1) ERD in Mermaid syntax, (2) JPA entity classes with relationships, (3) Flyway V1 migration SQL script. Use Spring Boot 3, Java 21, and follow enterprise naming conventions.</div>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>OpenAPI Spec Generator</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Generate an OpenAPI 3.0 YAML specification for a [resource name] REST API. Include: CRUD endpoints, request/response schemas with validation annotations, JWT bearer security, pagination support, and standard error response models.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🚫</span> Common Mistakes</div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Jumping straight to microservices for a 3-person team. The operational overhead will kill velocity.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>No API contract first. Defining APIs after code is written leads to mismatch between frontend and backend teams.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Skipping ADRs. Future-you (and new team members) will have no context on why decisions were made.</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-1" placeholder="Architecture decisions, open questions, diagram links..."></textarea>
+      <button class="notes-save" onclick="saveNote(1)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 3: DEV ENVIRONMENT SETUP
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-2">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(6,182,212,0.15)">🛠</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 03</div>
+        <div class="stage-name">Development Environment Setup</div>
+        <div class="stage-desc">Configure the team's tooling, repositories, CI/CD pipelines, and shared standards so every developer has a consistent, productive environment from day one.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ 2–3 days</span>
+          <span class="badge badge-team">👥 Tech lead</span>
+          <span class="badge badge-phase">Phase: Setup</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks</div>
+        <ul class="task-list" id="tasks-stage2">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Create GitHub/GitLab monorepo with branch protection rules</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Initialize Angular project (ng new) with routing, SCSS, strict mode</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Initialize Spring Boot project via Spring Initializr</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Configure Docker Compose for local dev (Postgres, Redis)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Set up ESLint, Prettier, Checkstyle, and pre-commit hooks</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Configure GitHub Actions CI pipeline (lint → test → build)</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📦</span> Spring Initializr Dependencies</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;font-family:var(--mono);font-size:0.72rem;">
+          <span style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:var(--accent);padding:4px 8px;border-radius:4px;">Spring Web</span>
+          <span style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:var(--accent);padding:4px 8px;border-radius:4px;">Spring Data JPA</span>
+          <span style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:var(--accent3);padding:4px 8px;border-radius:4px;">Spring Security</span>
+          <span style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:var(--accent3);padding:4px 8px;border-radius:4px;">OAuth2 Resource Server</span>
+          <span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--accent4);padding:4px 8px;border-radius:4px;">PostgreSQL Driver</span>
+          <span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--accent4);padding:4px 8px;border-radius:4px;">Flyway Migration</span>
+          <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--accent5);padding:4px 8px;border-radius:4px;">Spring Cache + Redis</span>
+          <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--accent5);padding:4px 8px;border-radius:4px;">Spring Actuator</span>
+          <span style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);color:var(--accent2);padding:4px 8px;border-radius:4px;">Lombok</span>
+          <span style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);color:var(--accent2);padding:4px 8px;border-radius:4px;">MapStruct</span>
+          <span style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);color:var(--accent2);padding:4px 8px;border-radius:4px;">Springdoc OpenAPI</span>
+        </div>
+        <div style="margin-top:1rem;">
+          <div style="font-size:0.72rem;color:var(--text3);font-family:var(--mono);margin-bottom:0.5rem;">ANGULAR KEY PACKAGES</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;font-family:var(--mono);font-size:0.72rem;">
+            <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:4px 8px;border-radius:4px;">@ngrx/store</span>
+            <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:4px 8px;border-radius:4px;">@angular/material</span>
+            <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:4px 8px;border-radius:4px;">@auth0/angular-jwt</span>
+            <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:4px 8px;border-radius:4px;">RxJS 7+</span>
+            <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:4px 8px;border-radius:4px;">Cypress (E2E)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🤖</span> Best AI Tools for This Stage</div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">⚡</span><div><div class="tool-name">Cursor IDE</div><div class="tool-category">AI-POWERED IDE</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Best AI-first IDE for enterprise dev. Understands your whole codebase context — ideal for generating boilerplate, refactoring, and onboarding new team members.</div>
+          <div class="tool-alts">Alts: <span>VS Code + Copilot, IntelliJ + AI</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🐙</span><div><div class="tool-name">GitHub Actions + Copilot</div><div class="tool-category">CI/CD AUTOMATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">AI-assisted CI/CD pipeline generation. Describe your pipeline in natural language and Copilot generates YAML workflow files for build, test, and deploy stages.</div>
+          <div class="tool-alts">Alts: <span>GitLab CI, Jenkins</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🐳</span><div><div class="tool-name">Docker + Claude</div><div class="tool-category">CONTAINERIZATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Generate optimized multi-stage Dockerfiles for both Angular and Spring Boot. Claude produces production-ready Docker Compose configs for local development.</div>
+          <div class="tool-alts">Alts: <span>Podman, Buildpacks</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🦊</span><div><div class="tool-name">IntelliJ IDEA Ultimate</div><div class="tool-category">BACKEND IDE</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">First-class Spring Boot support with AI Assistant built in. Understands Spring context, auto-suggests beans, generates test stubs, and integrates with databases.</div>
+          <div class="tool-alts">Alts: <span>Eclipse STS, VS Code Java</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+      <div class="grid-2" style="margin-bottom:0;">
+        <div class="prompt-block" style="margin-bottom:0;">
+          <div class="prompt-header"><span>Docker Compose Generator</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Generate a Docker Compose file for local development of an Angular + Spring Boot enterprise app. Include: PostgreSQL 16, Redis 7, pgAdmin, the Spring Boot app with hot-reload, and the Angular dev server with proxy config. Add health checks and named volumes.</div>
+        </div>
+        <div class="prompt-block" style="margin-bottom:0;">
+          <div class="prompt-header"><span>GitHub Actions CI Pipeline</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Create a GitHub Actions CI workflow for a monorepo with Angular frontend and Spring Boot backend. Include: parallel lint and test jobs, Maven build with caching, Angular build with caching, Docker image build, and security scan with Trivy. Trigger on PR and main branch.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-2" placeholder="Environment setup notes, repo links, tool credentials location..."></textarea>
+      <button class="notes-save" onclick="saveNote(2)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 4: FRONTEND DEVELOPMENT
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-3">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(239,68,68,0.15)">🅰</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 04</div>
+        <div class="stage-name">Angular Frontend Development</div>
+        <div class="stage-desc">Build the enterprise Angular application with component-driven architecture, state management, reactive patterns, and enterprise UI standards.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ 6–10 weeks</span>
+          <span class="badge badge-team">👥 1–2 frontend devs</span>
+          <span class="badge badge-phase">Phase: Core Development</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks</div>
+        <ul class="task-list" id="tasks-stage3">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Build design system: Angular Material theme + global styles</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Implement Auth module: login, JWT interceptor, route guards</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Set up NgRx store: actions, reducers, effects, selectors</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Build core layout: shell, sidebar, header, breadcrumbs</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Implement feature modules with lazy loading</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Add error handling, loading states, and empty states globally</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">⚛</span> Angular 17+ Key Patterns</div>
+        <div style="font-family:var(--mono);font-size:0.75rem;line-height:2;color:var(--text2);">
+          <div><span style="color:var(--accent5);">Standalone Components</span> — No NgModule needed</div>
+          <div><span style="color:var(--accent4);">Signals</span> — Reactive state without RxJS boilerplate</div>
+          <div><span style="color:var(--accent3);">@defer / @if / @for</span> — New control flow syntax</div>
+          <div><span style="color:var(--accent2);">inject()</span> — Functional dependency injection</div>
+          <div><span style="color:var(--accent);">provideRouter()</span> — Functional router setup</div>
+          <div><span style="color:#f87171;">httpResource()</span> — New HTTP resource pattern</div>
+          <div><span style="color:var(--accent5);">NgRx Signals Store</span> — Modern state alternative</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🤖</span> Best AI Tools for This Stage</div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">⚡</span><div><div class="tool-name">Cursor + Claude Sonnet</div><div class="tool-category">COMPONENT GENERATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Generates complete Angular standalone components with template, TypeScript, SCSS, and unit tests. Understands component relationships across your codebase.</div>
+          <div class="tool-alts">Alts: <span>GitHub Copilot, Cody</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🎨</span><div><div class="tool-name">v0 by Vercel</div><div class="tool-category">UI PROTOTYPING</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Quickly prototype enterprise UI screens with AI. Then adapt the HTML/CSS patterns to Angular Material components — great for rapid UI spec validation.</div>
+          <div class="tool-alts">Alts: <span>Locofy, Builder.io</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🦋</span><div><div class="tool-name">Figma + AI plugins</div><div class="tool-category">DESIGN HANDOFF</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Anima or Locofy converts Figma designs to Angular components automatically. Significantly reduces design-to-code translation time for enterprise UIs.</div>
+          <div class="tool-alts">Alts: <span>Zeplin, Storybook</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📖</span><div><div class="tool-name">Storybook + Chromatic</div><div class="tool-category">COMPONENT LIBRARY</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Document and visually test enterprise Angular components in isolation. AI-powered visual regression with Chromatic catches UI regressions before they reach production.</div>
+          <div class="tool-alts">Alts: <span>Bit.dev, Styleguidist</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>Angular Standalone Component</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Generate an Angular 17 standalone component for [feature description]. Include: TypeScript class with Signals for state, reactive form with validation, Angular Material UI, HTTP service call using inject(), error and loading states, and a Jasmine unit test. Use OnPush change detection.</div>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>NgRx Feature Store</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Create a complete NgRx feature store for [entity name] management. Include: actions (CRUD + loading states), reducer with adapter, effects for HTTP calls with error handling, selectors with memoization, and the corresponding service using HttpClient.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🚫</span> Common Mistakes</div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Using default change detection everywhere. Always use OnPush for smart/container components in enterprise apps — critical for performance.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Direct HTTP calls in components. All API calls must go through services — never in template or component directly.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Missing unsubscribe logic with RxJS. Use takeUntilDestroyed() or async pipe to prevent memory leaks.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>No accessibility (a11y) from the start. Enterprise products must meet WCAG 2.1 AA — add aria labels and keyboard navigation early.</span></div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">📤 Expected Outputs</div>
+        <div class="output-item"><div class="output-dot"></div>Shared component library in Storybook</div>
+        <div class="output-item"><div class="output-dot"></div>Auth module with JWT + guards</div>
+        <div class="output-item"><div class="output-dot"></div>NgRx store per feature module</div>
+        <div class="output-item"><div class="output-dot"></div>Lazy-loaded feature modules</div>
+        <div class="output-item"><div class="output-dot"></div>Responsive enterprise UI shell</div>
+      </div>
+      <div class="card">
+        <div class="card-title">✨ Best Practices</div>
+        <ul class="practices-list">
+          <li class="practice-item"><span class="practice-icon">✓</span>Use Angular Signals for local state, NgRx for shared/global state.</li>
+          <li class="practice-item"><span class="practice-icon">✓</span>Code-split every feature module. Enterprise apps balloon in size without it.</li>
+          <li class="practice-item"><span class="practice-icon">✓</span>Write Storybook stories in parallel with components, not after.</li>
+          <li class="practice-item"><span class="practice-icon">✓</span>Use Angular ESLint with strict rules from project start.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">💡 Efficiency Tips</div>
+        <div class="tip-item"><span class="tip-icon">⚡</span>Use Angular Schematics + Cursor to generate complete feature modules in under 2 minutes.</div>
+        <div class="tip-item"><span class="tip-icon">⚡</span>Create component snippets in VS Code for recurring enterprise patterns (data table, form dialogs).</div>
+        <div class="tip-item"><span class="tip-icon">⚡</span>Use AI to generate mock data for development so frontend can proceed before backend is ready.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-3" placeholder="Frontend decisions, component library choices, state management patterns..."></textarea>
+      <button class="notes-save" onclick="saveNote(3)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 5: BACKEND DEVELOPMENT
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-4">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(16,185,129,0.15)">☕</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 05</div>
+        <div class="stage-name">Spring Boot Backend Development</div>
+        <div class="stage-desc">Build the enterprise Java backend with layered architecture, security, performance, and production-grade patterns for a small but powerful team.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ 6–10 weeks</span>
+          <span class="badge badge-team">👥 1–2 backend devs</span>
+          <span class="badge badge-phase">Phase: Core Development</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks</div>
+        <ul class="task-list" id="tasks-stage4">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Build layered architecture: Controller → Service → Repository</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Implement Spring Security with JWT and role-based access (RBAC)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Create DTOs, mappers (MapStruct), and validation (@Valid)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Implement global exception handling with @ControllerAdvice</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Add caching layer with Spring Cache + Redis</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Configure Flyway DB migrations and audit logging</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🏗</span> Layered Architecture</div>
+        <div style="font-family:var(--mono);font-size:0.75rem;line-height:2;color:var(--text2);">
+          <div style="color:var(--accent);">@RestController</div>
+          <div style="padding-left:1rem;">Request validation (@Valid)</div>
+          <div style="padding-left:1rem;">DTO mapping (MapStruct)</div>
+          <div style="color:var(--accent3);margin-top:4px;">@Service (Business Logic)</div>
+          <div style="padding-left:1rem;">Transactions (@Transactional)</div>
+          <div style="padding-left:1rem;">Caching (@Cacheable)</div>
+          <div style="color:var(--accent4);margin-top:4px;">@Repository (JPA)</div>
+          <div style="padding-left:1rem;">Spring Data queries</div>
+          <div style="padding-left:1rem;">JPQL / Native SQL</div>
+          <div style="color:var(--accent5);margin-top:4px;">Entity Layer</div>
+          <div style="padding-left:1rem;">JPA entities + Flyway</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🤖</span> Best AI Tools for This Stage</div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🦊</span><div><div class="tool-name">IntelliJ IDEA + AI Assistant</div><div class="tool-category">BACKEND DEVELOPMENT</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Best IDE for Spring Boot. AI Assistant understands Spring context, auto-completes beans, generates test cases, and refactors legacy patterns with full project awareness.</div>
+          <div class="tool-alts">Alts: <span>Cursor, VS Code + Extension Pack</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🤖</span><div><div class="tool-name">Claude / ChatGPT-4o</div><div class="tool-category">CODE GENERATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Generate complete Spring Boot service layers, JPA repositories, security configs, and exception handlers. Best for generating boilerplate-heavy Java enterprise patterns quickly.</div>
+          <div class="tool-alts">Alts: <span>GitHub Copilot, Amazon CodeWhisperer</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🧪</span><div><div class="tool-name">Diffblue Cover</div><div class="tool-category">TEST GENERATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">AI-powered Java unit test generator. Writes JUnit 5 tests for existing Spring Boot service and repository classes automatically — saves hours of test writing.</div>
+          <div class="tool-alts">Alts: <span>CodiumAI, EvoSuite</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🔍</span><div><div class="tool-name">SonarQube + AI</div><div class="tool-category">CODE QUALITY</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Enterprise-grade static analysis for Java. Detects security vulnerabilities, code smells, and bugs in Spring Boot code. Essential for any enterprise product.</div>
+          <div class="tool-alts">Alts: <span>Checkmarx, Snyk Code</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>Spring Boot Service Layer</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Generate a complete Spring Boot 3 service layer for [entity/feature]. Include: @Service class with @Transactional, CRUD operations, input validation, MapStruct DTO mapping, @Cacheable on reads, custom exceptions, and a JUnit 5 test class with Mockito and @DataJpaTest.</div>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>Spring Security JWT Config</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Create a Spring Boot 3 security configuration with: JWT token validation using Spring Security's OAuth2 Resource Server, role-based method security (@PreAuthorize), stateless session, CORS configuration for Angular at localhost:4200, and a custom UserDetailsService.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🚫</span> Common Mistakes</div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Business logic in @Controller methods. Controllers must only handle HTTP, never business rules — that belongs in @Service.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Missing @Transactional on write operations. Especially critical for multi-step operations — always annotate service write methods.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Exposing entities directly in API responses. Always use DTOs to prevent data leakage and breaking changes.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>N+1 query problems with JPA. Always check generated SQL in dev and use fetch joins or projections for list endpoints.</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-4" placeholder="Backend decisions, API endpoint notes, security considerations..."></textarea>
+      <button class="notes-save" onclick="saveNote(4)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 6: INTEGRATION
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-5">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(245,158,11,0.15)">🔗</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 06</div>
+        <div class="stage-name">Frontend–Backend Integration</div>
+        <div class="stage-desc">Connect the Angular frontend to the Spring Boot backend — wire up APIs, handle authentication end-to-end, real-time features, and cross-cutting concerns.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ 2–3 weeks</span>
+          <span class="badge badge-team">👥 Full team</span>
+          <span class="badge badge-phase">Phase: Integration</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks</div>
+        <ul class="task-list" id="tasks-stage5">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Configure Angular HTTP interceptor (auth token + error handling)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Wire up login flow end-to-end (Angular → Spring Security → JWT)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Test all CRUD API endpoints through Angular UI</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Implement real-time updates with WebSocket / Server-Sent Events</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Handle pagination, sorting, and filtering end-to-end</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Implement file upload/download if required</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🔄</span> Auth Integration Flow</div>
+        <div style="font-family:var(--mono);font-size:0.75rem;line-height:1.8;color:var(--text2);">
+          <div>1. <span style="color:var(--accent);">User submits</span> credentials (Angular form)</div>
+          <div>2. <span style="color:var(--accent2);">POST /api/auth/login</span> → Spring Security</div>
+          <div>3. <span style="color:var(--accent4);">Spring returns</span> JWT access + refresh tokens</div>
+          <div>4. <span style="color:var(--accent);">Angular stores</span> JWT in memory (not localStorage)</div>
+          <div>5. <span style="color:var(--accent3);">HTTP Interceptor</span> attaches Bearer token to all requests</div>
+          <div>6. <span style="color:var(--accent5);">401 response</span> → interceptor auto-refreshes token</div>
+          <div>7. <span style="color:var(--accent4);">Spring validates</span> JWT on every protected endpoint</div>
+          <div>8. <span style="color:var(--accent);">Angular guards</span> protect routes by role/permission</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🤖</span> Best AI Tools for This Stage</div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📮</span><div><div class="tool-name">Postman AI</div><div class="tool-category">API TESTING</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">AI-generated test scripts, automated collection running, and Postbot that writes tests from natural language. Essential for verifying backend endpoints during integration.</div>
+          <div class="tool-alts">Alts: <span>Bruno, Insomnia</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🔧</span><div><div class="tool-name">CORS + Proxy Config AI</div><div class="tool-category">CONFIG HELP</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Use Claude to debug CORS issues, generate Angular proxy.conf.json, and write Spring Security CORS configs — one of the most common integration pain points.</div>
+          <div class="tool-alts">Alts: <span>Browser DevTools, Spring Docs</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📡</span><div><div class="tool-name">Wiremock + AI</div><div class="tool-category">API MOCKING</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Mock Spring Boot APIs for Angular development before backend is ready. AI generates WireMock stub definitions from OpenAPI specs automatically.</div>
+          <div class="tool-alts">Alts: <span>MSW (Angular), JSON Server</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📊</span><div><div class="tool-name">Datadog / New Relic</div><div class="tool-category">OBSERVABILITY</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">AI-powered anomaly detection during integration testing. Identifies slow queries, error spikes, and integration failures in distributed traces before they hit production.</div>
+          <div class="tool-alts">Alts: <span>Grafana + Prometheus, Dynatrace</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+      <div class="grid-2" style="margin-bottom:0;">
+        <div class="prompt-block" style="margin-bottom:0;">
+          <div class="prompt-header"><span>Angular HTTP Interceptor</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Create an Angular 17 functional HTTP interceptor that: attaches JWT Bearer token from memory storage to every request, handles 401 responses by calling a refresh token endpoint, queues concurrent requests during token refresh, and redirects to login on refresh failure. Use Angular 17's functional interceptor pattern.</div>
+        </div>
+        <div class="prompt-block" style="margin-bottom:0;">
+          <div class="prompt-header"><span>Postman Test Suite Generator</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Write a Postman test suite for a [resource name] REST API. Include: authentication setup (get JWT token), CRUD operation tests with assertions on status codes and response schema, negative test cases (404, 400, 401), and environment variables for base URL and credentials.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-5" placeholder="Integration issues, CORS fixes, API endpoint status..."></textarea>
+      <button class="notes-save" onclick="saveNote(5)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 7: TESTING
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-6">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(16,185,129,0.15)">🧪</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 07</div>
+        <div class="stage-name">Testing & Quality Assurance</div>
+        <div class="stage-desc">Establish a comprehensive testing strategy with unit, integration, and E2E tests for both Angular and Spring Boot to ship production-quality software.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ Ongoing + 2-week sprint</span>
+          <span class="badge badge-team">👥 All developers</span>
+          <span class="badge badge-phase">Phase: QA</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🔺</span> Testing Pyramid for Angular + Spring Boot</div>
+      <div style="text-align:center;padding:1rem 0;">
+        <div style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px;margin:0 auto 8px;width:60%;font-size:0.8rem;color:#f87171;">
+          🎭 E2E Tests (Cypress) — 10%<br><span style="font-size:0.7rem;color:var(--text3);">Critical user flows: login, purchase, key workflows</span>
+        </div>
+        <div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:10px;margin:0 auto 8px;width:75%;font-size:0.8rem;color:var(--accent5);">
+          🔗 Integration Tests (Spring @SpringBootTest) — 20%<br><span style="font-size:0.7rem;color:var(--text3);">API contracts, DB interactions, security filters</span>
+        </div>
+        <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:10px;margin:0 auto;width:90%;font-size:0.8rem;color:var(--accent4);">
+          ✅ Unit Tests (JUnit 5 + Jasmine) — 70%<br><span style="font-size:0.7rem;color:var(--text3);">Service methods, components, pipes, utilities — fast and isolated</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks</div>
+        <ul class="task-list" id="tasks-stage6">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Achieve 80%+ unit test coverage on Spring Boot services</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Write @DataJpaTest and @WebMvcTest integration tests</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Write Jasmine unit tests for Angular services and components</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Write Cypress E2E tests for all critical user flows</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Run performance tests with k6 or JMeter</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Run OWASP ZAP security scan on API</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🤖</span> Key AI Tools</div>
+        <div class="tool-card" style="margin-bottom:0.75rem;">
+          <div class="tool-header"><span class="tool-emoji">🧪</span><div><div class="tool-name">CodiumAI / Diffblue</div><div class="tool-category">TEST GENERATION</div></div></div>
+          <div class="tool-why">Generates JUnit 5 and Jasmine tests for existing code. Analyzes method behavior and edge cases to produce meaningful test scenarios automatically.</div>
+        </div>
+        <div class="tool-card" style="margin-bottom:0.75rem;">
+          <div class="tool-header"><span class="tool-emoji">🌲</span><div><div class="tool-name">Cypress Cloud + AI</div><div class="tool-category">E2E TESTING</div></div></div>
+          <div class="tool-why">AI-powered E2E test generation from user actions. Cypress Cloud provides parallel test execution and flaky test detection for CI pipelines.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+      <div class="grid-2" style="margin-bottom:0;">
+        <div class="prompt-block" style="margin-bottom:0;">
+          <div class="prompt-header"><span>JUnit 5 Spring Boot Tests</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Generate JUnit 5 unit tests for this Spring Boot service class. Include: happy path tests, edge cases, null input handling, and exception scenarios. Use Mockito to mock all @Autowired dependencies. Target 100% method coverage for the service layer. [paste your service class]</div>
+        </div>
+        <div class="prompt-block" style="margin-bottom:0;">
+          <div class="prompt-header"><span>Cypress E2E Test</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Write a Cypress E2E test for the [user flow] feature of an Angular enterprise app. Include: test setup with cy.session for authentication, data-testid attribute selectors (never CSS classes), assertions for UI state changes, and cleanup of test data via API calls in afterEach.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🚫</span> Common Mistakes</div>
+      <div class="grid-2" style="margin-bottom:0;">
+        <div>
+          <div class="mistake-item"><span class="mistake-icon">✕</span><span>Testing implementation details instead of behavior in Angular. Test what the component does, not how.</span></div>
+          <div class="mistake-item"><span class="mistake-icon">✕</span><span>Using @SpringBootTest for every test — it's slow. Use @WebMvcTest or @DataJpaTest slices for focused tests.</span></div>
+        </div>
+        <div>
+          <div class="mistake-item"><span class="mistake-icon">✕</span><span>Writing E2E tests before unit tests are stable. E2E tests are expensive — use them for smoke tests only.</span></div>
+          <div class="mistake-item"><span class="mistake-icon">✕</span><span>No test data strategy. Enterprise apps need DB reset between test runs — use Testcontainers + Flyway for clean state.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-6" placeholder="Coverage metrics, failing tests, QA sign-off checklist..."></textarea>
+      <button class="notes-save" onclick="saveNote(6)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 8: DEPLOYMENT
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-7">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(6,182,212,0.15)">🚀</div>
+      <div class="stage-meta">
+        <div class="stage-number">STAGE 08</div>
+        <div class="stage-name">Deployment & DevOps</div>
+        <div class="stage-desc">Ship the enterprise application to production with containers, CI/CD pipelines, cloud infrastructure, monitoring, and zero-downtime deployment strategies.</div>
+        <div class="stage-badges">
+          <span class="badge badge-time">⏱ 1–2 weeks</span>
+          <span class="badge badge-team">👥 Tech lead + DevOps</span>
+          <span class="badge badge-phase">Phase: Production</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✅</span> Tasks</div>
+        <ul class="task-list" id="tasks-stage7">
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Write production-optimized Dockerfiles (multi-stage builds)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Set up Kubernetes manifests or Docker Compose for production</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Configure CD pipeline: staging → production with manual gate</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Set up secrets management (Vault, AWS Secrets Manager)</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Configure monitoring: Actuator → Prometheus → Grafana</span></li>
+          <li class="task-item" onclick="toggleTask(this)"><div class="task-check"></div><span class="task-text">Set up alerting, log aggregation (ELK / Datadog)</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">☁</span> Cloud Deployment Options</div>
+        <div style="font-size:0.82rem;color:var(--text2);">
+          <div style="padding:0.6rem;background:rgba(255,153,0,0.08);border:1px solid rgba(255,153,0,0.2);border-radius:6px;margin-bottom:0.5rem;">
+            <span style="color:#ff9900;font-weight:700;">☁ AWS</span> — EC2 / ECS Fargate + RDS PostgreSQL + ElastiCache Redis. Best for enterprise with existing AWS contracts.
+          </div>
+          <div style="padding:0.6rem;background:rgba(0,120,212,0.08);border:1px solid rgba(0,120,212,0.2);border-radius:6px;margin-bottom:0.5rem;">
+            <span style="color:#0078d4;font-weight:700;">☁ Azure</span> — App Service / AKS + Azure DB for PostgreSQL. Best for Microsoft-stack enterprises.
+          </div>
+          <div style="padding:0.6rem;background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2);border-radius:6px;margin-bottom:0.5rem;">
+            <span style="color:#4285f4;font-weight:700;">☁ GCP</span> — Cloud Run + Cloud SQL + Memorystore. Best for containerized workloads with low ops overhead.
+          </div>
+          <div style="padding:0.6rem;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:6px;">
+            <span style="color:var(--accent4);font-weight:700;">🐳 Self-hosted</span> — Docker Swarm + Traefik on VPS. Lowest cost for small enterprise teams.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🤖</span> Best AI Tools for This Stage</div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">☸</span><div><div class="tool-name">Pulumi / Terraform + AI</div><div class="tool-category">INFRASTRUCTURE AS CODE</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">AI-assisted IaC generation. Describe your infrastructure in natural language and get production-ready Terraform or Pulumi configs for your cloud of choice.</div>
+          <div class="tool-alts">Alts: <span>AWS CDK, Bicep (Azure)</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🔒</span><div><div class="tool-name">Snyk + Trivy</div><div class="tool-category">SECURITY SCANNING</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">AI-powered container and dependency vulnerability scanning. Integrates directly into GitHub Actions to block deployments with critical CVEs before they reach production.</div>
+          <div class="tool-alts">Alts: <span>Grype, OWASP, Checkov</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">📊</span><div><div class="tool-name">Grafana + AI Insights</div><div class="tool-category">MONITORING</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★★</span></div>
+          <div class="tool-why">Spring Boot Actuator exports metrics to Prometheus. Grafana AI Insights auto-generates dashboards and sends alerts on anomalies, memory leaks, and latency spikes.</div>
+          <div class="tool-alts">Alts: <span>Datadog, New Relic, Dynatrace</span></div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-header"><span class="tool-emoji">🤖</span><div><div class="tool-name">GitHub Copilot for DevOps</div><div class="tool-category">PIPELINE AUTOMATION</div></div></div>
+          <div class="tool-rating"><span class="star">★★★★☆</span></div>
+          <div class="tool-why">Generates Kubernetes manifests, Helm charts, and complex GitHub Actions workflows from descriptions. Drastically cuts DevOps scripting time for small teams.</div>
+          <div class="tool-alts">Alts: <span>GitLab AI, AWS CodePipeline</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💬</span> Prompt Examples</div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>Production Dockerfile</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Write a production-optimized multi-stage Dockerfile for a Spring Boot 3 app (Java 21). Stage 1: Maven build. Stage 2: slim JRE runtime. Include: non-root user, health check, JVM tuning flags for containers, and build arg for version labeling. Target image size under 200MB.</div>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-header"><span>K8s Deployment Manifest</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+          <div class="prompt-body">Generate a Kubernetes Deployment and Service manifest for a Spring Boot 3 enterprise app. Include: resource limits/requests, liveness and readiness probes using /actuator/health, ConfigMap for app properties, Secret reference for DB credentials, 2 replicas with rolling update strategy, and HPA for autoscaling.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🚫</span> Common Mistakes</div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Hardcoded secrets in Dockerfiles or application.properties. Always use environment variables + secrets management.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Running containers as root. Always create a non-root user in production Dockerfiles for security compliance.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>No health checks or readiness probes in Kubernetes. Without them, Kubernetes won't know when your app is ready.</span></div>
+        <div class="mistake-item"><span class="mistake-icon">✕</span><span>Skipping staging environment. Always have at minimum dev → staging → production with identical infrastructure.</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">📝</span> Stage Notes</div>
+      <textarea class="notes-area" id="notes-7" placeholder="Deployment configs, cloud resources, monitoring dashboards..."></textarea>
+      <button class="notes-save" onclick="saveNote(7)">Save Note</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 9: SUMMARY
+  ═══════════════════════════════════════════ -->
+  <section class="stage-section" id="stage-8">
+    <div class="stage-header">
+      <div class="stage-icon" style="background:rgba(245,158,11,0.15)">⭐</div>
+      <div class="stage-meta">
+        <div class="stage-number">WORKFLOW SUMMARY</div>
+        <div class="stage-name">Complete AI Stack & Resources</div>
+        <div class="stage-desc">Your recommended AI toolstack, learning resources, communities, search keywords, additional prompts, and future automation opportunities.</div>
+        <div class="stage-badges">
+          <span class="badge badge-phase">Full-Stack Enterprise Product</span>
+          <span class="badge badge-team">Angular + Spring Boot</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🧠</span> Recommended AI Stack by Layer</div>
+      <div class="summary-grid">
+        <div>
+          <div class="section-subtitle" style="color:var(--accent);">Planning & Architecture</div>
+          <div class="stack-item"><span class="stack-icon">🤖</span><div><div class="stack-name">Claude / ChatGPT-4o</div><div class="stack-role">SRS, ADRs, OpenAPI specs, diagrams</div></div></div>
+          <div class="stack-item"><span class="stack-icon">📋</span><div><div class="stack-name">Notion AI</div><div class="stack-role">Documentation, meeting notes, wikis</div></div></div>
+          <div class="stack-item"><span class="stack-icon">📊</span><div><div class="stack-name">Linear</div><div class="stack-role">AI-powered backlog + sprint planning</div></div></div>
+        </div>
+        <div>
+          <div class="section-subtitle" style="color:var(--accent3);">Development</div>
+          <div class="stack-item"><span class="stack-icon">⚡</span><div><div class="stack-name">Cursor IDE</div><div class="stack-role">AI-first coding for Angular + Java</div></div></div>
+          <div class="stack-item"><span class="stack-icon">🦊</span><div><div class="stack-name">IntelliJ IDEA Ultimate</div><div class="stack-role">Spring Boot development + AI assistant</div></div></div>
+          <div class="stack-item"><span class="stack-icon">🐙</span><div><div class="stack-name">GitHub Copilot</div><div class="stack-role">Inline suggestions across the stack</div></div></div>
+        </div>
+        <div>
+          <div class="section-subtitle" style="color:var(--accent4);">Testing & Deployment</div>
+          <div class="stack-item"><span class="stack-icon">🧪</span><div><div class="stack-name">CodiumAI / Diffblue</div><div class="stack-role">Automated test generation (JUnit + Jasmine)</div></div></div>
+          <div class="stack-item"><span class="stack-icon">🔒</span><div><div class="stack-name">Snyk + Trivy</div><div class="stack-role">Security scanning in CI/CD</div></div></div>
+          <div class="stack-item"><span class="stack-icon">📊</span><div><div class="stack-name">Grafana + Prometheus</div><div class="stack-role">AI-driven monitoring + alerting</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📚</span> Learning Resources</div>
+        <div class="resource-item"><span class="resource-type">DOCS</span><div><strong>Angular Docs (angular.dev)</strong> — Official Angular 17+ documentation with standalone components, signals, and new control flow.</div></div>
+        <div class="resource-item"><span class="resource-type">DOCS</span><div><strong>Spring Boot Reference</strong> — spring.io/projects/spring-boot — Comprehensive Spring Boot 3 reference with all starters.</div></div>
+        <div class="resource-item"><span class="resource-type">COURSE</span><div><strong>Udemy — Angular + Spring Boot Masterclass</strong> — Full-stack enterprise courses by Ranga Rao, Maximilian Schwarzmüller.</div></div>
+        <div class="resource-item"><span class="resource-type">BOOK</span><div><strong>"Spring in Action" (6th Ed.)</strong> — Craig Walls. The definitive guide to building modern Spring Boot applications.</div></div>
+        <div class="resource-item"><span class="resource-type">YT</span><div><strong>Amigoscode, Dan Vega, Bouali Ali</strong> — Best YouTube channels for modern Spring Boot patterns and best practices.</div></div>
+        <div class="resource-item"><span class="resource-type">YT</span><div><strong>Decoded Frontend, Angular University</strong> — Best YouTube channels for advanced Angular concepts and enterprise patterns.</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">👥</span> Communities to Join</div>
+        <div class="community-item"><span class="community-icon">💬</span><div><strong>Angular Discord</strong> — Official Angular community with core team members answering questions daily.</div></div>
+        <div class="community-item"><span class="community-icon">🔴</span><div><strong>r/Angular2 + r/SpringBoot</strong> — Reddit communities for architecture questions and code reviews.</div></div>
+        <div class="community-item"><span class="community-icon">🐦</span><div><strong>Twitter/X: #Angular, #SpringBoot</strong> — Follow @Angular, @SpringBoot, @dan_vega for announcements.</div></div>
+        <div class="community-item"><span class="community-icon">💼</span><div><strong>LinkedIn: Spring Boot & Angular groups</strong> — Enterprise-focused communities with job postings and architecture discussions.</div></div>
+        <div class="community-item"><span class="community-icon">🌐</span><div><strong>Stack Overflow</strong> — [angular], [spring-boot], [spring-security] tags have millions of Q&As.</div></div>
+        <div class="community-item"><span class="community-icon">🎯</span><div><strong>Baeldung + Angular In Depth</strong> — Premium blog communities for deep-dive technical articles.</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🔍</span> Search Keywords</div>
+      <div>
+        <span class="keyword-pill" onclick="copyText('Angular 17 standalone components tutorial')">Angular 17 standalone components</span>
+        <span class="keyword-pill" onclick="copyText('Spring Boot 3 JWT authentication example')">Spring Boot 3 JWT authentication</span>
+        <span class="keyword-pill" onclick="copyText('NgRx signals store Angular')">NgRx signals store</span>
+        <span class="keyword-pill" onclick="copyText('Spring Boot 3 Spring Security 6 configuration')">Spring Security 6 configuration</span>
+        <span class="keyword-pill" onclick="copyText('Angular OnPush change detection strategy')">Angular OnPush change detection</span>
+        <span class="keyword-pill" onclick="copyText('Spring Boot JPA N+1 problem fix')">JPA N+1 query fix</span>
+        <span class="keyword-pill" onclick="copyText('Angular HTTP interceptor JWT refresh token')">Angular JWT interceptor refresh</span>
+        <span class="keyword-pill" onclick="copyText('Spring Boot Testcontainers PostgreSQL')">Spring Boot Testcontainers</span>
+        <span class="keyword-pill" onclick="copyText('Angular lazy loading feature modules')">Angular lazy loading modules</span>
+        <span class="keyword-pill" onclick="copyText('Spring Boot Docker multi-stage build Java 21')">Spring Boot Docker Java 21</span>
+        <span class="keyword-pill" onclick="copyText('Angular material theming enterprise')">Angular Material enterprise theming</span>
+        <span class="keyword-pill" onclick="copyText('Spring Boot Flyway migration best practices')">Flyway migration best practices</span>
+        <span class="keyword-pill" onclick="copyText('Kubernetes Spring Boot deployment readiness probe')">K8s Spring Boot deployment</span>
+        <span class="keyword-pill" onclick="copyText('Angular Cypress E2E testing enterprise')">Angular Cypress E2E testing</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">💬</span> Additional AI Prompts for the Entire Project</div>
+      <div class="grid-2" style="margin-bottom:0;">
+        <div>
+          <div class="prompt-block">
+            <div class="prompt-header"><span>Code Review Assistant</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">Review this [Angular component / Spring Boot service] code for: SOLID principles violations, security issues, performance anti-patterns, missing error handling, and enterprise coding standard adherence. Format your response with severity (Critical/Major/Minor) and specific fix suggestions. [paste code]</div>
+          </div>
+          <div class="prompt-block">
+            <div class="prompt-header"><span>Sprint Planning Helper</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">Given this product backlog for a 2-week sprint with a 3-developer team (1 frontend Angular, 1 backend Spring Boot, 1 full-stack): [list user stories]. Create a sprint plan with: story assignments, effort estimates, dependencies, and a daily work breakdown for each developer.</div>
+          </div>
+        </div>
+        <div>
+          <div class="prompt-block">
+            <div class="prompt-header"><span>Database Query Optimizer</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">Analyze this Spring Data JPA query and suggest optimizations: [paste query/repository method]. Check for: N+1 problems, missing indexes, fetch strategy issues, and whether a native query or projection would be more efficient. Include the optimized version.</div>
+          </div>
+          <div class="prompt-block">
+            <div class="prompt-header"><span>Security Audit Prompt</span><button class="prompt-copy" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">Perform a security audit of this Spring Boot REST API endpoint: [paste controller + security config]. Check for: OWASP Top 10 vulnerabilities, missing authorization checks, SQL injection risks, improper error messages exposing internals, and missing input sanitization. Suggest fixes for each issue found.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title"><span class="card-title-icon">🔮</span> Future Automation Opportunities</div>
+      <div class="grid-2" style="margin-bottom:0;">
+        <div>
+          <div class="future-item"><span class="future-icon">🤖</span><div><strong>AI-Powered Code Generation</strong> — As the team's patterns solidify, train a custom Copilot model on your codebase to generate boilerplate 10x faster with your exact conventions.</div></div>
+          <div class="future-item"><span class="future-icon">🧠</span><div><strong>AI Code Review Bot</strong> — Integrate CodeRabbit or similar into your GitHub PRs for automated review comments before human review — catches 60% of common issues automatically.</div></div>
+          <div class="future-item"><span class="future-icon">📊</span><div><strong>Predictive Sprint Planning</strong> — Use historical velocity data + AI to auto-generate sprint plans and flag risks before each sprint starts.</div></div>
+        </div>
+        <div>
+          <div class="future-item"><span class="future-icon">🔐</span><div><strong>Automated Security Compliance</strong> — Integrate AI-driven compliance scanning (Bridgecrew, Checkov) into every PR so security issues never reach production in enterprise environments.</div></div>
+          <div class="future-item"><span class="future-icon">🎨</span><div><strong>Design-to-Code Pipeline</strong> — When the product stabilizes, implement a Figma → Angular component pipeline using Locofy AI or Builder.io — reduces design handoff from days to hours.</div></div>
+          <div class="future-item"><span class="future-icon">🔄</span><div><strong>Self-healing Infrastructure</strong> — Implement AI-driven auto-scaling and anomaly response with Kubernetes + Karpenter so the system responds to load automatically without manual intervention.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem; background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08)); border-color: rgba(59,130,246,0.3);">
+      <div class="card-title"><span class="card-title-icon">🏆</span> Workflow Summary</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem;">
+        <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);">
+          <div style="font-size:2rem;font-weight:800;color:var(--accent);">8</div>
+          <div style="font-size:0.7rem;color:var(--text3);">Stages</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);">
+          <div style="font-size:2rem;font-weight:800;color:var(--accent3);">30+</div>
+          <div style="font-size:0.7rem;color:var(--text3);">AI Tools Mapped</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);">
+          <div style="font-size:2rem;font-weight:800;color:var(--accent4);">~20</div>
+          <div style="font-size:0.7rem;color:var(--text3);">Weeks End-to-End</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);">
+          <div style="font-size:2rem;font-weight:800;color:var(--accent5);">48</div>
+          <div style="font-size:0.7rem;color:var(--text3);">Trackable Tasks</div>
+        </div>
+      </div>
+      <div style="font-size:0.88rem;color:var(--text2);line-height:1.7;">
+        This workflow takes a small team of 2–5 developers through the complete lifecycle of building an enterprise-grade Angular + Spring Boot product — from stakeholder discovery to production deployment. Following this workflow with AI augmentation at every stage can reduce development time by 30–40% compared to traditional approaches, while maintaining enterprise quality standards.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- TOAST -->
+<div id="toast">✓ Copied to clipboard!</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────
+const totalTasks = 48;
+let taskStates = JSON.parse(localStorage.getItem('wf_tasks') || '{}');
+let notes = JSON.parse(localStorage.getItem('wf_notes') || '{}');
+let currentStage = 0;
+
+// ─── INIT ─────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadTasks();
+  loadNotes();
+  updateProgress();
+});
+
+// ─── STAGE NAVIGATION ─────────────────────────────────────────────
+function showStage(idx, btn) {
+  document.querySelectorAll('.stage-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('stage-' + idx).classList.add('active');
+  btn.classList.add('active');
+  currentStage = idx;
+  
+  // Update progress tracker
+  document.querySelectorAll('.progress-stage').forEach((ps, i) => {
+    ps.classList.remove('active');
+    if(i < idx) ps.classList.add('done');
+    else ps.classList.remove('done');
+  });
+  if(idx < 8) document.getElementById('ps-' + idx)?.classList.add('active');
+  
+  // Scroll to top
+  document.getElementById('progress-tracker').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ─── TASK MANAGEMENT ──────────────────────────────────────────────
+function toggleTask(el) {
+  el.classList.toggle('done');
+  const id = getTaskId(el);
+  taskStates[id] = el.classList.contains('done');
+  localStorage.setItem('wf_tasks', JSON.stringify(taskStates));
+  updateProgress();
+}
+
+function getTaskId(el) {
+  const list = el.closest('.task-list');
+  const items = Array.from(list.querySelectorAll('.task-item'));
+  const listId = list.id;
+  return listId + '-' + items.indexOf(el);
+}
+
+function loadTasks() {
+  document.querySelectorAll('.task-list').forEach(list => {
+    const items = list.querySelectorAll('.task-item');
+    items.forEach((item, i) => {
+      const id = list.id + '-' + i;
+      if(taskStates[id]) item.classList.add('done');
+    });
+  });
+}
+
+function updateProgress() {
+  const done = document.querySelectorAll('.task-item.done').length;
+  document.getElementById('overall-progress').textContent = done + ' / ' + totalTasks + ' tasks done';
+}
+
+// ─── NOTES ────────────────────────────────────────────────────────
+function saveNote(stageIdx) {
+  const val = document.getElementById('notes-' + stageIdx).value;
+  notes[stageIdx] = val;
+  localStorage.setItem('wf_notes', JSON.stringify(notes));
+  showToast('Note saved!');
+}
+
+function loadNotes() {
+  Object.keys(notes).forEach(k => {
+    const el = document.getElementById('notes-' + k);
+    if(el) el.value = notes[k];
+  });
+}
+
+// ─── CLIPBOARD ────────────────────────────────────────────────────
+function copyPrompt(btn) {
+  const body = btn.closest('.prompt-block').querySelector('.prompt-body').textContent.trim();
+  navigator.clipboard.writeText(body).then(() => showToast('Prompt copied!'));
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('Keyword copied!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── DARK/LIGHT TOGGLE ────────────────────────────────────────────
+function toggleDark() {
+  document.body.classList.toggle('light-mode');
+  const btn = document.querySelector('[onclick="toggleDark()"]');
+  btn.textContent = document.body.classList.contains('light-mode') ? '🌑' : '🌙';
+  localStorage.setItem('wf_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+}
+
+// Load saved theme
+if(localStorage.getItem('wf_theme') === 'light') {
+  document.body.classList.add('light-mode');
+  document.querySelector('[onclick="toggleDark()"]').textContent = '🌑';
+}
+</script>
+</body>
+</html>
