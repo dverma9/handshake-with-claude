@@ -1,0 +1,182 @@
+
+<style>
+  .sec { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .sec-title { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 1rem; }
+  .day-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .day-pill { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+  .d1 { background: #EEEDFE; color: #3C3489; }
+  .d2 { background: #E1F5EE; color: #085041; }
+  .d3 { background: #E6F1FB; color: #0C447C; }
+  .d4 { background: #FAEEDA; color: #633806; }
+  .d5 { background: #E1F5EE; color: #085041; }
+  .d6 { background: #FBEAF0; color: #72243E; }
+  .d7 { background: #F1EFE8; color: #444441; }
+  .day-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .body-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; margin: 0; }
+  .checklist-item { display: flex; gap: 10px; align-items: flex-start; margin: 6px 0; font-size: 13px; color: var(--color-text-primary); line-height: 1.5; }
+  .check-icon { color: var(--color-text-success); font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+  .post-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; margin: 10px 0; font-size: 13px; color: var(--color-text-primary); line-height: 1.8; white-space: pre-line; }
+  .char-tag { font-size: 11px; color: var(--color-text-success); background: var(--color-background-success); padding: 2px 8px; border-radius: 99px; display: inline-block; margin-top: 6px; }
+  .template-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; margin: 10px 0; font-size: 13px; color: var(--color-text-primary); line-height: 1.6; font-style: italic; }
+  .formula-row { display: grid; grid-template-columns: 120px 1fr; gap: 10px; align-items: start; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .formula-row:last-child { border-bottom: none; }
+  .formula-label { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+  .formula-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+  .metric-row { display: grid; grid-template-columns: 140px 1fr; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); align-items: start; }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-val { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+  .metric-meaning { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 12px 0; }
+  .target-chip { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 99px; margin: 3px; background: var(--color-background-secondary); color: var(--color-text-secondary); }
+</style>
+
+<h2 class="sr-only">Part 4 — 7-day LinkedIn activation plan with post drafts and action templates</h2>
+
+<div style="padding: 1rem 0 0.5rem;">
+  <p style="font-size:14px; font-weight:500; color:var(--color-text-primary); margin:0 0 4px;">Part 4 — 7-day LinkedIn activation plan</p>
+  <p style="font-size:13px; color:var(--color-text-secondary); margin:0;">Not just profile edits — actions that generate actual client visibility.</p>
+</div>
+
+<div class="sec">
+  <div class="day-header"><span class="day-pill d1">Day 1</span><div class="day-title">Make all profile changes</div></div>
+  <div class="body-text" style="margin-bottom:12px;">Work through this checklist in order. Estimated time: 90 minutes.</div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Replace headline with Option 2 (value proposition style) from the rebuild above</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Before writing About: spend 20 minutes listing your real numbers — team sizes, project count, client count, domains. Rough estimates are fine.</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Paste in the new About section using all 4 blocks (hook → story → proof → CTA), with your numbers filled in</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Rewrite all 6 experience bullets using the before/after template above</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Remove "Coding &amp; Development" and "Scrum Management" from skills</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Add the 10 new skills in priority order listed in Section 4 of the rebuild</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Pin "Technical Delivery Management," "Java Architecture," and "Freelance Consulting" to the top 3 skills</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Add a Featured section — link to any article, GitHub project, case study, or even a well-performing past LinkedIn post</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Set "Open to Work" → Freelance/Contract only, visible to everyone (not just recruiters)</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Upload or update your profile photo — plain background, professional, looking at camera</span></div>
+  <div class="checklist-item"><i class="ti ti-circle-check check-icon" aria-hidden="true"></i><span>Remove "Occult Sciences" and "Immediate Joiner" permanently from all visible sections</span></div>
+</div>
+
+<div class="sec">
+  <div class="day-header"><span class="day-pill d2">Day 2</span><div class="day-title">Publish Post #1 — the profile rebuild post</div></div>
+  <div class="body-text" style="margin-bottom:10px;">This post serves two purposes: it announces your new positioning and drives comments (which signal the algorithm to expand your reach). Copy, personalise lightly, publish.</div>
+  <div class="post-box">I just did something uncomfortable.
+
+I let AI brutally roast my LinkedIn profile.
+
+My headline had 11 pipe-separated words — including "Immediate Joiner."
+My About section had zero numbers in 500 words.
+My experience bullets read like a job description from 2010.
+
+15 years of engineering leadership. Hidden in plain sight.
+
+Here's what changed:
+→ Headline now says what I actually do for clients, not what I am
+→ About section opens with a client problem, not my job title
+→ Every experience bullet leads with an action verb and ends with a result
+
+If you're a Technical Manager or senior engineer and your profile still says things like "passionate about technology" or "results-driven professional" — fix it today.
+
+Here's the truth: your LinkedIn profile is either working for you 24/7 or it's silently costing you opportunities.
+
+I was in the second camp. Now I'm not.
+
+What's the worst line currently sitting on your LinkedIn? Drop it in the comments — let's roast it together.</div>
+  <span class="char-tag">~940 characters — well within the 1,300 limit</span>
+  <p style="font-size:12px; color:var(--color-text-secondary); margin:8px 0 0; font-style:italic;">Hook strategy: Opens with vulnerability ("uncomfortable") which stops the scroll. The specifics ("11 pipe-separated words") are funny and relatable. The CTA asks for comments — "drop it in the comments" invites participation which feeds the algorithm.</p>
+</div>
+
+<div class="sec">
+  <div class="day-header"><span class="day-pill d3">Day 3</span><div class="day-title">Send 10 strategic connection requests</div></div>
+  <div class="body-text" style="margin-bottom:12px;">Do not connect randomly. Every connection should be someone who could hire you or refer you within the next 6 months. Quality over volume.</div>
+  <div style="font-size:12px; font-weight:500; color:var(--color-text-primary); margin-bottom:8px;">Who to target (in this order)</div>
+  <span class="target-chip">CTOs at 50–500 person tech companies (India, UK, US)</span>
+  <span class="target-chip">VP Engineering / Head of Engineering</span>
+  <span class="target-chip">Startup founders in Telecom, Healthcare, Fintech</span>
+  <span class="target-chip">Tech consulting firm owners</span>
+  <span class="target-chip">Freelance talent managers / staffing leads</span>
+  <span class="target-chip">Project delivery heads at IT service companies</span>
+  <div class="divider"></div>
+  <div style="font-size:12px; font-weight:500; color:var(--color-text-primary); margin-bottom:6px;">Connection note template — under 300 characters</div>
+  <div class="template-box">"Hi [Name] — I'm a freelance Technical Manager specialising in Java/Microservices delivery. I work with engineering teams navigating complex projects. Came across your profile and thought it worth connecting — your work in [their industry] is interesting."</div>
+  <p style="font-size:12px; color:var(--color-text-secondary); margin:4px 0 0; font-style:italic;">Always personalise the last sentence with something specific to their profile or company. Generic notes get ignored. Specific notes get accepted and sometimes replied to.</p>
+</div>
+
+<div class="sec">
+  <div class="day-header"><span class="day-pill d4">Day 4</span><div class="day-title">Comment on 5 posts in your target space</div></div>
+  <div class="body-text" style="margin-bottom:12px;">Find 5 posts by CTOs, engineering leads, or startup founders in Telecom, Healthcare, or Fintech. Apply the Value Comment Formula to each one.</div>
+  <div class="formula-row">
+    <div class="formula-label">Step 1 — Agree</div>
+    <div class="formula-desc">Validate their point genuinely in 1 sentence. Do not start with "Great post!" — that's noise. Be specific about what you agree with and why.</div>
+  </div>
+  <div class="formula-row">
+    <div class="formula-label">Step 2 — Add insight</div>
+    <div class="formula-desc">Share a specific experience you've had that adds to their point. 2 sentences max. The more specific and domain-relevant, the better — this is where your 15 years and 7 industries become a superpower.</div>
+  </div>
+  <div class="formula-row">
+    <div class="formula-label">Step 3 — Ask a question</div>
+    <div class="formula-desc">End with a question that invites them to respond. This triggers a notification to them, starts a conversation, and puts your name in front of their network when they reply.</div>
+  </div>
+  <div class="divider"></div>
+  <div style="font-size:12px; font-weight:500; color:var(--color-text-primary); margin-bottom:6px;">Example comment in action</div>
+  <div class="template-box">"This is exactly right — sprint planning breakdowns almost always start with unclear acceptance criteria, not poor velocity.
+
+In my experience leading Healthcare IT teams, we fixed this by introducing a 'definition of ready' gate before any story entered sprint planning. Took 2 weeks to embed but cut mid-sprint scope changes by roughly half.
+
+Have you found any formats that make the product owner / engineering handoff cleaner?"</div>
+</div>
+
+<div class="sec">
+  <div class="day-header"><span class="day-pill d5">Day 5</span><div class="day-title">Publish Post #2 — hot-take / lessons learned</div></div>
+  <div class="body-text" style="margin-bottom:10px;">This post establishes your expertise and point of view. It should feel like something only someone with your specific experience could write. Publish as-is or adapt with your own example.</div>
+  <div class="post-box">Hot take: most software projects don't fail because of the technology.
+
+They fail because nobody is managing the humans.
+
+In 15 years across 7 industries, I've seen the same pattern repeat:
+→ Talented developers. Unclear scope. Nobody owning stakeholder expectations.
+→ Result: a 6-month project becoming a 14-month project, at 2x the budget.
+
+Kafka doesn't cause delays. Microservices don't cause scope creep.
+People do.
+
+The most underrated skill in software engineering isn't system design or code review.
+
+It's being able to walk into a client meeting and say — clearly, calmly, early — "we have a problem, here's what it is, here's how we fix it."
+
+Most engineers wait until the problem is visible. By then, the damage is done.
+
+I've spent 15 years being the person who says it early.
+
+That's not a technical skill. That's a leadership skill.
+
+What's the earliest warning sign you've learned to watch for in a project before things go wrong?</div>
+  <span class="char-tag">~1,020 characters — within the 1,300 limit</span>
+  <p style="font-size:12px; color:var(--color-text-secondary); margin:8px 0 0; font-style:italic;">Why this works: Contrarian opening grabs attention. The specific pain (6-month project → 14 months) is visceral and recognisable. It positions you as someone who combines technical depth with leadership maturity — exactly the profile a client wants to hire. The question at the end is open enough to attract engineers AND CTOs.</p>
+</div>
+
+<div class="sec">
+  <div class="day-header"><span class="day-pill d6">Day 6</span><div class="day-title">Engage on your posts + 5 more connections</div></div>
+  <div class="body-text">Reply to every single comment on both posts today — even one-liners. "Great point — I've also seen this when..." is enough. LinkedIn's algorithm treats replies as fresh engagement signals and re-circulates the post. Do not let comments go unanswered for more than 24 hours. Then send 5 more connection requests using the Day 3 template, targeting anyone who liked or commented on your posts but isn't connected yet.</div>
+</div>
+
+<div class="sec">
+  <div class="day-header"><span class="day-pill d7">Day 7</span><div class="day-title">Review your numbers — know what they mean</div></div>
+  <div class="body-text" style="margin-bottom:12px;">Go to LinkedIn Analytics (top of your profile → "Analytics" tab). Check these three numbers and interpret them using the guide below.</div>
+  <div class="metric-row">
+    <div class="metric-val">Profile views up</div>
+    <div class="metric-meaning">Your content is driving traffic. People are curious enough after seeing your posts to check who you are. Keep posting consistently — this number compounds over weeks, not days.</div>
+  </div>
+  <div class="metric-row">
+    <div class="metric-val">Connection acceptance below 40%</div>
+    <div class="metric-meaning">Your note is too generic or the target isn't right. Try personalising the last sentence more specifically — reference a post they published or a company milestone. Also try connecting with 2nd-degree connections (shared connection = more trust).</div>
+  </div>
+  <div class="metric-row">
+    <div class="metric-val">Post impressions below 300</div>
+    <div class="metric-meaning">Your hook isn't strong enough. The first line is the only thing visible in the feed — it needs to create a pattern interrupt. Try opening with a provocative number, a counterintuitive claim, or a short one-liner that creates curiosity. Post at 8–9am IST on Tuesday, Wednesday, or Thursday for best reach.</div>
+  </div>
+  <div class="metric-row">
+    <div class="metric-val">No inbound messages yet</div>
+    <div class="metric-meaning">Normal at day 7. Inbound from content takes 4–8 weeks of consistent posting to build. The goal this week was to lay the foundation. Stay consistent — 2 posts per week, 5 value comments per day — for 30 days and your profile views and connection requests will compound significantly.</div>
+  </div>
+  <div class="metric-row" style="border-bottom:none;">
+    <div class="metric-val">Appearing in search results</div>
+    <div class="metric-meaning">Check "Search appearances" in Analytics. If it's climbing, your skills and keywords are working. If it's flat, go back and make sure you've used the exact skill node names as listed in the rebuild — LinkedIn's search indexes exact skill matches, not synonyms.</div>
+  </div>
+</div>

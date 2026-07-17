@@ -1,0 +1,372 @@
+
+<style>
+  .section { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 1rem; }
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .score-label { font-size: 14px; color: var(--color-text-primary); min-width: 140px; }
+  .score-bar-wrap { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 99px; }
+  .score-bar { height: 6px; border-radius: 99px; }
+  .score-num { font-size: 13px; font-weight: 500; min-width: 28px; text-align: right; }
+  .tag-danger { background: var(--color-background-danger); color: var(--color-text-danger); font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+  .tag-success { background: var(--color-background-success); color: var(--color-text-success); font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+  .tag-warning { background: var(--color-background-warning); color: var(--color-text-warning); font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+  .problem-block { border-left: 2px solid var(--color-border-danger); border-radius: 0; padding: 10px 14px; background: var(--color-background-danger); margin: 8px 0; }
+  .rebuild-block { border-left: 2px solid var(--color-border-success); border-radius: 0; padding: 10px 14px; background: var(--color-background-success); margin: 8px 0; }
+  .quote { font-style: italic; color: var(--color-text-secondary); font-size: 13px; }
+  .label-sm { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .headline-opt { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; margin: 6px 0; font-size: 13px; color: var(--color-text-primary); }
+  .opt-tag { font-size: 11px; font-weight: 500; color: var(--color-text-info); background: var(--color-background-info); padding: 2px 8px; border-radius: 99px; margin-bottom: 4px; display: inline-block; }
+  .bullet-row { display: flex; gap: 8px; margin: 6px 0; font-size: 13px; }
+  .bullet-before { color: var(--color-text-danger); min-width: 50px; font-size: 11px; font-weight: 500; padding-top: 1px; }
+  .bullet-after { color: var(--color-text-success); min-width: 50px; font-size: 11px; font-weight: 500; padding-top: 1px; }
+  .day-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px 14px; margin: 8px 0; }
+  .day-num { font-size: 11px; font-weight: 500; color: var(--color-text-info); background: var(--color-background-info); padding: 2px 8px; border-radius: 99px; display: inline-block; margin-bottom: 6px; }
+  .day-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+  .day-body { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+  .score-change { font-size: 13px; color: var(--color-text-success); font-weight: 500; }
+  .sharecard { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; background: var(--color-background-secondary); font-size: 13px; line-height: 1.7; color: var(--color-text-primary); }
+  .big-score { font-size: 32px; font-weight: 500; }
+  .nav-btn { display: inline-block; padding: 6px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; margin: 4px 4px 4px 0; background: var(--color-background-primary); color: var(--color-text-primary); }
+  .nav-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .overall-bar { height: 10px; border-radius: 99px; background: var(--color-background-secondary); margin: 8px 0; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1rem 0; }
+  .skill-pill { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 99px; margin: 3px; border: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+  .skill-add { background: var(--color-background-success); color: var(--color-text-success); border-color: transparent; }
+  .skill-remove { background: var(--color-background-danger); color: var(--color-text-danger); border-color: transparent; text-decoration: line-through; }
+  .skill-pin { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; }
+</style>
+
+<h2 class="sr-only">LinkedIn profile roast and rebuild report — full analysis with scores, rewrites, and 7-day action plan</h2>
+
+<div style="padding: 1rem 0 0.5rem;">
+  <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0 0 12px;">Navigate sections</p>
+  <div id="nav">
+    <button class="nav-btn active" onclick="show('roast')">Part 1 — Roast</button>
+    <button class="nav-btn" onclick="show('rebuild')">Part 2 — Rebuild</button>
+    <button class="nav-btn" onclick="show('scorecard')">Part 3 — Scorecard</button>
+    <button class="nav-btn" onclick="show('plan')">Part 4 — 7-day plan</button>
+    <button class="nav-btn" onclick="show('share')">Part 5 — Share card</button>
+  </div>
+</div>
+
+<div id="roast" class="page active" style="margin-top: 1rem;">
+
+  <div class="section">
+    <div class="section-title">Overall profile strength — before</div>
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <div class="big-score">34</div><div style="font-size:20px; color:var(--color-text-secondary);">/100</div>
+      <span class="tag-danger">Needs serious work</span>
+    </div>
+    <div class="overall-bar"><div style="width:34%; height:10px; border-radius:99px; background:#E24B4A;"></div></div>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:8px 0 0;">You have 15 years of valuable experience hiding behind a profile that reads like a resume keyword dump from 2009. A potential client visiting your profile right now would not understand what you do for them, and would move on in 4 seconds.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Headline — 2/10</div>
+    <span class="tag-danger">Critical issue</span>
+    <div class="problem-block" style="margin-top: 10px;">
+      <div class="label-sm">What they see</div>
+      <div class="quote">"Immediate Joiner | Technical Manager | Freelancer | Occult Sciences | Content Creator | Java | Springboot | Microservices | Kafka | AWS |"</div>
+    </div>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:10px 0 4px;">Three fatal problems here:</p>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:4px 0;"><strong style="color:var(--color-text-primary);">1. "Immediate Joiner"</strong> — This screams desperation to a client. It signals "I have no work right now" and devalues you immediately. A client wants someone confident and in-demand, not someone who is urgently available.</p>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:4px 0;"><strong style="color:var(--color-text-primary);">2. Occult Sciences</strong> — Between AWS and Kafka sits Occult Sciences. A client scanning for a tech delivery partner will question your seriousness. Keep that interest separate from your professional headline entirely.</p>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:4px 0;"><strong style="color:var(--color-text-primary);">3. No value proposition</strong> — The whole headline is about what you ARE, not what you DO for clients. Who do you help? What results do you produce? That's what stops a scroll.</p>
+    <p style="font-size:13px; color:var(--color-text-danger); margin:8px 0 0;">Invisible cost: Clients visiting your profile are gone before they read your About section.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">About — first 2 lines — 3/10</div>
+    <span class="tag-danger">Critical issue</span>
+    <div class="problem-block" style="margin-top: 10px;">
+      <div class="label-sm">What they see before "see more"</div>
+      <div class="quote">"Leading with a strategic vision at workplace, my focus has been on guiding development teams to excel in technical project leadership and customer relationship management."</div>
+    </div>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:10px 0 0;">This is the most expensive real estate on your profile. The recruiter/client reads exactly this before deciding to click "see more." And it starts with <em>your</em> focus, <em>your</em> teams, <em>your</em> workplace. The client doesn't care. They want to know: can you solve my problem? This hook answers nothing about who you help or what outcome they get. They will not click "see more."</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">About — full section — 3/10</div>
+    <span class="tag-danger">Vague, corporate, no proof</span>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:8px 0;">Every sentence is a claim with zero evidence. "Forged strong client relationships" — how many clients? "Enhanced project delivery outcomes" — what outcomes? By how much? The section reads like a template filled with buzzwords. It tells a client nothing that differentiates you from the other 10,000 Technical Managers on LinkedIn India.</p>
+    <p style="font-size:13px; color:var(--color-text-danger); margin:4px 0 0;">There is no call to action. After reading, a potential client has nowhere to go. No "message me," no link, nothing.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Experience — 3/10</div>
+    <span class="tag-danger">Responsibilities, not results</span>
+    <div class="problem-block" style="margin-top: 10px;">
+      <div class="quote">"Led multiple development teams · Played as Scrum Master · Contributed in development of complex application · Client Management..."</div>
+    </div>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:10px 0 0;">Every bullet describes a duty, not an achievement. "Led multiple development teams" — how many teams? How many engineers? What did they build? "Contributed in development of complex application" is the weakest possible way to describe 15 years of engineering leadership. "Played as Scrum Master" — "played as" signals you were not serious about the role.</p>
+    <p style="font-size:13px; color:var(--color-text-danger); margin:4px 0 0;">There is not a single number on this entire experience entry. Zero metrics = zero credibility.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Skills &amp; keywords — 4/10</div>
+    <span class="tag-warning">Incomplete &amp; unfocused</span>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:8px 0 0;">You have only 7 skills listed. LinkedIn's algorithm rewards profiles with 5+ endorsed skills in search results — you need 10–15 targeted skills. "Coding &amp; Development" is too vague for search. You are missing critical searchable keywords that freelance/consulting clients actually type: "Freelance Java Consultant," "Technical Delivery Manager," "Software Architecture." Your domain expertise (Telecom, Healthcare, etc.) is buried in experience text but not in skills where it drives search.</p>
+  </div>
+</div>
+
+<div id="rebuild" class="page" style="margin-top: 1rem;">
+
+  <div class="section">
+    <div class="section-title">New headline — 3 options</div>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:0 0 12px;">Formula used: [Who you are] | [What you do for clients] | [Proof/differentiator]</p>
+
+    <div class="opt-tag">Option 1 — keyword optimized (use for search visibility)</div>
+    <div class="headline-opt">Java &amp; Microservices Technical Manager | 15 Yrs Delivering Complex Software Projects | Freelance Consultant — Telecom, Healthcare, Fintech</div>
+    <p style="font-size:12px; color:var(--color-text-secondary); margin:4px 0 12px;">Use this if your primary channel is inbound — clients searching LinkedIn for a Java/Microservices consultant. Packs the keywords recruiters and procurement teams type.</p>
+
+    <div class="opt-tag">Option 2 — value proposition (use for client attraction)</div>
+    <div class="headline-opt">I Help Startups &amp; Enterprises Deliver Complex Java Projects On Time | Technical Manager &amp; Freelance Consultant | 15 Years, 6 Industries</div>
+    <p style="font-size:12px; color:var(--color-text-secondary); margin:4px 0 12px;">Use this if you want to speak directly to the pain of a client who has a failing or delayed project. "On time" hits an immediate nerve. The 6 industries line signals breadth.</p>
+
+    <div class="opt-tag">Option 3 — authority (use for thought leadership)</div>
+    <div class="headline-opt">Senior Technical Manager | Java · Microservices · AWS · Kafka | Turning Engineering Chaos Into Predictable Delivery | 15 Years, 7 Domains</div>
+    <p style="font-size:12px; color:var(--color-text-secondary); margin:4px 0 0;">Use this if you want to publish content and build an audience. "Engineering Chaos Into Predictable Delivery" is a memorable positioning line that content can be built around.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">About section — complete rewrite</div>
+    <div class="rebuild-block">
+      <div class="label-sm">Hook (lines 1–2 — visible before "see more")</div>
+      <p style="font-size:13px; color:var(--color-text-primary); margin:4px 0 0;">If your software project is behind schedule, over-scoped, or held together by heroics — that's the exact situation I've spent 15 years fixing.</p>
+    </div>
+    <div class="rebuild-block">
+      <div class="label-sm">Story (lines 3–5)</div>
+      <p style="font-size:13px; color:var(--color-text-primary); margin:4px 0 0;">I'm a freelance Technical Manager and Java architect with deep roots in building and leading high-performing engineering teams. I work with startups and mid-size companies that need an experienced hand to structure their delivery, manage their engineering squads, and actually ship complex software — across Java, Spring Boot, Microservices, Kafka, and AWS.</p>
+      <p style="font-size:13px; color:var(--color-text-primary); margin:8px 0 0;">I've worked across 7 industries — Telecom, Healthcare, Hospitality, Retail, Insurance, Clinical, and Automation — so I understand what "complex" really means in your domain, not just in theory.</p>
+    </div>
+    <div class="rebuild-block">
+      <div class="label-sm">Proof (lines 6–8)</div>
+      <p style="font-size:13px; color:var(--color-text-primary); margin:4px 0 0;">Over 15 years I've led cross-functional development teams, driven Agile delivery as Scrum Master, built client relationships across multiple continents, and mentored engineers from junior to senior level. [ADD: e.g. "Delivered X projects," "Led teams of N engineers," "Reduced delivery time by X%" — add your real numbers here.]</p>
+    </div>
+    <div class="rebuild-block">
+      <div class="label-sm">CTA (last line)</div>
+      <p style="font-size:13px; color:var(--color-text-primary); margin:4px 0 0;">If you need a senior technical partner to lead your next project — not just advise on it — send me a message. I'm open to freelance and consulting engagements.</p>
+    </div>
+    <hr class="divider">
+    <div class="label-sm">Keywords embedded for LinkedIn SEO</div>
+    <div style="margin-top:6px;">
+      <span class="skill-pill">Java</span><span class="skill-pill">Spring Boot</span><span class="skill-pill">Microservices</span><span class="skill-pill">Kafka</span><span class="skill-pill">AWS</span><span class="skill-pill">Technical Manager</span><span class="skill-pill">Freelance</span><span class="skill-pill">Scrum Master</span><span class="skill-pill">Agile delivery</span><span class="skill-pill">Engineering teams</span><span class="skill-pill">Healthcare</span><span class="skill-pill">Telecom</span><span class="skill-pill">Consulting</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Experience — bullet rewrites</div>
+    <div class="bullet-row"><div class="bullet-before">Before</div><div style="color:var(--color-text-secondary); font-size:13px;">Led multiple development teams</div></div>
+    <div class="bullet-row"><div class="bullet-after">After</div><div style="font-size:13px;">Led cross-functional engineering teams of [N] developers across [X] concurrent Java projects, managing delivery timelines, code quality, and stakeholder reporting.</div></div>
+    <hr class="divider">
+    <div class="bullet-row"><div class="bullet-before">Before</div><div style="color:var(--color-text-secondary); font-size:13px;">Played as Scrum Master, JIRA Management</div></div>
+    <div class="bullet-row"><div class="bullet-after">After</div><div style="font-size:13px;">Drove Agile delivery as Scrum Master across [N] sprints — managed backlog, velocity, and JIRA workflows, cutting average sprint delivery cycle by [X]%.</div></div>
+    <hr class="divider">
+    <div class="bullet-row"><div class="bullet-before">Before</div><div style="color:var(--color-text-secondary); font-size:13px;">Contributed in development of complex application</div></div>
+    <div class="bullet-row"><div class="bullet-after">After</div><div style="font-size:13px;">Architected and delivered [specific system/feature] using Java, Spring Boot, and Microservices — serving [X users / processing X transactions / reducing latency by X].</div></div>
+    <hr class="divider">
+    <div class="bullet-row"><div class="bullet-before">Before</div><div style="color:var(--color-text-secondary); font-size:13px;">Client Management, Stake Holder Management</div></div>
+    <div class="bullet-row"><div class="bullet-after">After</div><div style="font-size:13px;">Managed client relationships across [N] enterprise accounts — conducted weekly delivery reviews, resolved escalations, and maintained [X]% client retention / renewal rate.</div></div>
+    <hr class="divider">
+    <div class="bullet-row"><div class="bullet-before">Before</div><div style="color:var(--color-text-secondary); font-size:13px;">Strong debugging skills, mentoring, provided technical trainings</div></div>
+    <div class="bullet-row"><div class="bullet-after">After</div><div style="font-size:13px;">Mentored [N] junior and mid-level engineers, delivering structured technical training programs that reduced onboarding time and improved code review pass rates.</div></div>
+    <p style="font-size:12px; color:var(--color-text-tertiary); margin:10px 0 0;">Replace all [bracketed] placeholders with your real numbers. Even rough estimates ("~10 engineers," "roughly 30% faster") are dramatically better than no numbers.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Skills — recommendations</div>
+    <div class="label-sm" style="margin-bottom:8px;">Add these (in priority order)</div>
+    <span class="skill-pill skill-add">Java Architecture</span>
+    <span class="skill-pill skill-add">Technical Delivery Management</span>
+    <span class="skill-pill skill-add">Freelance Consulting</span>
+    <span class="skill-pill skill-add">Spring Boot</span>
+    <span class="skill-pill skill-add">Apache Kafka</span>
+    <span class="skill-pill skill-add">AWS Cloud</span>
+    <span class="skill-pill skill-add">Agile / Scrum</span>
+    <span class="skill-pill skill-add">Software Architecture</span>
+    <span class="skill-pill skill-add">Team Leadership</span>
+    <span class="skill-pill skill-add">Healthcare IT</span>
+    <hr class="divider">
+    <div class="label-sm" style="margin-bottom:8px;">Remove or deprioritize</div>
+    <span class="skill-pill skill-remove">Coding &amp; Development</span>
+    <span class="skill-pill skill-remove">Scrum Management</span>
+    <p style="font-size:12px; color:var(--color-text-secondary); margin:6px 0;">"Coding &amp; Development" is too vague to appear in any search. "Scrum Management" is not a recognized term — replace with "Agile / Scrum."</p>
+    <hr class="divider">
+    <div class="label-sm" style="margin-bottom:8px;">Pin these 3 to the top</div>
+    <span class="skill-pill skill-pin">Java Architecture</span>
+    <span class="skill-pill skill-pin">Technical Delivery Management</span>
+    <span class="skill-pill skill-pin">Freelance Consulting</span>
+  </div>
+</div>
+
+<div id="scorecard" class="page" style="margin-top: 1rem;">
+  <div class="section">
+    <div class="section-title">Before vs after scorecard</div>
+
+    <div class="score-row">
+      <div class="score-label" style="font-size:13px;">Headline</div>
+      <div style="font-size:13px; color:var(--color-text-danger);">2/10</div>
+      <div style="font-size:13px; color:var(--color-text-secondary); margin: 0 4px;">→</div>
+      <div style="font-size:13px; color:var(--color-text-success);">9/10</div>
+      <span class="score-change">+7</span>
+    </div>
+    <div class="score-row">
+      <div class="score-label" style="font-size:13px;">About — hook</div>
+      <div style="font-size:13px; color:var(--color-text-danger);">3/10</div>
+      <div style="font-size:13px; color:var(--color-text-secondary); margin: 0 4px;">→</div>
+      <div style="font-size:13px; color:var(--color-text-success);">9/10</div>
+      <span class="score-change">+6</span>
+    </div>
+    <div class="score-row">
+      <div class="score-label" style="font-size:13px;">About — full section</div>
+      <div style="font-size:13px; color:var(--color-text-danger);">3/10</div>
+      <div style="font-size:13px; color:var(--color-text-secondary); margin: 0 4px;">→</div>
+      <div style="font-size:13px; color:var(--color-text-success);">8/10</div>
+      <span class="score-change">+5</span>
+    </div>
+    <div class="score-row">
+      <div class="score-label" style="font-size:13px;">Experience</div>
+      <div style="font-size:13px; color:var(--color-text-danger);">3/10</div>
+      <div style="font-size:13px; color:var(--color-text-secondary); margin: 0 4px;">→</div>
+      <div style="font-size:13px; color:var(--color-text-success);">8/10</div>
+      <span class="score-change">+5</span>
+    </div>
+    <div class="score-row">
+      <div class="score-label" style="font-size:13px;">Skills &amp; keywords</div>
+      <div style="font-size:13px; color:var(--color-text-warning);">4/10</div>
+      <div style="font-size:13px; color:var(--color-text-secondary); margin: 0 4px;">→</div>
+      <div style="font-size:13px; color:var(--color-text-success);">9/10</div>
+      <span class="score-change">+5</span>
+    </div>
+
+    <hr class="divider">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom: 8px;">
+      <div>
+        <div class="label-sm">Before</div>
+        <div class="big-score" style="color:var(--color-text-danger);">34</div>
+        <div style="font-size:13px; color:var(--color-text-secondary);">/100</div>
+      </div>
+      <div style="font-size:22px; color:var(--color-text-secondary);">→</div>
+      <div>
+        <div class="label-sm">After</div>
+        <div class="big-score" style="color:var(--color-text-success);">84</div>
+        <div style="font-size:13px; color:var(--color-text-secondary);">/100</div>
+      </div>
+      <span class="tag-success" style="align-self:center;">+50 points</span>
+    </div>
+    <div class="overall-bar"><div style="width:34%; height:10px; border-radius:99px; background:#E24B4A;"></div></div>
+    <div style="font-size:12px; color:var(--color-text-tertiary); margin-top:2px;">Before (34/100)</div>
+    <div class="overall-bar" style="margin-top:8px;"><div style="width:84%; height:10px; border-radius:99px; background:#639922;"></div></div>
+    <div style="font-size:12px; color:var(--color-text-tertiary); margin-top:2px;">After (84/100) — with your real numbers filled in</div>
+  </div>
+</div>
+
+<div id="plan" class="page" style="margin-top: 1rem;">
+  <div class="section">
+    <div class="section-title">7-day LinkedIn activation plan</div>
+
+    <div class="day-card">
+      <div class="day-num">Day 1 — Make all changes</div>
+      <div class="day-title">Profile overhaul checklist</div>
+      <div class="day-body">
+        <p style="margin:0 0 6px;">Work through this in order:</p>
+        <p style="margin:2px 0;">— Replace headline with Option 1 or 2 from the rebuild</p>
+        <p style="margin:2px 0;">— Rewrite About section using the rebuild template (fill in your real numbers first)</p>
+        <p style="margin:2px 0;">— Update all experience bullets using the before/after rewrites</p>
+        <p style="margin:2px 0;">— Add 10 new skills, remove vague ones, pin the top 3</p>
+        <p style="margin:2px 0;">— Remove "Immediate Joiner" and "Occult Sciences" from headline permanently</p>
+        <p style="margin:2px 0;">— Add a Featured section: link to any project, GitHub, case study, or article you've written</p>
+        <p style="margin:2px 0;">— Set your profile to "Open to work" → Freelance/Contract only (visible to clients, not the green banner)</p>
+      </div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-num">Day 2 — Post #1</div>
+      <div class="day-title">The "I just rebuilt my LinkedIn" post</div>
+      <div class="day-body">
+        <p style="margin:0 0 6px; font-size:12px; color:var(--color-text-tertiary);">Draft — under 1300 characters, paste and publish as-is or personalise</p>
+        <p style="margin:0; font-style:italic; font-size:13px; line-height:1.7;">I just did something uncomfortable.<br><br>I let AI roast my LinkedIn profile. Honestly.<br><br>My headline had 10 pipe-separated words including "Immediate Joiner." My About section had zero numbers. My experience bullets read like a job description from 2010.<br><br>15 years of experience. Hidden in plain sight.<br><br>Here's what I changed:<br>→ Headline now says what I actually do for clients<br>→ About section opens with a problem, not my job title<br>→ Every experience bullet now starts with an action verb and ends with a result<br><br>If you're a Technical Manager or senior engineer and your profile still says "passionate about technology" — fix it today.<br><br>Your profile is either working for you or against you. There's no neutral.<br><br>What's the worst thing on your LinkedIn right now? Drop it in the comments.</p>
+      </div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-num">Day 3 — 10 connection requests</div>
+      <div class="day-title">Who to target + message template</div>
+      <div class="day-body">
+        <p style="margin:0 0 6px;">Target in this order: CTOs and VPs of Engineering at 50–500 person companies in India, UK, or US. Startup founders in Telecom, Healthcare, or Fintech. Freelance talent managers and tech consulting firm owners.</p>
+        <p style="margin:8px 0 4px; font-size:12px; color:var(--color-text-tertiary);">Connection note template (under 300 characters):</p>
+        <div class="headline-opt" style="font-style:italic;">"Hi [Name] — I'm a freelance Technical Manager specialising in Java/Microservices delivery. I work with engineering teams that need an experienced hand on complex projects. Would love to connect."</div>
+      </div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-num">Day 4 — Comment on 5 posts</div>
+      <div class="day-title">The value comment formula</div>
+      <div class="day-body">
+        <p style="margin:0 0 4px;">Find 5 posts by CTOs, engineering leads, or startup founders in your target industries. Apply this formula to each comment:</p>
+        <p style="margin:4px 0;"><strong style="color:var(--color-text-primary);">Agree</strong> — validate their point genuinely (1 sentence)</p>
+        <p style="margin:4px 0;"><strong style="color:var(--color-text-primary);">Add insight</strong> — share a specific experience you've had that adds to it (2 sentences)</p>
+        <p style="margin:4px 0;"><strong style="color:var(--color-text-primary);">Ask a question</strong> — end with a question that invites them to respond</p>
+        <p style="margin:6px 0 0; font-size:12px; color:var(--color-text-tertiary);">Example: "Completely agree on the sprint planning problem. In my experience leading Healthcare IT teams, the biggest issue was scope creep disguised as 'minor' changes — we solved it by locking scope 72 hours before sprint start. Have you tried any fixed-scope windows in your team?"</p>
+      </div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-num">Day 5 — Post #2</div>
+      <div class="day-title">Lessons-learned / hot-take post</div>
+      <div class="day-body">
+        <p style="margin:0 0 6px; font-size:12px; color:var(--color-text-tertiary);">Draft — customise with your own experience</p>
+        <p style="margin:0; font-style:italic; font-size:13px; line-height:1.7;">Hot take: Most software projects don't fail because of the technology.<br><br>They fail because nobody is actually managing the humans.<br><br>In 15 years and 7 industries, I've seen the same pattern:<br>→ Great developers. Unclear scope. No one owning stakeholder expectations.<br>→ Result: 6-month project delivered in 14 months, 2x budget.<br><br>The technical stack is rarely the problem. Kafka doesn't cause delays. People mismanaging Kafka does.<br><br>The most underrated skill in engineering is client communication. Not coding. Not architecture. Telling a CTO — clearly, calmly, early — that the deadline is at risk.<br><br>That's what I do.<br><br>What's the #1 reason you've seen projects go off the rails?</p>
+      </div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-num">Day 6 — Engage + connect</div>
+      <div class="day-title">Reply to every comment. Send 5 more requests.</div>
+      <div class="day-body">Reply to every comment on both posts — even a "thanks, great point, I've also seen..." counts. LinkedIn's algorithm rewards conversations, not broadcasts. Send 5 more targeted connection requests using the Day 3 template.</div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-num">Day 7 — Review &amp; adjust</div>
+      <div class="day-title">What the numbers mean</div>
+      <div class="day-body">
+        <p style="margin:0 0 6px;">Check Profile Views (last 7 days) and Post Impressions in your LinkedIn analytics.</p>
+        <p style="margin:4px 0;"><strong style="color:var(--color-text-primary);">Profile views up</strong> — your content is driving traffic. Keep posting.</p>
+        <p style="margin:4px 0;"><strong style="color:var(--color-text-primary);">Connection acceptance below 40%</strong> — your note is too generic. Make it more specific to their company or post they published.</p>
+        <p style="margin:4px 0;"><strong style="color:var(--color-text-primary);">Post impressions below 200</strong> — your hook isn't strong enough. Try opening with a number or a counterintuitive statement next time.</p>
+        <p style="margin:4px 0;"><strong style="color:var(--color-text-primary);">No DMs yet</strong> — normal at day 7. Consistency over 30 days is what generates inbound. Keep the routine going.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="share" class="page" style="margin-top: 1rem;">
+  <div class="section">
+    <div class="section-title">Part 5 — shareable summary card</div>
+    <p style="font-size:13px; color:var(--color-text-secondary); margin:0 0 12px;">Screenshot this and post on LinkedIn as-is.</p>
+    <div class="sharecard">
+      <p style="margin:0 0 8px; font-weight:500;">I let AI roast my LinkedIn profile today. Here's what changed:</p>
+      <p style="margin:0 0 4px;">Before: <strong>34/100</strong></p>
+      <p style="margin:0 0 12px;">After: <strong>84/100</strong></p>
+      <p style="margin:0 0 6px; font-weight:500;">Top 3 mistakes I was making:</p>
+      <p style="margin:0 0 4px;">1. My headline led with "Immediate Joiner" — the single fastest way to devalue yourself to a potential client before they read a single word.</p>
+      <p style="margin:0 0 4px;">2. My About section was full of corporate buzzwords and zero proof — "strengthened client partnerships" with no number, no name, no result.</p>
+      <p style="margin:0 0 12px;">3. Every experience bullet was a job duty, not an achievement. 15 years of work, and not one number on the page.</p>
+      <p style="margin:0 0 12px; font-weight:500;">The #1 thing that made the biggest difference: Rewriting the first 2 lines of my About section to open with a client problem, not my job title. That's the only text visible before "see more" — and it was completely wasted.</p>
+      <p style="margin:0; color:var(--color-text-secondary); font-size:12px;">#LinkedIn #PersonalBranding #FreelanceConsulting #TechLeadership</p>
+    </div>
+    <button class="nav-btn" style="margin-top:12px;" onclick="sendPrompt('Can you give me more post ideas for LinkedIn based on my background as a Java Technical Manager and freelance consultant?')">Get more post ideas ↗</button>
+  </div>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    var map = {roast:0,rebuild:1,scorecard:2,plan:3,share:4};
+    document.querySelectorAll('.nav-btn')[map[id]].classList.add('active');
+  }
+</script>

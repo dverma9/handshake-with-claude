@@ -1,0 +1,139 @@
+
+<style>
+  .sec { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .sec-title { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 1.25rem; }
+  .row { display: grid; grid-template-columns: 160px 1fr 1fr 60px; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .row:last-child { border-bottom: none; }
+  .row-label { font-size: 13px; color: var(--color-text-primary); }
+  .bar-wrap { height: 8px; background: var(--color-background-secondary); border-radius: 99px; }
+  .bar-before { height: 8px; border-radius: 99px; background: #E24B4A; }
+  .bar-after { height: 8px; border-radius: 99px; background: #639922; }
+  .score-pair { display: flex; align-items: center; gap: 4px; }
+  .s-before { font-size: 13px; color: var(--color-text-danger); font-weight: 500; }
+  .s-after { font-size: 13px; color: var(--color-text-success); font-weight: 500; }
+  .s-arrow { font-size: 11px; color: var(--color-text-tertiary); }
+  .delta { font-size: 12px; color: var(--color-text-success); font-weight: 500; }
+  .overall-sec { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-top: 1rem; }
+  .big { font-size: 36px; font-weight: 500; line-height: 1; }
+  .big-before { color: var(--color-text-danger); }
+  .big-after { color: var(--color-text-success); }
+  .verdict { font-size: 13px; color: var(--color-text-secondary); margin: 10px 0 0; line-height: 1.6; }
+  .tag-success { background: var(--color-background-success); color: var(--color-text-success); font-size: 12px; padding: 3px 10px; border-radius: 99px; font-weight: 500; display: inline-block; }
+  .cond-note { font-size: 12px; color: var(--color-text-warning); background: var(--color-background-warning); padding: 8px 12px; border-radius: var(--border-radius-md); margin-top: 10px; line-height: 1.6; }
+</style>
+
+<h2 class="sr-only">Part 3 — before and after LinkedIn profile scorecard</h2>
+
+<div style="padding: 1rem 0 0.5rem;">
+  <p style="font-size:14px; font-weight:500; color:var(--color-text-primary); margin:0 0 4px;">Part 3 — Before vs after scorecard</p>
+  <p style="font-size:13px; color:var(--color-text-secondary); margin:0;">Section-by-section score change and the overall transformation.</p>
+</div>
+
+<div class="sec">
+  <div class="sec-title">Section scores</div>
+
+  <div class="row" style="border-bottom: 0.5px solid var(--color-border-tertiary); padding-bottom:8px; margin-bottom:4px;">
+    <div style="font-size:11px; color:var(--color-text-tertiary);">Section</div>
+    <div style="font-size:11px; color:var(--color-text-danger);">Before</div>
+    <div style="font-size:11px; color:var(--color-text-success);">After</div>
+    <div style="font-size:11px; color:var(--color-text-tertiary);">Change</div>
+  </div>
+
+  <div class="row">
+    <div class="row-label">Headline</div>
+    <div>
+      <div class="bar-wrap"><div class="bar-before" style="width:20%;"></div></div>
+      <div class="score-pair"><span class="s-before">2/10</span></div>
+    </div>
+    <div>
+      <div class="bar-wrap"><div class="bar-after" style="width:90%;"></div></div>
+      <div class="score-pair"><span class="s-after">9/10</span></div>
+    </div>
+    <div class="delta">+7</div>
+  </div>
+
+  <div class="row">
+    <div class="row-label">About — hook (first 2 lines)</div>
+    <div>
+      <div class="bar-wrap"><div class="bar-before" style="width:30%;"></div></div>
+      <div class="score-pair"><span class="s-before">3/10</span></div>
+    </div>
+    <div>
+      <div class="bar-wrap"><div class="bar-after" style="width:90%;"></div></div>
+      <div class="score-pair"><span class="s-after">9/10</span></div>
+    </div>
+    <div class="delta">+6</div>
+  </div>
+
+  <div class="row">
+    <div class="row-label">About — full section</div>
+    <div>
+      <div class="bar-wrap"><div class="bar-before" style="width:30%;"></div></div>
+      <div class="score-pair"><span class="s-before">3/10</span></div>
+    </div>
+    <div>
+      <div class="bar-wrap"><div class="bar-after" style="width:85%;"></div></div>
+      <div class="score-pair"><span class="s-after">8.5/10</span></div>
+    </div>
+    <div class="delta">+5.5</div>
+  </div>
+
+  <div class="row">
+    <div class="row-label">Experience bullets</div>
+    <div>
+      <div class="bar-wrap"><div class="bar-before" style="width:30%;"></div></div>
+      <div class="score-pair"><span class="s-before">3/10</span></div>
+    </div>
+    <div>
+      <div class="bar-wrap"><div class="bar-after" style="width:85%;"></div></div>
+      <div class="score-pair"><span class="s-after">8.5/10</span></div>
+    </div>
+    <div class="delta">+5.5</div>
+  </div>
+
+  <div class="row">
+    <div class="row-label">Skills &amp; keywords</div>
+    <div>
+      <div class="bar-wrap"><div class="bar-before" style="width:40%;"></div></div>
+      <div class="score-pair"><span class="s-before">4/10</span></div>
+    </div>
+    <div>
+      <div class="bar-wrap"><div class="bar-after" style="width:90%;"></div></div>
+      <div class="score-pair"><span class="s-after">9/10</span></div>
+    </div>
+    <div class="delta">+5</div>
+  </div>
+</div>
+
+<div class="overall-sec">
+  <div style="font-size:11px; font-weight:500; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:14px;">Overall profile strength</div>
+
+  <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:16px; margin-bottom:16px;">
+    <div>
+      <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">Before</div>
+      <div class="big big-before">34</div>
+      <div style="font-size:13px; color:var(--color-text-secondary);">/100</div>
+      <div style="margin-top:8px; height:8px; background:var(--color-background-primary); border-radius:99px;"><div style="width:34%; height:8px; border-radius:99px; background:#E24B4A;"></div></div>
+    </div>
+    <div style="font-size:24px; color:var(--color-text-tertiary);">→</div>
+    <div>
+      <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">After</div>
+      <div class="big big-after">86</div>
+      <div style="font-size:13px; color:var(--color-text-secondary);">/100</div>
+      <div style="margin-top:8px; height:8px; background:var(--color-background-primary); border-radius:99px;"><div style="width:86%; height:8px; border-radius:99px; background:#639922;"></div></div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+    <span class="tag-success">+52 points</span>
+    <span style="font-size:13px; color:var(--color-text-secondary);">Weak → Top 10% of technical freelancer profiles</span>
+  </div>
+
+  <div class="verdict">
+    Before the rebuild, your profile was invisible to clients and unconvincing to anyone who stumbled on it. Every section told people what you are — not what you do for them. After the rebuild, your profile opens with a client problem, closes with a clear CTA, is packed with the right keywords for search, and every experience bullet leads with impact. A client who visits now understands your value in under 10 seconds.
+  </div>
+
+  <div class="cond-note">
+    One condition on the 86: this assumes you fill in the bracketed numbers in the About section and experience bullets with real figures. Without those numbers it sits closer to 74. The fastest single action to close that gap: spend 20 minutes writing down your real team sizes, project counts, and domain examples — then paste them in.
+  </div>
+</div>

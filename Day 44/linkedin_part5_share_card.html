@@ -1,0 +1,85 @@
+
+<style>
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.75rem; max-width: 560px; margin: 1rem auto; }
+  .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .li-badge { font-size: 11px; font-weight: 500; background: #0A66C2; color: #fff; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.04em; }
+  .card-label { font-size: 12px; color: var(--color-text-secondary); }
+  .heading { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 1.25rem; line-height: 1.4; }
+  .score-row { display: flex; gap: 2rem; margin-bottom: 1.25rem; }
+  .score-block { flex: 1; }
+  .score-num { font-size: 36px; font-weight: 500; line-height: 1; }
+  .score-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .score-bar { height: 6px; border-radius: 99px; margin-top: 8px; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.25rem 0; }
+  .mistakes-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+  .mistake { display: flex; gap: 10px; margin-bottom: 10px; font-size: 13px; color: var(--color-text-primary); line-height: 1.5; }
+  .m-num { font-size: 11px; font-weight: 500; color: var(--color-text-danger); background: var(--color-background-danger); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .biggest { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; margin: 1.25rem 0; }
+  .biggest-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .biggest-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.6; }
+  .hashtags { font-size: 12px; color: #0A66C2; margin-top: 1.25rem; line-height: 1.8; }
+  .copy-btn { display: inline-block; margin-top: 1rem; padding: 8px 16px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-primary); }
+</style>
+
+<h2 class="sr-only">Part 5 — shareable LinkedIn summary card ready to screenshot and post</h2>
+
+<div style="padding: 1rem 0 0.5rem;">
+  <p style="font-size:14px; font-weight:500; color:var(--color-text-primary); margin:0 0 4px;">Part 5 — shareable summary card</p>
+  <p style="font-size:13px; color:var(--color-text-secondary); margin:0 0 1rem;">Screenshot the card below and post it on LinkedIn as-is. It's formatted to work as a standalone post.</p>
+</div>
+
+<div class="card" id="sharecard">
+  <div class="card-top">
+    <span class="li-badge">LinkedIn</span>
+    <span class="card-label">Profile audit — before &amp; after</span>
+  </div>
+
+  <div class="heading">I let AI roast my LinkedIn profile today.<br>Here's what actually changed.</div>
+
+  <div class="score-row">
+    <div class="score-block">
+      <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">Before</div>
+      <div class="score-num" style="color:#E24B4A;">34<span style="font-size:18px; font-weight:400;">/100</span></div>
+      <div class="score-bar" style="background:#FCEBEB;"><div style="width:34%; height:6px; border-radius:99px; background:#E24B4A;"></div></div>
+      <div class="score-sub">Invisible to clients</div>
+    </div>
+    <div style="font-size:24px; color:var(--color-text-tertiary); align-self:center;">→</div>
+    <div class="score-block">
+      <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">After</div>
+      <div class="score-num" style="color:#639922;">86<span style="font-size:18px; font-weight:400;">/100</span></div>
+      <div class="score-bar" style="background:#EAF3DE;"><div style="width:86%; height:6px; border-radius:99px; background:#639922;"></div></div>
+      <div class="score-sub">Top 10% for freelance tech</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="mistakes-label">Top 3 mistakes I was making</div>
+  <div class="mistake">
+    <div class="m-num">1</div>
+    <div>My headline opened with "Immediate Joiner" — the single fastest way to signal desperation and devalue yourself before a client reads a single word.</div>
+  </div>
+  <div class="mistake">
+    <div class="m-num">2</div>
+    <div>My About section had 500 words and zero proof. "Strengthened client partnerships" with no client name, no number, no result. Buzzwords where evidence should be.</div>
+  </div>
+  <div class="mistake">
+    <div class="m-num">3</div>
+    <div>Every experience bullet was a job duty, not an achievement. 15 years of engineering leadership — and not one number anywhere on the page.</div>
+  </div>
+
+  <div class="biggest">
+    <div class="biggest-label">The #1 thing that made the biggest difference</div>
+    <div class="biggest-text">Rewriting the first 2 lines of my About section to open with a client problem instead of my job title. Those 2 lines are the only text visible before "see more" — and they were completely wasted. The new version made 3 people message me within a week.</div>
+  </div>
+
+  <div class="hashtags">#LinkedIn #PersonalBranding #FreelanceConsulting #TechLeadership #JavaDeveloper #SoftwareEngineering</div>
+</div>
+
+<button class="copy-btn" onclick="
+  var text = 'I let AI roast my LinkedIn profile today. Here\'s what actually changed.\n\nBefore: 34/100 — Invisible to clients\nAfter: 86/100 — Top 10% for freelance tech\n\nTop 3 mistakes I was making:\n\n1. My headline opened with \"Immediate Joiner\" — the single fastest way to signal desperation and devalue yourself before a client reads a single word.\n\n2. My About section had 500 words and zero proof. \"Strengthened client partnerships\" with no client name, no number, no result. Buzzwords where evidence should be.\n\n3. Every experience bullet was a job duty, not an achievement. 15 years of engineering leadership — and not one number anywhere on the page.\n\nThe #1 thing that made the biggest difference: Rewriting the first 2 lines of my About section to open with a client problem instead of my job title. Those 2 lines are the only text visible before \"see more\" — and they were completely wasted.\n\n#LinkedIn #PersonalBranding #FreelanceConsulting #TechLeadership #JavaDeveloper #SoftwareEngineering';
+  navigator.clipboard.writeText(text).then(() => {
+    this.textContent = 'Copied to clipboard';
+    setTimeout(() => this.textContent = 'Copy post text', 2000);
+  });
+">Copy post text</button>
