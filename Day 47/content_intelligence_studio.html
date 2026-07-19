@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Intelligence Studio</title>
+<style>
+:root{
+  --bg:#0a0a0b;--bg2:#111113;--bg3:#18181c;--bg4:#1e1e24;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f0f2;--text2:#9a9aaa;--text3:#5a5a6e;
+  --red:#e63946;--red2:#ff6b6b;--gold:#f4a261;
+  --green:#2ec4b6;--blue:#7eb8d9;--purple:#c084fc;
+  --r:10px;--rlg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:256px;min-width:256px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.main{flex:1;overflow-y:auto}
+
+/* sidebar */
+.sb-head{padding:16px;border-bottom:1px solid var(--border)}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.logo-icon{width:30px;height:30px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-text{font-size:13px;font-weight:600;color:var(--text)}
+.logo-sub{font-size:11px;color:var(--text3)}
+.cfg-box{padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);font-size:11px}
+.cfg-row{display:flex;justify-content:space-between;padding:2px 0;color:var(--text2)}
+.cfg-row span:last-child{color:var(--text);font-weight:500}
+.sb-section{padding:12px 14px}
+.sb-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:8px}
+.rv-card{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);margin-bottom:5px}
+.rv-card.st-running{border-color:var(--gold);background:rgba(244,162,97,.07)}
+.rv-card.st-done{border-color:var(--green);background:rgba(46,196,182,.06)}
+.rv-card.st-error{border-color:var(--red);background:rgba(230,57,70,.07)}
+.rv-top{display:flex;align-items:center;gap:7px}
+.rv-icon{font-size:14px;flex-shrink:0}
+.rv-name{font-size:12px;font-weight:500;flex:1;color:var(--text)}
+.rv-badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
+.rv-badge.idle{background:var(--bg4);color:var(--text3)}
+.rv-badge.running{background:rgba(244,162,97,.2);color:var(--gold)}
+.rv-badge.done{background:rgba(46,196,182,.18);color:var(--green)}
+.rv-badge.error{background:rgba(230,57,70,.18);color:var(--red2)}
+.rv-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.rv-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:5px;overflow:hidden}
+.rv-bar-fill{height:100%;border-radius:1px;transition:width .6s ease;width:0%}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);line-height:1.7}
+.gp-wrap{margin-bottom:8px}
+.gp-row{display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px}
+.gp-track{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.gp-fill{height:100%;background:var(--red);border-radius:2px;transition:width .5s ease;width:0%}
+
+/* main header */
+.mhead{padding:16px 26px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between}
+.mhead h2{font-size:15px;font-weight:600}
+.mhead p{font-size:12px;color:var(--text2);margin-top:1px}
+.score-wrap{display:flex;align-items:center;gap:12px}
+.score-meta{text-align:right;font-size:11px;color:var(--text2)}
+.score-meta b{color:var(--text);font-weight:600;display:block;font-size:13px}
+.score-ring{width:50px;height:50px;border-radius:50%;border:3px solid var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .5s}
+.score-num{font-size:15px;font-weight:700;line-height:1}
+.score-denom{font-size:9px;color:var(--text3);margin-top:1px}
+
+/* sections */
+.section{padding:20px 26px;border-bottom:1px solid var(--border)}
+.sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* upload */
+.toggle-row{display:flex;gap:8px;margin-bottom:12px}
+.tog-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
+.tog-btn.on{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+
+/* Drop zone — pointer-events on children must not block the zone */
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--rlg);padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2);position:relative}
+.drop-zone:hover,.drop-zone.over{border-color:var(--red);background:rgba(230,57,70,.04)}
+.drop-zone *{pointer-events:none}          /* ← children don't steal events */
+.dz-icon{font-size:28px;margin-bottom:8px}
+.dz-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.dz-sub{font-size:12px;color:var(--text2)}
+.browse-label{display:inline-block;margin-top:12px;padding:7px 18px;background:var(--red);color:#fff;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;transition:opacity .2s;pointer-events:all}
+.browse-label:hover{opacity:.85}
+
+/* Hidden real file input — positioned over the drop zone */
+#fileInput{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2}
+
+.preview-box{display:none;border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;background:var(--bg3)}
+.preview-box img{max-width:100%;max-height:260px;display:block;margin:0 auto}
+.preview-foot{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)}
+.preview-name{font-size:12px;color:var(--text2)}
+.change-btn{font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;font-family:inherit}
+.txt-area{width:100%;min-height:130px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;font-family:inherit;padding:13px;resize:vertical;line-height:1.6}
+.txt-area:focus{outline:none;border-color:var(--border2)}
+.run-btn{width:100%;padding:12px;margin-top:13px;background:var(--red);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+.run-btn:hover:not(:disabled){background:#c1121f}
+.run-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* log */
+.log-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;font-family:'SF Mono','Fira Code','Consolas',monospace;font-size:11px;max-height:175px;overflow-y:auto;line-height:1.9}
+.log-line{display:flex;gap:9px}
+.log-t{color:var(--text3);flex-shrink:0}
+.log-i{flex-shrink:0}
+.log-m{color:var(--text2)}
+.log-m.ok{color:var(--green)}
+.log-m.warn{color:var(--gold)}
+.log-m.err{color:var(--red2)}
+.log-m.info{color:var(--blue)}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab-btn{padding:8px 16px;font-size:13px;cursor:pointer;border:none;border-bottom:2px solid transparent;color:var(--text2);background:none;font-family:inherit;margin-bottom:-1px;transition:all .15s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.on{color:var(--text);border-bottom-color:var(--red)}
+.tab-pane{display:none}
+.tab-pane.on{display:block}
+
+/* cards */
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rlg);padding:16px 18px;margin-bottom:12px}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.card-icon{font-size:16px}
+.card-title{font-size:13px;font-weight:600;flex:1}
+.badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500}
+.badge.red{background:rgba(230,57,70,.18);color:var(--red2)}
+.badge.green{background:rgba(46,196,182,.18);color:var(--green)}
+.badge.gold{background:rgba(244,162,97,.18);color:var(--gold)}
+.badge.purple{background:rgba(192,132,252,.18);color:var(--purple)}
+.badge.blue{background:rgba(126,184,217,.18);color:var(--blue)}
+.card-body{font-size:13px;color:var(--text2);line-height:1.78}
+.card-body p{margin-bottom:9px}
+.card-body p:last-child{margin-bottom:0}
+
+/* score grid */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sc-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px}
+.sc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.sc-label{font-size:12px;color:var(--text2)}
+.sc-val{font-size:20px;font-weight:700}
+.sc-track{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.sc-fill{height:100%;border-radius:2px;transition:width 1.1s ease}
+
+/* lists */
+.dot-list{list-style:none}
+.dot-list li{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.dot-list li:last-child{border-bottom:none}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:7px}
+
+/* exec */
+.exec-box{background:linear-gradient(135deg,rgba(230,57,70,.07),rgba(192,132,252,.07));border:1px solid rgba(230,57,70,.22);border-radius:var(--rlg);padding:20px 22px}
+.exec-verdict{font-size:19px;font-weight:700;margin-bottom:4px;line-height:1.35}
+.exec-sub{font-size:12px;color:var(--text2);margin-bottom:14px}
+.exec-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.exec-metric{background:rgba(0,0,0,.35);border-radius:9px;padding:11px;text-align:center}
+.exec-metric-val{font-size:21px;font-weight:700;line-height:1}
+.exec-metric-lbl{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* compare */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-side{background:var(--bg4);border-radius:var(--r);padding:13px}
+.compare-tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:9px}
+.compare-tag.before{background:rgba(230,57,70,.18);color:var(--red2)}
+.compare-tag.after{background:rgba(46,196,182,.18);color:var(--green)}
+.compare-text{font-size:12px;color:var(--text2);line-height:1.7}
+
+/* checklist */
+.check-list{list-style:none}
+.check-list li{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.check-list li:last-child{border-bottom:none}
+.check-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+
+/* pred bars */
+.pred-item{margin-bottom:13px}
+.pred-head{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px}
+.pred-label{color:var(--text2)}
+.pred-note{font-size:10px;color:var(--text3);margin-top:2px;font-style:italic}
+.pred-track{height:7px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.pred-fill{height:100%;border-radius:3px;transition:width 1.3s ease}
+
+/* health row */
+.health-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.health-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.health-val{font-size:24px;font-weight:700;margin-bottom:3px}
+.health-lbl{font-size:11px;color:var(--text3)}
+
+/* chips */
+.chip-row{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s}
+.chip:hover{border-color:var(--red);color:var(--text)}
+
+/* util */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-state .ei{font-size:34px;margin-bottom:10px;opacity:.3}
+.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:10px 15px;font-size:13px;color:var(--text);z-index:999;transform:translateY(60px);transition:transform .3s;max-width:290px}
+.toast.show{transform:translateY(0)}
+.warn-box{background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.2);border-radius:8px;padding:9px 13px;margin-bottom:13px;font-size:11px;color:var(--red2)}
+
+@media(max-width:760px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;min-width:auto;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .two-col,.compare-grid,.exec-metrics{grid-template-columns:1fr}
+  .health-row{grid-template-columns:1fr}
+  .section{padding:16px}
+  .mhead{padding:13px 16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── SIDEBAR ─────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo">
+      <div class="logo-icon">🎯</div>
+      <div><div class="logo-text">Content Intelligence</div><div class="logo-sub">Studio v2.0</div></div>
+    </div>
+    <div class="cfg-box">
+      <div class="cfg-row"><span>Type</span><span>YouTube Script</span></div>
+      <div class="cfg-row"><span>Platform</span><span>YouTube</span></div>
+      <div class="cfg-row"><span>Goal</span><span>Viral Growth</span></div>
+      <div class="cfg-row"><span>Mode</span><span>🔥 Brutal</span></div>
+    </div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">AI Reviewers</div>
+    <div id="rv-list"></div>
+  </div>
+  <div class="sb-foot">
+    <div class="gp-wrap" id="gp-wrap" style="display:none">
+      <div class="gp-row"><span>Analysis progress</span><span id="gp-pct">0%</span></div>
+      <div class="gp-track"><div class="gp-fill" id="gp-fill"></div></div>
+    </div>
+    Powered by Claude AI · All analysis live
+  </div>
+</aside>
+
+<!-- ── MAIN ────────────────────────────────────────────────── -->
+<main class="main">
+  <div class="mhead">
+    <div>
+      <h2>Content Intelligence Studio</h2>
+      <p>YouTube · Viral Growth · Brutal Review Mode</p>
+    </div>
+    <div class="score-wrap">
+      <div class="score-meta"><b id="score-label">—</b>Overall Score</div>
+      <div class="score-ring" id="score-ring">
+        <div class="score-num" id="score-num" style="color:var(--text3)">—</div>
+        <div class="score-denom">/ 100</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="section">
+    <div class="sec-title">Upload Your Content</div>
+    <div class="toggle-row">
+      <button class="tog-btn on" id="tog-img" onclick="switchMode('img')">📸 Screenshot / Image</button>
+      <button class="tog-btn"    id="tog-txt" onclick="switchMode('txt')">📝 Text Content</button>
+    </div>
+
+    <!-- IMAGE MODE -->
+    <div id="area-img">
+      <!-- Drop zone: the real <input type=file> sits inside and covers the whole zone -->
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="fileInput" accept="image/*">
+        <div class="dz-icon">📸</div>
+        <div class="dz-title">Drop your screenshot here or browse</div>
+        <div class="dz-sub">Analytics dashboard · thumbnail · competitor page · channel art</div>
+        <span class="browse-label">Browse Files</span>
+      </div>
+
+      <!-- Preview (shown after file picked) -->
+      <div class="preview-box" id="preview-box">
+        <img id="preview-img" alt="Preview">
+        <div class="preview-foot">
+          <span class="preview-name" id="preview-name"></span>
+          <button class="change-btn" id="change-btn">Change file</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEXT MODE -->
+    <div id="area-txt" style="display:none">
+      <textarea class="txt-area" id="txt-content"
+        placeholder="Paste your YouTube video script, description, title ideas, or any text content you want analyzed..."></textarea>
+    </div>
+
+    <button class="run-btn" id="run-btn" disabled>
+      🚀 Run Full Analysis
+    </button>
+  </div>
+
+  <!-- LOG -->
+  <div class="section" id="log-section" style="display:none">
+    <div class="sec-title">Live Activity Log</div>
+    <div class="log-box" id="log-box"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="section" id="results-section" style="display:none">
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="ov">Overview</button>
+      <button class="tab-btn"    data-tab="dp">Deep Analysis</button>
+      <button class="tab-btn"    data-tab="rw">Rewrites</button>
+      <button class="tab-btn"    data-tab="rp">Final Report</button>
+    </div>
+    <div class="tab-pane on" id="pane-ov">
+      <div id="out-exec"></div>
+      <div class="sec-title" style="margin-top:18px">Score Breakdown</div>
+      <div class="score-grid" id="out-scores"></div>
+      <div id="out-sw" style="margin-top:16px"></div>
+    </div>
+    <div class="tab-pane" id="pane-dp">
+      <div id="out-deep"><div class="empty-state"><div class="ei">🔬</div>Run analysis to see deep review</div></div>
+    </div>
+    <div class="tab-pane" id="pane-rw">
+      <div id="out-rw"><div class="empty-state"><div class="ei">✍️</div>Run analysis to see rewrites</div></div>
+    </div>
+    <div class="tab-pane" id="pane-rp">
+      <div id="out-rp"><div class="empty-state"><div class="ei">📋</div>Run analysis to see final report</div></div>
+    </div>
+  </div>
+
+  <!-- PROMPTS -->
+  <div class="section" id="prompts-section" style="display:none">
+    <div class="sec-title">Dive Deeper</div>
+    <div class="chip-row" id="chip-row"></div>
+  </div>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+var API   = 'https://api.anthropic.com/v1/messages';
+var MODEL = 'claude-sonnet-4-6';
+
+var REVIEWERS = [
+  {id:'hook',    icon:'🪝', name:'Hook Analyst',           desc:'First 30s & retention curve',    col:'#e63946'},
+  {id:'title',   icon:'📌', name:'Title & SEO Strategist', desc:'CTR, keywords, discoverability', col:'#f4a261'},
+  {id:'visual',  icon:'👁️', name:'Visual Intelligence',    desc:'Thumbnail, branding, aesthetics',col:'#c084fc'},
+  {id:'algo',    icon:'⚙️', name:'Algorithm Decoder',      desc:'YouTube ranking signals',        col:'#7eb8d9'},
+  {id:'psych',   icon:'🧠', name:'Behavioral Psychologist',desc:'Viewer psychology & triggers',   col:'#2ec4b6'},
+  {id:'compete', icon:'⚔️', name:'Competitive Intel',      desc:'Differentiation & positioning',  col:'#e63946'},
+  {id:'growth',  icon:'📈', name:'Growth Architect',       desc:'Viral loops & channel strategy', col:'#f4a261'},
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+var mode      = 'img';
+var imageB64  = null;
+var imageMime = 'image/jpeg';
+var results   = {};
+var busy      = false;
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────────────
+(function initSidebar() {
+  var wrap = document.getElementById('rv-list');
+  REVIEWERS.forEach(function(r) {
+    var d = document.createElement('div');
+    d.className = 'rv-card';
+    d.id = 'rv-' + r.id;
+    d.innerHTML =
+      '<div class="rv-top">' +
+        '<span class="rv-icon">' + r.icon + '</span>' +
+        '<span class="rv-name">' + r.name + '</span>' +
+        '<span class="rv-badge idle" id="rb-' + r.id + '">Idle</span>' +
+      '</div>' +
+      '<div class="rv-desc">' + r.desc + '</div>' +
+      '<div class="rv-bar"><div class="rv-bar-fill" id="rp-' + r.id + '" style="background:' + r.col + '"></div></div>';
+    wrap.appendChild(d);
+  });
+})();
+
+// ── FILE INPUT / DROP ZONE ───────────────────────────────────────────────────
+(function initUpload() {
+  var fileInput  = document.getElementById('fileInput');
+  var dropZone   = document.getElementById('drop-zone');
+  var previewBox = document.getElementById('preview-box');
+  var previewImg = document.getElementById('preview-img');
+  var previewNm  = document.getElementById('preview-name');
+  var changeBtn  = document.getElementById('change-btn');
+
+  // File picked via the native input (covers both browse click and drop)
+  fileInput.addEventListener('change', function() {
+    var file = fileInput.files && fileInput.files[0];
+    if (file) loadFile(file);
+  });
+
+  // Drag visual feedback
+  dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.add('over');
+  });
+  dropZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    dropZone.classList.remove('over');
+  });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('over');
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadFile(file);
+  });
+
+  // Change file button
+  changeBtn.addEventListener('click', function() {
+    imageB64 = null;
+    fileInput.value = '';
+    previewBox.style.display = 'none';
+    dropZone.style.display   = 'block';
+    checkReady();
+  });
+
+  function loadFile(file) {
+    imageMime = file.type || 'image/jpeg';
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      imageB64 = e.target.result.split(',')[1];
+      previewImg.src = e.target.result;
+      previewNm.textContent = file.name + ' · ' + (file.size / 1024).toFixed(1) + ' KB';
+      dropZone.style.display   = 'none';
+      previewBox.style.display = 'block';
+      checkReady();
+    };
+    reader.readAsDataURL(file);
+  }
+})();
+
+// ── MODE SWITCH ──────────────────────────────────────────────────────────────
+function switchMode(m) {
+  mode = m;
+  document.getElementById('area-img').style.display = m === 'img' ? 'block' : 'none';
+  document.getElementById('area-txt').style.display = m === 'txt' ? 'block' : 'none';
+  document.getElementById('tog-img').className = 'tog-btn' + (m === 'img' ? ' on' : '');
+  document.getElementById('tog-txt').className = 'tog-btn' + (m === 'txt' ? ' on' : '');
+  checkReady();
+}
+
+function checkReady() {
+  var ok = mode === 'img'
+    ? (imageB64 !== null)
+    : (document.getElementById('txt-content').value.trim().length > 10);
+  document.getElementById('run-btn').disabled = !ok;
+}
+document.getElementById('txt-content').addEventListener('input', checkReady);
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var name = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tab-btn').forEach(function(b)  { b.className = 'tab-btn'; });
+    document.querySelectorAll('.tab-pane').forEach(function(p) { p.className = 'tab-pane'; });
+    btn.className = 'tab-btn on';
+    document.getElementById('pane-' + name).className = 'tab-pane on';
+  });
+});
+
+// ── RUN BUTTON ───────────────────────────────────────────────────────────────
+document.getElementById('run-btn').addEventListener('click', runAnalysis);
+
+// ── UI HELPERS ────────────────────────────────────────────────────────────────
+function setReviewer(id, state) {
+  var card  = document.getElementById('rv-' + id);
+  var badge = document.getElementById('rb-' + id);
+  var bar   = document.getElementById('rp-' + id);
+  if (!card) return;
+  card.className  = 'rv-card' + (state !== 'idle' ? ' st-' + state : '');
+  badge.className = 'rv-badge ' + state;
+  badge.textContent = ({idle:'Idle',running:'Running…',done:'Done',error:'Error'})[state] || 'Idle';
+  bar.style.width   = ({running:'55%',done:'100%',idle:'0%',error:'100%'})[state] || '0%';
+  if (state === 'error') bar.style.background = '#e63946';
+}
+
+function setProgress(pct) {
+  document.getElementById('gp-wrap').style.display = 'block';
+  document.getElementById('gp-fill').style.width   = pct + '%';
+  document.getElementById('gp-pct').textContent    = Math.round(pct) + '%';
+}
+
+function addLog(msg, type) {
+  type = type || '';
+  var icons = {ok:'✓', warn:'⚡', err:'✗', info:'→', '':'·'};
+  var box   = document.getElementById('log-box');
+  var t     = new Date().toLocaleTimeString('en', {hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var line  = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML =
+    '<span class="log-t">' + t + '</span>' +
+    '<span class="log-i">' + (icons[type] || '·') + '</span>' +
+    '<span class="log-m ' + type + '">' + msg + '</span>';
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+
+function scoreColor(n) {
+  if (n >= 80) return 'var(--green)';
+  if (n >= 60) return 'var(--gold)';
+  if (n >= 40) return 'var(--red2)';
+  return 'var(--red)';
+}
+
+// ── CORE API ─────────────────────────────────────────────────────────────────
+function callClaude(contentBlocks, systemPrompt) {
+  var payload = {
+    model:      MODEL,
+    max_tokens: 1500,
+    system:     systemPrompt,
+    messages:   [{ role: 'user', content: contentBlocks }]
+  };
+  return fetch(API, {
+    method: 'POST',
+    headers: {
+      'Content-Type':                              'application/json',
+      'x-api-key':                                 'PLACEHOLDER',
+      'anthropic-version':                         '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(resp) {
+    if (!resp.ok) {
+      return resp.json().catch(function() { return {}; }).then(function(j) {
+        throw new Error((j && j.error && j.error.message) ? j.error.message : 'HTTP ' + resp.status);
+      });
+    }
+    return resp.json();
+  })
+  .then(function(data) {
+    return (data.content || [])
+      .filter(function(b) { return b.type === 'text'; })
+      .map(function(b) { return b.text; })
+      .join('');
+  });
+}
+
+// ── BUILD CONTENT BLOCKS ──────────────────────────────────────────────────────
+function buildBlocks(promptText) {
+  if (mode === 'txt') {
+    return Promise.resolve([{
+      type: 'text',
+      text: promptText + '\n\nCONTENT TO ANALYZE:\n' + document.getElementById('txt-content').value.trim()
+    }]);
+  }
+  return Promise.resolve([
+    { type: 'image', source: { type: 'base64', media_type: imageMime, data: imageB64 } },
+    { type: 'text',  text: promptText }
+  ]);
+}
+
+// ── RUN ONE REVIEWER ──────────────────────────────────────────────────────────
+function runReviewer(id, systemPrompt, userPrompt, p0, p1) {
+  var r = REVIEWERS.filter(function(x) { return x.id === id; })[0];
+  setReviewer(id, 'running');
+  addLog(r.icon + ' ' + r.name + ' reviewing…', 'info');
+  setProgress(p0);
+
+  return buildBlocks(userPrompt)
+    .then(function(blocks) { return callClaude(blocks, systemPrompt); })
+    .then(function(text) {
+      results[id] = text;
+      setReviewer(id, 'done');
+      addLog(r.icon + ' ' + r.name + ' — complete', 'ok');
+      setProgress(p1);
+    })
+    .catch(function(err) {
+      results[id] = '';
+      setReviewer(id, 'error');
+      addLog(r.icon + ' ' + r.name + ' — ' + err.message, 'err');
+      setProgress(p1);
+    });
+}
+
+function seq(tasks) {
+  return tasks.reduce(function(chain, fn) {
+    return chain.then(function() { return fn(); });
+  }, Promise.resolve());
+}
+
+// ── MAIN ANALYSIS ─────────────────────────────────────────────────────────────
+function runAnalysis() {
+  if (busy) return;
+  busy    = true;
+  results = {};
+
+  document.getElementById('run-btn').disabled  = true;
+  document.getElementById('run-btn').innerHTML = '<span class="spin"></span>&nbsp;Analyzing…';
+  document.getElementById('log-section').style.display     = 'block';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('prompts-section').style.display = 'none';
+  document.getElementById('log-box').innerHTML = '';
+  document.getElementById('score-label').textContent = 'Analyzing…';
+  REVIEWERS.forEach(function(r) { setReviewer(r.id, 'idle'); });
+
+  addLog('Content Intelligence Studio initialized', 'info');
+  addLog('Mode: YouTube · Viral Growth · Brutal', 'info');
+  addLog('Deploying 7 AI reviewers sequentially…', 'info');
+
+  seq([
+    function() {
+      return runReviewer('hook',
+        'You are a brutally honest YouTube hook analyst with a decade of viral content experience. You have studied audience retention curves on thousands of videos. Analyze the opening hook with zero mercy. Focus on: opening line punch, curiosity gap, pattern interrupt strength, emotional immediacy, and whether this passes the 3-second scroll-stop test. Write in direct paragraphs only.',
+        'Analyze this YouTube content\'s hook with brutal honesty. Start your response with "HOOK SCORE: [number]/100" on its own line. Explain exactly why that score, what will make viewers leave, what (if anything) works, and end with one sentence on what the hook is fundamentally missing.',
+        5, 20);
+    },
+    function() {
+      return runReviewer('title',
+        'You are a YouTube SEO and title optimization specialist. You live in keyword data and CTR benchmarks. Be clinical and brutal. Cover click-through rate potential, keyword gaps, emotional trigger words, length optimization, and whether this title earns the click.',
+        'Analyze the title, description, and SEO elements of this YouTube content. Start with "TITLE SCORE: [number]/100" on its own line. Identify exact keywords being missed, what top competing channels do better, and be ruthlessly specific about what makes this title fail or win the click.',
+        20, 34);
+    },
+    function() {
+      return runReviewer('visual',
+        'You are a visual content director and thumbnail psychologist. You have analyzed tens of thousands of YouTube thumbnails. Be brutally direct about amateur vs professional visual decisions.',
+        'Analyze every visual element — thumbnail composition, color contrast, facial expression, text overlay, branding consistency, and scroll-stop power. Start with "VISUAL SCORE: [number]/100" on its own line. Be specifically brutal about what needs to change.',
+        34, 48);
+    },
+    function() {
+      return runReviewer('algo',
+        'You are a former YouTube engineer turned algorithm consultant. You understand watch-time signals, CTR benchmarks, retention curves, and what the current YouTube algorithm actually rewards. No myths — pure signal analysis.',
+        'Analyze how the YouTube algorithm will treat this content. Start with "ALGO SCORE: [number]/100" on its own line. Explain the signals this content sends, what metadata works against it, expected CTR and watch-time range, and what changes get it into suggested videos.',
+        48, 61);
+    },
+    function() {
+      return runReviewer('psych',
+        'You are a behavioral psychologist specializing in digital consumption. You apply dopamine loops, FOMO, social proof, curiosity gaps, and emotional contagion to YouTube content. Be clinically precise and brutally honest.',
+        'Analyze the psychological triggers in this YouTube content. Start with "PSYCH SCORE: [number]/100" on its own line. Identify what emotional state this creates, which psychological biases are leveraged or missed, what makes this shareable or not, and predict the likely comment section tone.',
+        61, 72);
+    },
+    function() {
+      return runReviewer('compete',
+        'You are a YouTube competitive intelligence analyst who benchmarks content against category leaders. You are not kind about mediocrity. You identify exactly where a video falls short of the top 1% of creators.',
+        'Benchmark this YouTube content against top performers in its niche. Start with "COMPETE SCORE: [number]/100" on its own line. Identify what category leaders do that this content does not, which competitors own this topic and why, and what unique angle is being ignored.',
+        72, 82);
+    },
+    function() {
+      return runReviewer('growth',
+        'You are a YouTube growth strategist who has scaled channels from zero to millions. You see viral loop architecture, community hooks, and channel strategy in every video. You are direct about what has a ceiling.',
+        'Analyze the growth and viral potential of this YouTube content. Start with "GROWTH SCORE: [number]/100" on its own line. Cover viral loop design, share triggers, community hooks, channel strategy alignment, and realistic subscriber conversion. Be brutally specific about the ceiling on this piece.',
+        82, 90);
+    }
+  ])
+  .then(function() {
+    addLog('All 7 reviewers complete. Synthesizing…', 'ok');
+    setProgress(90);
+    return generateSynthesis();
+  })
+  .then(function() {
+    addLog('Synthesis complete. Building final report…', 'ok');
+    setProgress(100);
+    document.getElementById('results-section').style.display = 'block';
+    document.getElementById('prompts-section').style.display = 'block';
+    renderResults();
+    buildChips();
+    showToast('✓ Full analysis complete — 7 reviewers done');
+  })
+  .catch(function(err) {
+    addLog('Fatal: ' + err.message, 'err');
+    showToast('Error: ' + err.message);
+  })
+  .then(function() {
+    busy = false;
+    document.getElementById('run-btn').disabled  = false;
+    document.getElementById('run-btn').innerHTML = '🔄 Re-analyze';
+  });
+}
+
+// ── SYNTHESIS ─────────────────────────────────────────────────────────────────
+function generateSynthesis() {
+  addLog('🔮 Generating executive synthesis…', 'info');
+
+  var dump = REVIEWERS.map(function(r) {
+    return '=== ' + r.name.toUpperCase() + ' ===\n' + (results[r.id] || '(no data)');
+  }).join('\n\n');
+
+  var synthPrompt =
+    'You are the lead content intelligence director synthesizing 7 specialist reviews of YouTube content.\n' +
+    'Use EXACTLY these labeled lines — label first, then a colon, then your content:\n\n' +
+    'VERDICT: (one brutally honest sentence, max 15 words)\n' +
+    'OVERALL_SCORE: (integer 0-100 ONLY — no other text)\n' +
+    'HOOK_SCORE: (integer 0-100 ONLY)\n' +
+    'TITLE_SCORE: (integer 0-100 ONLY)\n' +
+    'VISUAL_SCORE: (integer 0-100 ONLY)\n' +
+    'ALGO_SCORE: (integer 0-100 ONLY)\n' +
+    'PSYCH_SCORE: (integer 0-100 ONLY)\n' +
+    'COMPETE_SCORE: (integer 0-100 ONLY)\n' +
+    'GROWTH_SCORE: (integer 0-100 ONLY)\n' +
+    'EXEC_SUMMARY: (3 brutal paragraphs separated by blank lines)\n' +
+    'STRENGTH_1: (one specific sentence)\n' +
+    'STRENGTH_2: (one specific sentence)\n' +
+    'STRENGTH_3: (one specific sentence)\n' +
+    'WEAKNESS_1: (one specific sentence)\n' +
+    'WEAKNESS_2: (one specific sentence)\n' +
+    'WEAKNESS_3: (one specific sentence)\n' +
+    'WEAKNESS_4: (one specific sentence)\n' +
+    'WEAKNESS_5: (one specific sentence)\n' +
+    'MISSED_1: (one specific sentence)\n' +
+    'MISSED_2: (one specific sentence)\n' +
+    'MISSED_3: (one specific sentence)\n' +
+    'IMPACT_1: (one actionable improvement sentence)\n' +
+    'IMPACT_2: (one actionable improvement sentence)\n' +
+    'IMPACT_3: (one actionable improvement sentence)\n\n' +
+    'Specialist reviews:\n\n' + dump;
+
+  var rwPrompt =
+    'Based on this YouTube content analysis, generate optimized rewrites.\n' +
+    'Use EXACTLY these labeled lines — label first, colon, then your content:\n\n' +
+    'TITLE_A: (viral-optimized title option 1)\n' +
+    'TITLE_B: (viral-optimized title option 2)\n' +
+    'TITLE_C: (curiosity-gap title option 3)\n' +
+    'HOOK_REWRITE: (rewritten opening hook, 3-5 sentences)\n' +
+    'DESC_REWRITE: (rewritten YouTube description, 4-5 SEO-optimized sentences)\n' +
+    'BEFORE_SNAPSHOT: (2 sentences on what the original does wrong)\n' +
+    'AFTER_SNAPSHOT: (2 sentences on what the improved version achieves)\n' +
+    'CHECK_1: (specific pre-publish action item)\n' +
+    'CHECK_2: (specific pre-publish action item)\n' +
+    'CHECK_3: (specific pre-publish action item)\n' +
+    'CHECK_4: (specific pre-publish action item)\n' +
+    'CHECK_5: (specific pre-publish action item)\n' +
+    'CHECK_6: (specific pre-publish action item)\n' +
+    'CHECK_7: (specific pre-publish action item)\n' +
+    'CHECK_8: (specific pre-publish action item)\n' +
+    'CHECK_9: (specific pre-publish action item)\n' +
+    'CHECK_10: (specific pre-publish action item)\n' +
+    'PERF_PREDICTION: (3 sentences: expected CTR range, view trajectory, subscriber conversion — label as AI estimates)';
+
+  return buildBlocks(synthPrompt)
+    .then(function(blocks) {
+      return callClaude(blocks, 'You are a senior content director. Follow the exact label format. Integers only for scores. Be specific and brutal.');
+    })
+    .then(function(text) {
+      results.synthesis = text;
+      addLog('🔮 Synthesis complete', 'ok');
+      addLog('✍️ Generating rewrites & checklist…', 'info');
+      return buildBlocks(rwPrompt);
+    })
+    .then(function(blocks) {
+      return callClaude(blocks, 'You are a YouTube optimization expert. Follow the exact label format. Write real specific content. No placeholders.');
+    })
+    .then(function(text) {
+      results.rewrites = text;
+      addLog('✍️ Rewrites complete', 'ok');
+    })
+    .catch(function(err) {
+      addLog('Synthesis/rewrite error: ' + err.message, 'err');
+    });
+}
+
+// ── PARSE HELPERS ──────────────────────────────────────────────────────────────
+function pick(text, key) {
+  if (!text) return '';
+  var esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  var re  = new RegExp(esc + ':\\s*([\\s\\S]*?)(?=\\n[A-Z][A-Z0-9_]+:|$)');
+  var m   = text.match(re);
+  return m ? m[1].trim() : '';
+}
+
+function pickInt(text, key) {
+  var val = pick(text, key);
+  var n   = parseInt(val);
+  if (!isNaN(n)) return Math.max(0, Math.min(100, n));
+  return 0;
+}
+
+function extractScore(reviewerText) {
+  if (!reviewerText) return 0;
+  var m = reviewerText.match(/SCORE[:\s]+(\d+)/i);
+  return m ? Math.max(0, Math.min(100, parseInt(m[1]))) : 0;
+}
+
+function scoreColor(n) {
+  if (n >= 80) return 'var(--green)';
+  if (n >= 60) return 'var(--gold)';
+  if (n >= 40) return 'var(--red2)';
+  return 'var(--red)';
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────────────────────────
+function renderResults() {
+  var syn = results.synthesis || '';
+  var rw  = results.rewrites  || '';
+
+  var scoreData = {
+    'Hook Strength':    pickInt(syn,'HOOK_SCORE')    || extractScore(results.hook),
+    'Title & SEO':      pickInt(syn,'TITLE_SCORE')   || extractScore(results.title),
+    'Visual Impact':    pickInt(syn,'VISUAL_SCORE')  || extractScore(results.visual),
+    'Algorithm Fit':    pickInt(syn,'ALGO_SCORE')    || extractScore(results.algo),
+    'Psych Triggers':   pickInt(syn,'PSYCH_SCORE')   || extractScore(results.psych),
+    'Competitive Edge': pickInt(syn,'COMPETE_SCORE') || extractScore(results.compete),
+    'Growth Potential': pickInt(syn,'GROWTH_SCORE')  || extractScore(results.growth),
+  };
+
+  var overall = pickInt(syn, 'OVERALL_SCORE');
+  if (!overall) {
+    var vals = Object.values(scoreData).filter(function(v) { return v > 0; });
+    overall  = vals.length ? Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length) : 0;
+  }
+
+  // Header
+  document.getElementById('score-num').textContent       = overall;
+  document.getElementById('score-num').style.color       = scoreColor(overall);
+  document.getElementById('score-ring').style.borderColor = scoreColor(overall);
+  document.getElementById('score-label').textContent     = overall + '/100';
+
+  var verdict  = pick(syn, 'VERDICT');
+  var execText = pick(syn, 'EXEC_SUMMARY');
+  var scoreVals = Object.values(scoreData);
+
+  // ── OVERVIEW ──
+  document.getElementById('out-exec').innerHTML =
+    '<div class="exec-box">' +
+      '<div class="exec-verdict">' + (verdict || 'Content analyzed — see breakdown below.') + '</div>' +
+      '<div class="exec-sub">Executive verdict · YouTube · Brutal Mode</div>' +
+      '<div class="exec-metrics">' +
+        metricHtml(overall, 'Overall Score') +
+        metricHtml(scoreData['Hook Strength'],    'Hook Strength') +
+        metricHtml(scoreData['Growth Potential'], 'Growth Potential') +
+        metricHtml(scoreData['Algorithm Fit'],    'Algorithm Fit') +
+      '</div>' +
+    '</div>' +
+    '<div class="card" style="margin-top:13px">' +
+      '<div class="card-head"><span class="card-icon">📋</span><span class="card-title">Executive Summary</span><span class="badge red">Brutal Mode</span></div>' +
+      '<div class="card-body">' +
+        (execText
+          ? execText.split(/\n\n+/).map(function(p){return '<p>'+p.replace(/\n/g,' ')+'</p>';}).join('')
+          : '<p>See individual reviewer scores below.</p>') +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('out-scores').innerHTML = Object.entries(scoreData).map(function(kv) {
+    var nm=kv[0]; var v=kv[1];
+    return '<div class="sc-card">' +
+      '<div class="sc-head"><span class="sc-label">'+nm+'</span><span class="sc-val" style="color:'+scoreColor(v)+'">'+v+'</span></div>' +
+      '<div class="sc-track"><div class="sc-fill" style="width:'+v+'%;background:'+scoreColor(v)+'"></div></div>' +
+    '</div>';
+  }).join('');
+
+  var str  = [1,2,3].map(function(i){return pick(syn,'STRENGTH_'+i);}).filter(Boolean);
+  var weak = [1,2,3,4,5].map(function(i){return pick(syn,'WEAKNESS_'+i);}).filter(Boolean);
+  var miss = [1,2,3].map(function(i){return pick(syn,'MISSED_'+i);}).filter(Boolean);
+
+  document.getElementById('out-sw').innerHTML =
+    '<div class="two-col">' +
+      '<div class="card"><div class="card-head"><span class="card-icon">✅</span><span class="card-title">What\'s working</span><span class="badge green">Strengths</span></div>' +
+        '<ul class="dot-list">' + (str.length ? str.map(function(s){return '<li><span class="dot" style="background:var(--green)"></span>'+s+'</li>';}).join('') : '<li><span class="dot" style="background:var(--text3)"></span>No notable strengths identified.</li>') + '</ul></div>' +
+      '<div class="card"><div class="card-head"><span class="card-icon">🔴</span><span class="card-title">Critical failures</span><span class="badge red">Weaknesses</span></div>' +
+        '<ul class="dot-list">' + (weak.length ? weak.map(function(w){return '<li><span class="dot" style="background:var(--red)"></span>'+w+'</li>';}).join('') : '<li><span class="dot" style="background:var(--text3)"></span>No data.</li>') + '</ul></div>' +
+    '</div>' +
+    '<div class="card"><div class="card-head"><span class="card-icon">💡</span><span class="card-title">Missed opportunities</span><span class="badge gold">Untapped</span></div>' +
+      '<ul class="dot-list">' + (miss.length ? miss.map(function(m){return '<li><span class="dot" style="background:var(--gold)"></span>'+m+'</li>';}).join('') : '<li><span class="dot" style="background:var(--text3)"></span>No data.</li>') + '</ul></div>';
+
+  // ── DEEP ──
+  var bCls = ['red','gold','purple','blue','green','red','gold'];
+  document.getElementById('out-deep').innerHTML = REVIEWERS.map(function(r,i) {
+    var txt = results[r.id] || 'No data returned.';
+    return '<div class="card">' +
+      '<div class="card-head"><span class="card-icon">'+r.icon+'</span><span class="card-title">'+r.name+'</span><span class="badge '+bCls[i]+'">'+(scoreVals[i]||0)+'/100</span></div>' +
+      '<div class="card-body">' + txt.split(/\n+/).filter(function(l){return l.trim();}).map(function(l){return '<p>'+l+'</p>';}).join('') + '</div>' +
+    '</div>';
+  }).join('');
+
+  // ── REWRITES ──
+  var titles = ['TITLE_A','TITLE_B','TITLE_C'].map(function(k){return pick(rw,k);}).filter(Boolean);
+  var checks = [1,2,3,4,5,6,7,8,9,10].map(function(i){return pick(rw,'CHECK_'+i);}).filter(Boolean);
+
+  document.getElementById('out-rw').innerHTML =
+    '<div class="card"><div class="card-head"><span class="card-icon">📌</span><span class="card-title">Optimized title options</span><span class="badge green">AI Generated</span></div>' +
+      (titles.length ? titles.map(function(t,i){return '<div style="padding:11px 13px;background:var(--bg4);border-radius:8px;border:1px solid var(--border);margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Option '+(i+1)+'</div><div style="font-size:14px;font-weight:500;color:var(--text)">'+t+'</div></div>';}).join('') : '<p style="color:var(--text2)">No titles generated.</p>') +
+    '</div>' +
+    '<div class="card"><div class="card-head"><span class="card-icon">🪝</span><span class="card-title">Rewritten hook</span><span class="badge purple">High Impact</span></div>' +
+      '<div class="card-body" style="background:var(--bg4);padding:13px;border-radius:8px;font-style:italic">'+(pick(rw,'HOOK_REWRITE')||'Not generated.')+'</div></div>' +
+    '<div class="card"><div class="card-head"><span class="card-icon">📝</span><span class="card-title">Optimized description</span><span class="badge blue">SEO Ready</span></div>' +
+      '<div class="card-body" style="background:var(--bg4);padding:13px;border-radius:8px">'+(pick(rw,'DESC_REWRITE')||'Not generated.')+'</div></div>' +
+    '<div class="card"><div class="card-head"><span class="card-icon">⚖️</span><span class="card-title">Before vs After</span></div>' +
+      '<div class="compare-grid">' +
+        '<div class="compare-side"><span class="compare-tag before">Before</span><div class="compare-text">'+(pick(rw,'BEFORE_SNAPSHOT')||'Original as submitted.')+'</div></div>' +
+        '<div class="compare-side"><span class="compare-tag after">After</span><div class="compare-text">'+(pick(rw,'AFTER_SNAPSHOT')||'Optimized with recommendations applied.')+'</div></div>' +
+      '</div></div>' +
+    '<div class="card"><div class="card-head"><span class="card-icon">✅</span><span class="card-title">Pre-publish checklist</span><span class="badge gold">'+checks.length+' items</span></div>' +
+      '<ul class="check-list">'+(checks.length ? checks.map(function(c){return '<li><span class="check-icon">○</span>'+c+'</li>';}).join('') : '<li><span class="check-icon">○</span>Run analysis to generate checklist.</li>')+'</ul></div>' +
+    '<div class="card"><div class="card-head"><span class="card-icon">🔮</span><span class="card-title">Performance prediction</span><span class="badge red">AI Estimate</span></div>' +
+      '<div class="warn-box">⚠️ AI-generated pattern estimates only — not guarantees. Actual results depend on many variables.</div>' +
+      '<div class="card-body">'+(pick(rw,'PERF_PREDICTION')||'Not generated.')+'</div>' +
+      '<div style="margin-top:14px">' +
+        predBar('CTR Potential',      scoreData['Title & SEO'],      'var(--gold)') +
+        predBar('Viral Coefficient',  scoreData['Psych Triggers'],   'var(--purple)') +
+        predBar('Algorithm Boost',    scoreData['Algorithm Fit'],    'var(--green)') +
+      '</div></div>';
+
+  // ── REPORT ──
+  var impacts   = [1,2,3].map(function(i){return pick(syn,'IMPACT_'+i);}).filter(Boolean);
+  var passCount = scoreVals.filter(function(v){return v>=60;}).length;
+
+  document.getElementById('out-rp').innerHTML =
+    '<div class="health-row">' +
+      '<div class="health-card"><div class="health-val" style="color:'+scoreColor(overall)+'">'+overall+'<span style="font-size:13px;color:var(--text3)">/100</span></div><div class="health-lbl">Content Health Score</div></div>' +
+      '<div class="health-card"><div class="health-val" style="color:var(--gold)">'+(overall>=70?'Good':overall>=50?'Fair':'Poor')+'</div><div class="health-lbl">Viral Readiness</div></div>' +
+      '<div class="health-card"><div class="health-val" style="color:var(--green)">'+passCount+'/7</div><div class="health-lbl">Reviewers Passed ≥60</div></div>' +
+    '</div>' +
+    '<div class="card"><div class="card-head"><span class="card-icon">🎯</span><span class="card-title">Highest-impact improvements</span><span class="badge red">Priority</span></div>' +
+      '<div class="card-body">'+(impacts.length ? impacts.map(function(imp,i){return '<p style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>'+(i+1)+'.</strong> '+imp+'</p>';}).join('') : '<p>See weaknesses for priority improvements.</p>')+'</div></div>' +
+    REVIEWERS.map(function(r,i){
+      var txt = results[r.id]||'No data.';
+      return '<div class="card"><div class="card-head"><span class="card-icon">'+r.icon+'</span><span class="card-title">'+r.name+' — Full Report</span><span class="badge '+bCls[i]+'">'+(scoreVals[i]||0)+'/100</span></div>' +
+        '<div class="card-body">'+txt.split(/\n+/).filter(function(l){return l.trim();}).map(function(l){return '<p>'+l+'</p>';}).join('')+'</div></div>';
+    }).join('') +
+    '<div class="card" style="border-color:rgba(230,57,70,.3)">' +
+      '<div class="card-head"><span class="card-icon">🏁</span><span class="card-title">Final Verdict</span><span class="badge red">Brutal Mode</span></div>' +
+      '<div class="card-body"><p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:12px">'+(verdict||'Analysis complete.')+'</p>' +
+        execText.split(/\n\n+/).map(function(p){return '<p>'+p.replace(/\n/g,' ')+'</p>';}).join('') +
+      '</div></div>';
+}
+
+function metricHtml(val, lbl) {
+  return '<div class="exec-metric"><div class="exec-metric-val" style="color:'+scoreColor(val)+'">'+val+'</div><div class="exec-metric-lbl">'+lbl+'</div></div>';
+}
+
+function predBar(label, val, color) {
+  return '<div class="pred-item">' +
+    '<div class="pred-head"><span class="pred-label">'+label+'</span></div>' +
+    '<div class="pred-track"><div class="pred-fill" style="width:'+val+'%;background:'+color+'"></div></div>' +
+    '<div class="pred-note">AI estimate only</div>' +
+  '</div>';
+}
+
+// ── PROMPT CHIPS ──────────────────────────────────────────────────────────────
+function buildChips() {
+  var items = [
+    'How can I 2x my thumbnail CTR?',
+    'Write 5 A/B test title variations',
+    'Which top YouTube channels should I study?',
+    'Plan my next 5 videos for channel growth',
+    'What hooks work best in my niche?',
+    'Rewrite my description with keyword clusters',
+    'What posting schedule beats the algorithm?',
+    'How do I convert viewers to subscribers faster?',
+  ];
+  document.getElementById('chip-row').innerHTML = items.map(function(c) {
+    return '<button class="chip" data-prompt="'+c.replace(/"/g,'&quot;')+'">'+c+' ↗</button>';
+  }).join('');
+  document.querySelectorAll('.chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var p = btn.getAttribute('data-prompt');
+      if (typeof sendPrompt === 'function') sendPrompt(p);
+      else showToast('Prompt: ' + p);
+    });
+  });
+}
+</script>
+</body>
+</html>
