@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Tool Comparison · Enterprise Decision Tool</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2333;
+    --border: #2a2f45;
+    --border-light: #333a55;
+    --text: #e4e8f4;
+    --text-muted: #7a82a0;
+    --text-dim: #4a5272;
+    --accent: #5c7cfa;
+    --accent-glow: rgba(92, 124, 250, 0.15);
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+
+    --jira: #0052cc;
+    --asana: #f06a6a;
+    --monday: #ff3d57;
+    --notion: #ffffff;
+
+    --jira-soft: rgba(0, 82, 204, 0.15);
+    --asana-soft: rgba(240, 106, 106, 0.15);
+    --monday-soft: rgba(255, 61, 87, 0.15);
+    --notion-soft: rgba(255, 255, 255, 0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-left { flex: 1; min-width: 200px; }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .header-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .tool-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .pill {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: 0.02em;
+  }
+  .pill-jira   { color: #4c9aff; border-color: rgba(76,154,255,0.4); background: rgba(76,154,255,0.08); }
+  .pill-asana  { color: #f06a6a; border-color: rgba(240,106,106,0.4); background: rgba(240,106,106,0.08); }
+  .pill-monday { color: #ff6b8a; border-color: rgba(255,107,138,0.4); background: rgba(255,107,138,0.08); }
+  .pill-notion { color: #c7cce8; border-color: rgba(199,204,232,0.3); background: rgba(199,204,232,0.06); }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    min-height: calc(100vh - 140px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 28px 24px;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+  .criterion-block {
+    margin-bottom: 24px;
+  }
+  .crit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .crit-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .crit-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 32px;
+    text-align: right;
+  }
+  .slider-wrap {
+    position: relative;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--accent);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+  }
+  .slider-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: width 0.1s;
+  }
+  .total-weight {
+    margin-top: 28px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .total-label { font-size: 12px; color: var(--text-muted); }
+  .total-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .total-num.over { color: var(--red); }
+  .total-num.ok { color: var(--green); }
+  .normalize-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    background: var(--accent-glow);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .normalize-btn:hover { background: rgba(92,124,250,0.25); }
+
+  /* ── Main content ── */
+  .main { padding: 28px 32px; min-width: 0; }
+
+  /* ── Ranking cards ── */
+  .ranking-section { margin-bottom: 36px; }
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .rank-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .rank-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .rank-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .rank-card.tool-jira::before   { background: #4c9aff; }
+  .rank-card.tool-asana::before  { background: #f06a6a; }
+  .rank-card.tool-monday::before { background: #ff6b8a; }
+  .rank-card.tool-notion::before { background: rgba(199,204,232,0.6); }
+
+  .rank-card.rank-1 {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(92,124,250,0.08) 100%);
+  }
+  .rank-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .rank-card.rank-1 .rank-badge { color: var(--accent); }
+  .rank-card.rank-1 .rank-badge::before { content: '★ '; }
+  .tool-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .tool-name.tool-jira   { color: #4c9aff; }
+  .tool-name.tool-asana  { color: #f06a6a; }
+  .tool-name.tool-monday { color: #ff6b8a; }
+  .tool-name.tool-notion { color: #c7cce8; }
+
+  .score-bar-wrap {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .score-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .bar-jira   { background: #4c9aff; }
+  .bar-asana  { background: #f06a6a; }
+  .bar-monday { background: #ff6b8a; }
+  .bar-notion { background: rgba(199,204,232,0.6); }
+
+  .score-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .score-label { font-size: 11px; color: var(--text-muted); }
+
+  /* ── Comparison table ── */
+  .table-section { margin-bottom: 36px; overflow-x: auto; }
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 600px;
+  }
+  .comp-table th {
+    padding: 10px 14px;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .comp-table th:first-child { color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+  .th-jira   { color: #4c9aff !important; }
+  .th-asana  { color: #f06a6a !important; }
+  .th-monday { color: #ff6b8a !important; }
+  .th-notion { color: #c7cce8 !important; }
+  .comp-table td {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .comp-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .comp-table td:first-child {
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    background: var(--surface);
+  }
+  .cell-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .dot-score {
+    display: flex;
+    gap: 3px;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .dot.filled-jira   { background: #4c9aff; }
+  .dot.filled-asana  { background: #f06a6a; }
+  .dot.filled-monday { background: #ff6b8a; }
+  .dot.filled-notion { background: rgba(199,204,232,0.6); }
+
+  .est-flag {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--amber);
+    border: 1px solid rgba(251,191,36,0.4);
+    border-radius: 3px;
+    padding: 1px 5px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .weight-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+  }
+
+  /* ── Collapsibles ── */
+  .collapsible {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .collapsible-header {
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .collapsible-header:hover { background: var(--surface2); }
+  .collapsible-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .collapsible-icon {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    transition: transform 0.2s;
+  }
+  .collapsible-icon.open { transform: rotate(180deg); }
+  .collapsible-body {
+    display: none;
+    padding: 20px;
+    background: var(--bg);
+  }
+  .collapsible-body.open { display: block; }
+
+  /* Sources */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .source-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+  .source-tool {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .source-name {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .source-url {
+    color: var(--accent);
+    text-decoration: none;
+    word-break: break-all;
+    font-size: 11px;
+  }
+  .source-url:hover { text-decoration: underline; }
+  .source-note {
+    margin-top: 4px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* Research methodology */
+  .method-block { margin-bottom: 16px; }
+  .method-block h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .method-block p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* Verdict */
+  .verdict-box {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(92,124,250,0.06) 100%);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .verdict-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .verdict-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+  .verdict-winner {
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; border-right: none; border-bottom: 1px solid var(--border); max-height: none; }
+    .main { padding: 20px 16px; }
+  }
+  @media (max-width: 600px) {
+    .header { padding: 20px 16px; }
+    .rank-cards { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .rank-card { animation: fadeUp 0.4s ease both; }
+  .rank-card:nth-child(1) { animation-delay: 0.05s; }
+  .rank-card:nth-child(2) { animation-delay: 0.10s; }
+  .rank-card:nth-child(3) { animation-delay: 0.15s; }
+  .rank-card:nth-child(4) { animation-delay: 0.20s; }
+
+  .flag-est { color: var(--amber); }
+  .flag-est-inline {
+    font-size: 10px;
+    color: var(--amber);
+    font-family: 'DM Mono', monospace;
+  }
+  .disclaimer {
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: rgba(251,191,36,0.06);
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--amber);
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="eyebrow">Enterprise Decision Tool · PM Software</div>
+    <h1>Project Management Tool Comparison</h1>
+    <div class="header-subtitle">For: Enterprise IT Manager standardizing tools across departments · 6 weighted criteria</div>
+  </div>
+  <div class="tool-pills">
+    <span class="pill pill-jira">Jira</span>
+    <span class="pill pill-asana">Asana</span>
+    <span class="pill pill-monday">Monday.com</span>
+    <span class="pill pill-notion">Notion</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR: sliders -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Adjust criteria weights</div>
+
+    <div class="criterion-block" data-crit="integrations">
+      <div class="crit-header">
+        <span class="crit-label">🔗 Integration Ecosystem</span>
+        <span class="crit-value" id="val-integrations">20%</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track" id="track-integrations"></div>
+        <input type="range" min="0" max="100" value="20" id="sl-integrations" oninput="updateWeights()">
+      </div>
+    </div>
+
+    <div class="criterion-block" data-crit="security">
+      <div class="crit-header">
+        <span class="crit-label">🔒 Security & Compliance</span>
+        <span class="crit-value" id="val-security">20%</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track" id="track-security"></div>
+        <input type="range" min="0" max="100" value="20" id="sl-security" oninput="updateWeights()">
+      </div>
+    </div>
+
+    <div class="criterion-block" data-crit="admin">
+      <div class="crit-header">
+        <span class="crit-label">⚙️ Admin Controls</span>
+        <span class="crit-value" id="val-admin">20%</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track" id="track-admin"></div>
+        <input type="range" min="0" max="100" value="20" id="sl-admin" oninput="updateWeights()">
+      </div>
+    </div>
+
+    <div class="criterion-block" data-crit="automation">
+      <div class="crit-header">
+        <span class="crit-label">⚡ Automation Capabilities</span>
+        <span class="crit-value" id="val-automation">15%</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track" id="track-automation"></div>
+        <input type="range" min="0" max="100" value="15" id="sl-automation" oninput="updateWeights()">
+      </div>
+    </div>
+
+    <div class="criterion-block" data-crit="scalability">
+      <div class="crit-header">
+        <span class="crit-label">📈 Scalability</span>
+        <span class="crit-value" id="val-scalability">15%</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track" id="track-scalability"></div>
+        <input type="range" min="0" max="100" value="15" id="sl-scalability" oninput="updateWeights()">
+      </div>
+    </div>
+
+    <div class="criterion-block" data-crit="adoption">
+      <div class="crit-header">
+        <span class="crit-label">🧠 Ease of Adoption</span>
+        <span class="crit-value" id="val-adoption">10%</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track" id="track-adoption"></div>
+        <input type="range" min="0" max="100" value="10" id="sl-adoption" oninput="updateWeights()">
+      </div>
+    </div>
+
+    <div class="total-weight">
+      <span class="total-label">Total weight</span>
+      <span class="total-num ok" id="total-val">100%</span>
+    </div>
+    <button class="normalize-btn" onclick="normalizeWeights()">Normalize to 100%</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Verdict -->
+    <div class="verdict-box" id="verdict-box">
+      <div class="verdict-eyebrow">Live Recommendation</div>
+      <div class="verdict-text" id="verdict-text">Adjust weights to see a tailored recommendation for your organization's priorities.</div>
+    </div>
+
+    <!-- Ranking cards -->
+    <div class="ranking-section">
+      <div class="section-title">Weighted ranking · updates live</div>
+      <div class="rank-cards" id="rank-cards"></div>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="table-section">
+      <div class="section-title">Criterion-by-criterion breakdown</div>
+      <table class="comp-table" id="comp-table">
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th class="th-jira">Jira</th>
+            <th class="th-asana">Asana</th>
+            <th class="th-monday">Monday.com</th>
+            <th class="th-notion">Notion</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div class="disclaimer">⚠ <strong>EST</strong> flags indicate estimates or analyst-derived scores, not a single official published number. All sourced data points are cited in the Sources panel below.</div>
+    </div>
+
+    <!-- Sources -->
+    <div class="collapsible" id="sources-panel">
+      <div class="collapsible-header" onclick="toggleCollapse('sources-panel')">
+        <div class="collapsible-title">📎 Sources & Citations</div>
+        <div class="collapsible-icon" id="icon-sources-panel">▼</div>
+      </div>
+      <div class="collapsible-body" id="body-sources-panel">
+        <div class="sources-grid" id="sources-grid"></div>
+      </div>
+    </div>
+
+    <!-- Methodology -->
+    <div class="collapsible" id="method-panel">
+      <div class="collapsible-header" onclick="toggleCollapse('method-panel')">
+        <div class="collapsible-title">🔬 How this was researched</div>
+        <div class="collapsible-icon" id="icon-method-panel">▼</div>
+      </div>
+      <div class="collapsible-body" id="body-method-panel">
+        <div class="method-block">
+          <h4>Scoring methodology</h4>
+          <p>Each tool is scored 1–10 per criterion. Scores are derived from a combination of official vendor documentation, third-party review sites (G2, Plaky, TaskRhino, monday.com blog, cloudwards.net), and analyst write-ups verified against primary sources. Where a single authoritative number exists (e.g., "3,000+ integrations" for Jira from multiple review sources), it is cited as sourced. Where scores reflect a synthesis of qualitative evidence (e.g., "ease of adoption"), the score is flagged EST.</p>
+        </div>
+        <div class="method-block">
+          <h4>Integration ecosystem</h4>
+          <p>Jira's 3,000+ figure is cited by multiple review sites (Plaky, monday.com blog) referencing the Atlassian Marketplace. Asana's 200+ is the vendor's own widely cited figure. Monday.com's 200+ dev-tool integrations is from their monday dev marketing and review comparisons. Notion's 100+ native integrations is from the Confluence/Notion 2026 comparison on saascrmreview.com.</p>
+        </div>
+        <div class="method-block">
+          <h4>Security & compliance</h4>
+          <p>All four tools have confirmed SOC 2 Type II and ISO 27001 certifications per their trust centers (Asana: trustcenter.asana.com; Notion: notion.com/security; Monday: trust.monday.com; Jira/Atlassian: trust.atlassian.com). Monday.com holds the most certifications (SOC 1, SOC 2, ISO 27001/17/18/32/27701, GDPR, HIPAA, FedRAMP). Jira offers on-premises Data Center deployment, a significant differentiator for regulated industries. Notion lacks HIPAA and FedRAMP eligibility. Scores reflect breadth of certifications + deployment flexibility.</p>
+        </div>
+        <div class="method-block">
+          <h4>Admin controls & user management</h4>
+          <p>Jira (Atlassian Access) offers SAML SSO, SCIM, enforced 2FA, and audit logs with organization-wide admin across all Atlassian products. Asana Enterprise adds SCIM user provisioning and de-provisioning per their official plan comparison. Monday.com Enterprise includes SSO, SCIM, DLP, BYOK, and Tenant-Level Encryption via the Guardian add-on (trust.monday.com). Notion gates SCIM and audit logs to Enterprise tier (custom pricing) — a notable weakness per stitchflow.com analysis.</p>
+        </div>
+        <div class="method-block">
+          <h4>Automation capabilities</h4>
+          <p>Jira uses rule-based drag-and-drop automation with JQL-based triggers and Atlassian ecosystem automation. Asana's automation is well-regarded for task-centric workflows. Monday.com uses a sentence-builder automation interface with no-code triggers described as more accessible to non-technical users. Notion's automation is more limited natively; it depends on Zapier/Make for complex flows. Scores are EST as no single authoritative benchmark compares automation depth.</p>
+        </div>
+        <div class="method-block">
+          <h4>Scalability</h4>
+          <p>Jira is the de facto standard for large enterprise dev orgs; its Data Center product supports on-premises deployments at 500+ users. Monday.com's Maximum Quantity Billing (MQB) introduced July–Oct 2025 adds cost risk at scale. Notion is noted to "become disorganized at enterprise scale without strict governance" (docsie.io). Asana's portfolio and workload features are designed for cross-team coordination. Scores are EST for Asana and Notion as peer-reviewed scalability benchmarks were not found.</p>
+        </div>
+        <div class="method-block">
+          <h4>Ease of adoption</h4>
+          <p>Consensus across multiple review sources: Monday.com is rated most intuitive for non-technical staff; Asana has moderate complexity; Notion has the steepest learning curve due to its open-ended block structure; Jira is powerful but notoriously complex to configure, especially for non-engineering teams. Scores are EST synthesized from qualitative review consensus.</p>
+        </div>
+        <div class="method-block">
+          <h4>Pricing note</h4>
+          <p>Enterprise pricing for all four tools requires contacting sales. Published rates: Jira Standard $7.91/user/mo, Premium $14.54/user/mo (monthly billing); actual TCO $20–30/user/mo with add-ons. Asana Business $24.99/user/mo. Monday.com Enterprise custom. Notion Business $20/user/mo; Enterprise custom ($18–25/user/mo estimated by stitchflow.com). Pricing is not a scored criterion per your selections but informs context.</p>
+        </div>
+        <div class="method-block">
+          <h4>Conflicts between sources</h4>
+          <p>Monday.com's integration count varies by source (some cite 200+, others 250+). We used 200+ as the conservative figure. Jira's pricing is complicated by the July 2025 Maximum Quantity Billing change — total cost of ownership is higher than headline pricing suggests. Notion's Enterprise pricing is not public; the $18–25/user/mo figure is from stitchflow.com's SCIM analysis and may not reflect all scenarios.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── Data ──
+const TOOLS = ['jira', 'asana', 'monday', 'notion'];
+const TOOL_NAMES = { jira: 'Jira', asana: 'Asana', monday: 'Monday.com', notion: 'Notion' };
+
+// Raw scores 1–10 per criterion per tool
+// EST = true means this is an analyst-synthesized estimate, not a single official metric
+const DATA = {
+  integrations: {
+    label: 'Integration Ecosystem',
+    icon: '🔗',
+    scores: { jira: 10, asana: 7, monday: 7, notion: 5 },
+    est:    { jira: false, asana: false, monday: false, notion: false },
+    details: {
+      jira:   '3,000+ apps via Atlassian Marketplace; native GitHub, GitLab, Bitbucket, Confluence, ServiceNow, Azure DevOps, Salesforce.',
+      asana:  '200+ native integrations incl. Slack, Teams, Figma, Salesforce, Tableau, Outlook. REST API available.',
+      monday: '200+ integrations; strong Microsoft 365 suite (Teams, Outlook, Excel, SharePoint); 250+ dev-tool integrations via monday dev.',
+      notion: '100+ native integrations; Slack, Google Workspace, GitHub, Figma, Jira, Zapier. API available but narrower than competitors.',
+    },
+    raw: {
+      jira:   '3,000+',
+      asana:  '200+',
+      monday: '200+',
+      notion: '100+',
+    }
+  },
+  security: {
+    label: 'Security & Compliance',
+    icon: '🔒',
+    scores: { jira: 9, asana: 8, monday: 9, notion: 6 },
+    est:    { jira: false, asana: false, monday: false, notion: false },
+    details: {
+      jira:   'SOC 2 Type II, ISO 27001/17/18, GDPR, HIPAA. On-premises Data Center option for regulated industries. Atlassian Guard for org-wide security.',
+      asana:  'SOC 2 Type II + HIPAA (Feb 2025–Jan 2026 period), ISO 27001/17/18/27701. GDPR-compliant DPA available. Verified via trustcenter.asana.com.',
+      monday: 'SOC 1 & 2, ISO 27001/17/18/32/27701, GDPR, CCPA, HIPAA, FedRAMP (in progress), LGPD, PIPEDA. Broadest certification portfolio.',
+      notion: 'SOC 2 Type II, ISO 27001/17/18, GDPR. No HIPAA BAA or FedRAMP. Enterprise data residency available. Lacks some regulated-industry certs.',
+    },
+    raw: {
+      jira:   'SOC 2 T2 · ISO 27001 · HIPAA · On-prem option',
+      asana:  'SOC 2 T2 · ISO 27001/27701 · HIPAA',
+      monday: 'SOC 1+2 · ISO 27001/27701 · HIPAA · FedRAMP',
+      notion: 'SOC 2 T2 · ISO 27001 · GDPR · No HIPAA/FedRAMP',
+    }
+  },
+  admin: {
+    label: 'Admin Controls & User Mgmt',
+    icon: '⚙️',
+    scores: { jira: 9, asana: 7, monday: 8, notion: 5 },
+    est:    { jira: false, asana: false, monday: false, notion: false },
+    details: {
+      jira:   'SAML SSO, SCIM provisioning, enforced 2FA, audit logs, org-wide admin console (Atlassian Access). Global & project-level permission granularity.',
+      asana:  'SSO, SCIM user provisioning/de-provisioning on Enterprise. Role-based access on all paid plans. Priority support on Enterprise.',
+      monday: 'Enterprise: SSO (multi-IdP), SCIM, DLP, BYOK encryption, Tenant-Level Encryption, audit logs via Guardian add-on. 2FA enforceable.',
+      notion: 'SAML SSO on Business. SCIM and audit logs gated to Enterprise (custom pricing). No org-wide multi-workspace console on Business. Significant gap vs peers.',
+    },
+    raw: {
+      jira:   'SAML SSO · SCIM · Org-wide admin console · All tiers above Standard',
+      asana:  'SCIM on Enterprise · Role-based on all paid plans',
+      monday: 'SCIM · DLP · BYOK · Guardian add-on (Enterprise)',
+      notion: 'SSO on Business · SCIM only on Enterprise · No multi-workspace console',
+    }
+  },
+  automation: {
+    label: 'Automation Capabilities',
+    icon: '⚡',
+    scores: { jira: 8, asana: 7, monday: 8, notion: 4 },
+    est:    { jira: true, asana: true, monday: true, notion: true },
+    details: {
+      jira:   'Rule-based drag-and-drop automation builder with JQL triggers. Cross-project automation. Unlimited automation on Premium+. Dev-oriented (branch creation, PR status, etc.).',
+      asana:  'No-code automation rules for task assignment, due dates, notifications, project routing. Well-suited for PM workflows but less technical depth than Jira.',
+      monday: 'Sentence-builder automation interface ("When X → Then Y"). 250+ pre-built templates. Non-technical-friendly. Conditional logic, multi-step automations on Enterprise.',
+      notion: 'Limited native automation. Relies on Zapier/Make/third-party for most automations. Notion AI Agents (Sept 2025) add some autonomous task creation but not workflow automation in the traditional sense.',
+    },
+    raw: {
+      jira:   'Drag-and-drop + JQL rules; unlimited on Premium',
+      asana:  'No-code rules; standard PM workflow coverage',
+      monday: '250+ templates; sentence-builder; multi-step on Enterprise',
+      notion: 'Minimal native; Zapier/Make required for workflows',
+    }
+  },
+  scalability: {
+    label: 'Scalability at Enterprise Scale',
+    icon: '📈',
+    scores: { jira: 9, asana: 7, monday: 7, notion: 5 },
+    est:    { jira: false, asana: true, monday: true, notion: false },
+    details: {
+      jira:   'Industry standard for large enterprises. Data Center supports 500+ users on-prem ($51k/yr for 500 users). Cloud scales to tens of thousands. Agile-native.',
+      asana:  'Portfolio and workload views designed for cross-team coordination. Scales well for multi-department PM; less native support for engineering workflows at scale.',
+      monday: 'Strong visual scalability for non-dev teams. MQB billing (July 2025) charges peak user count with no mid-cycle refunds — cost risk at large scale. Fast-growing enterprise customer base.',
+      notion: 'Scales reasonably for mid-size teams but "can become disorganized at enterprise scale without strict governance policies." Requires dedicated workspace administrators. No FedRAMP.',
+    },
+    raw: {
+      jira:   'Data Center for 500+ users; on-prem available',
+      asana:  'Portfolio views for cross-team; less dev-native',
+      monday: 'MQB billing risk at scale; strong visual UX',
+      notion: 'Mid-size OK; governance challenges at 200+ users',
+    }
+  },
+  adoption: {
+    label: 'Ease of Adoption',
+    icon: '🧠',
+    scores: { jira: 4, asana: 7, monday: 9, notion: 5 },
+    est:    { jira: true, asana: true, monday: true, notion: true },
+    details: {
+      jira:   'Powerful but steep configuration curve. Non-engineering teams often struggle. 2–4 week onboarding typical. UI overhaul in late 2024 improved navigation.',
+      asana:  'Moderate complexity. Intuitive for PM workflows. Days to get comfortable per user reviews. Strong onboarding resources.',
+      monday: 'Rated most intuitive for non-technical staff across multiple reviews. Visual, color-coded interface. Minimal training required even for complex workflows.',
+      notion: 'Steepest learning curve due to open-ended block structure. Requires "attention to detail" in setup. Power users love it; casual users can get lost.',
+    },
+    raw: {
+      jira:   'Steep curve; best for tech teams; improved 2024 UI',
+      asana:  'Moderate; days to onboard; intuitive PM interface',
+      monday: 'Most intuitive for non-tech staff; visual-first UX',
+      notion: 'High learning curve; flexible but setup-demanding',
+    }
+  }
+};
+
+const CRITERIA_ORDER = ['integrations', 'security', 'admin', 'automation', 'scalability', 'adoption'];
+
+const SOURCES = [
+  { tool: 'Jira', name: 'Jira Pricing 2026: Standard vs Premium & Real Cost Guide', url: 'https://saascrmreview.com/jira-pricing/', note: 'Standard $7.91/user/mo, Premium $14.54/user/mo; MQB billing explained' },
+  { tool: 'Jira', name: 'Asana vs. Jira (Plaky, May 2025)', url: 'https://plaky.com/blog/asana-vs-jira/', note: 'Jira 3,000+ integrations; admin permission granularity' },
+  { tool: 'Jira/Monday', name: 'Jira vs Monday.com (TaskRhino, 2026)', url: 'https://www.taskrhino.ca/blog/monday-com-vs-jira/', note: 'Automation comparison; MQB; pricing at scale' },
+  { tool: 'Asana', name: 'Asana Trust Center (trustcenter.asana.com)', url: 'https://trustcenter.asana.com/', note: 'SOC 2 Type II + HIPAA Feb 2025–Jan 2026; ISO 27001/27017/27018/27701' },
+  { tool: 'Asana', name: 'Asana vs. Jira (monday.com blog, 2026)', url: 'https://monday.com/blog/rnd/asana-or-jira-which-is-right-for-your-team/', note: 'SCIM on Enterprise; 200+ integrations; pricing tiers' },
+  { tool: 'Monday', name: 'monday.com Security Compliance Hub (trust.monday.com)', url: 'https://trust.monday.com/', note: 'SOC 1+2, ISO certs, HIPAA, GDPR, FedRAMP, Guardian add-on details' },
+  { tool: 'Monday', name: 'Monday.com Security Compliance (TaskRhino, March 2026)', url: 'https://www.taskrhino.ca/blog/monday-com-data-security-compliance/', note: 'SCIM, DLP, SSO, audit logs via Admin panel' },
+  { tool: 'Notion', name: 'Notion Security & Compliance (notion.com/security)', url: 'https://www.notion.com/security', note: 'SOC 2 Type II, GDPR, ISO 27001; Enterprise-tier advanced security' },
+  { tool: 'Notion', name: 'Notion SCIM Provisioning: Pricing & Limitations (Stitchflow)', url: 'https://www.stitchflow.com/scim/notion', note: 'SCIM only on Enterprise; $18–25/user/mo range; gap vs Business plan SSO' },
+  { tool: 'Notion', name: 'Notion Enterprise: SSO, SCIM, Audit Log (resumelens.org, 2026)', url: 'https://www.resumelens.org/blog/notion/notion-enterprise-sso-scim', note: 'SCIM, Audit Log API, mandatory MFA, data residency on Enterprise' },
+  { tool: 'Notion', name: 'Notion vs Slab Enterprise (Docsie, 2026)', url: 'https://www.docsie.io/vs/notion-vs-slab-enterprise/', note: '"Scales reasonably for mid-size but disorganized at enterprise scale"' },
+  { tool: 'Notion', name: 'Notion Pricing 2026 (saascrmreview.com)', url: 'https://saascrmreview.com/notion-pricing/', note: 'Business $20/user/mo; AI bundled mid-2025; Enterprise custom' },
+  { tool: 'All', name: 'Top PM Tools 2026: Linear vs Notion vs Jira (Deepak Gupta)', url: 'https://guptadeepak.com/tools/top-10-project-management-tools-2026/', note: 'Adoption ratings; Notion steepest curve; Monday most intuitive for non-tech' },
+  { tool: 'All', name: 'Notion vs Asana vs Monday.com (monday.com blog, May 2026)', url: 'https://monday.com/blog/project-management/notion-vs-asana-vs-monday-work-management/', note: 'Learning curve comparison; Microsoft 365 integrations; distributed teams' },
+  { tool: 'All', name: 'Jira vs Monday.com (Getint, Nov 2025)', url: 'https://www.getint.io/blog/jira-vs-monday-comparison-2025', note: 'Automation, deployment options, enterprise security' },
+];
+
+// ── State ──
+const weights = { integrations: 20, security: 20, admin: 20, automation: 15, scalability: 15, adoption: 10 };
+
+// ── Update slider tracks ──
+function updateTrack(id) {
+  const sl = document.getElementById('sl-' + id);
+  const track = document.getElementById('track-' + id);
+  track.style.width = (sl.value / sl.max * 100) + '%';
+}
+
+// ── Main update function ──
+function updateWeights() {
+  CRITERIA_ORDER.forEach(c => {
+    const sl = document.getElementById('sl-' + c);
+    weights[c] = parseInt(sl.value);
+    document.getElementById('val-' + c).textContent = weights[c] + '%';
+    updateTrack(c);
+  });
+
+  const total = CRITERIA_ORDER.reduce((s, c) => s + weights[c], 0);
+  const totalEl = document.getElementById('total-val');
+  totalEl.textContent = total + '%';
+  totalEl.className = 'total-num ' + (total === 100 ? 'ok' : 'over');
+
+  renderRanking();
+  renderTable();
+  renderVerdict();
+}
+
+// ── Normalize ──
+function normalizeWeights() {
+  const total = CRITERIA_ORDER.reduce((s, c) => s + weights[c], 0);
+  if (total === 0) return;
+  let remaining = 100;
+  CRITERIA_ORDER.forEach((c, i) => {
+    if (i < CRITERIA_ORDER.length - 1) {
+      const norm = Math.round(weights[c] / total * 100);
+      weights[c] = norm;
+      remaining -= norm;
+    } else {
+      weights[c] = remaining;
+    }
+    document.getElementById('sl-' + c).value = weights[c];
+    document.getElementById('val-' + c).textContent = weights[c] + '%';
+    updateTrack(c);
+  });
+  updateWeights();
+}
+
+// ── Compute scores ──
+function computeScores() {
+  const total = CRITERIA_ORDER.reduce((s, c) => s + weights[c], 0) || 1;
+  return TOOLS.map(tool => {
+    const raw = CRITERIA_ORDER.reduce((s, c) => s + DATA[c].scores[tool] * weights[c], 0);
+    const score = raw / total;
+    return { tool, score };
+  }).sort((a, b) => b.score - a.score);
+}
+
+// ── Render ranking cards ──
+function renderRanking() {
+  const ranked = computeScores();
+  const container = document.getElementById('rank-cards');
+  const max = ranked[0].score;
+
+  container.innerHTML = ranked.map((r, i) => `
+    <div class="rank-card tool-${r.tool} rank-${i+1}">
+      <div class="rank-badge">${['1st', '2nd', '3rd', '4th'][i]} place</div>
+      <div class="tool-name tool-${r.tool}">${TOOL_NAMES[r.tool]}</div>
+      <div class="score-bar-wrap">
+        <div class="score-bar bar-${r.tool}" style="width:${(r.score / max * 100).toFixed(1)}%"></div>
+      </div>
+      <div class="score-num">${r.score.toFixed(2)}</div>
+      <div class="score-label">weighted score / 10</div>
+    </div>
+  `).join('');
+}
+
+// ── Render table ──
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  const total = CRITERIA_ORDER.reduce((s, c) => s + weights[c], 0) || 1;
+
+  tbody.innerHTML = CRITERIA_ORDER.map(crit => {
+    const d = DATA[crit];
+    const w = weights[crit];
+    const pct = Math.round(w / total * 100);
+    const cells = TOOLS.map(tool => {
+      const score = d.scores[tool];
+      const isEst = d.est[tool];
+      const filled = TOOLS.indexOf(tool) < 4;
+      const dots = Array.from({length:10}, (_, i) =>
+        `<div class="dot ${i < score ? `filled-${tool}` : ''}"></div>`
+      ).join('');
+      return `<td>
+        <div style="font-size:12px;line-height:1.5;color:var(--text-muted);margin-bottom:6px;">${d.details[tool]}${isEst ? '<span class="est-flag">EST</span>' : ''}</div>
+        <div class="cell-score">
+          <div class="dot-score">${dots}</div>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${score}/10</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;font-family:'DM Mono',monospace;">${d.raw[tool]}</div>
+      </td>`;
+    }).join('');
+
+    return `<tr>
+      <td>${d.icon} <strong>${d.label}</strong><span class="weight-badge">${w}%</span></td>
+      ${cells}
+    </tr>`;
+  }).join('');
+}
+
+// ── Render verdict ──
+function renderVerdict() {
+  const ranked = computeScores();
+  const winner = ranked[0];
+  const runner = ranked[1];
+
+  const verdicts = {
+    jira:   'Jira leads when you prioritize integration depth and enterprise-grade scalability. It is the industry default for organizations managing engineering, IT, and cross-functional work at scale, with the widest certification portfolio and the only option with on-premises Data Center deployment.',
+    asana:  'Asana leads when you value cross-departmental ease of adoption alongside solid compliance. It hits the sweet spot for enterprises that need broad team buy-in without sacrificing PM structure or security. Best for organizations where non-technical departments outnumber engineering teams.',
+    monday: 'Monday.com leads when ease of adoption and visual simplicity are paramount. Its sentence-builder automation and non-technical UX drive the fastest time-to-value for diverse, non-engineering departments. Strongest compliance portfolio after Jira; watch MQB billing at scale.',
+    notion: 'Notion leads in no scenario for enterprise IT standardization under these weights. Its admin controls, SCIM, and scalability weaknesses are significant for 200+ user deployments. Consider it as a documentation complement to a dedicated PM tool rather than a standalone solution.',
+  };
+
+  const colorMap = { jira: '#4c9aff', asana: '#f06a6a', monday: '#ff6b8a', notion: '#c7cce8' };
+
+  document.getElementById('verdict-text').innerHTML =
+    `${verdicts[winner.tool]} <br><br>
+    <span style="font-size:13px;color:var(--text-muted);">Runner-up: <strong style="color:${colorMap[runner.tool]}">${TOOL_NAMES[runner.tool]}</strong> (${runner.score.toFixed(2)}) — ${runner.score.toFixed(2) >= winner.score.toFixed(2) - 0.5 ? 'close contender; consider based on your specific team mix.' : 'meaningful gap; winner is clear.'}</span>`;
+
+  document.getElementById('verdict-box').style.borderColor =
+    winner.tool === 'jira' ? '#4c9aff' :
+    winner.tool === 'asana' ? '#f06a6a' :
+    winner.tool === 'monday' ? '#ff6b8a' : 'rgba(199,204,232,0.4)';
+}
+
+// ── Render sources ──
+function renderSources() {
+  const grid = document.getElementById('sources-grid');
+  grid.innerHTML = SOURCES.map(s => `
+    <div class="source-card">
+      <div class="source-tool">${s.tool}</div>
+      <div class="source-name">${s.name}</div>
+      <a class="source-url" href="${s.url}" target="_blank" rel="noopener">${s.url}</a>
+      <div class="source-note">${s.note}</div>
+    </div>
+  `).join('');
+}
+
+// ── Toggle collapsible ──
+function toggleCollapse(id) {
+  const body = document.getElementById('body-' + id);
+  const icon = document.getElementById('icon-' + id);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  icon.classList.toggle('open', !isOpen);
+}
+
+// ── Init ──
+CRITERIA_ORDER.forEach(c => updateTrack(c));
+updateWeights();
+renderSources();
+</script>
+</body>
+</html>
