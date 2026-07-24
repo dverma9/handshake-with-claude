@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Defend Your Experience</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e8e8e8;
+    --border-strong: #c8c8c8;
+    --text: #111111;
+    --text-2: #555555;
+    --text-3: #999999;
+    --accent: #111111;
+    --accent-soft: #f0f0f0;
+    --green: #1a7a4a;
+    --green-bg: #edf7f2;
+    --amber: #92600a;
+    --amber-bg: #fdf6e8;
+    --red: #c0392b;
+    --red-bg: #fdf0ef;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --radius: 4px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+
+  /* ── LAYOUT ── */
+  #app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 52px; flex-shrink: 0;
+  }
+  .logo { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; padding: 3px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius); color: var(--text-2); }
+
+  #main { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 240px; flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
+  .sidebar-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-3); text-transform: uppercase; margin-bottom: 10px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px; border-radius: var(--radius);
+    cursor: pointer; transition: background 0.15s; color: var(--text-2); font-size: 13px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--accent-soft); color: var(--text); }
+  .nav-item.active { background: var(--text); color: white; }
+  .nav-item .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+  .claim-list { flex: 1; overflow-y: auto; padding: 12px; }
+  .claim-pill {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 8px 10px; border-radius: var(--radius);
+    margin-bottom: 4px; cursor: pointer; border: 1px solid transparent;
+    transition: all 0.15s; font-size: 12px; line-height: 1.4;
+  }
+  .claim-pill:hover { border-color: var(--border-strong); }
+  .claim-pill.active { border-color: var(--text); background: var(--accent-soft); }
+  .claim-pill .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .dot-defended { background: var(--green); }
+  .dot-weak { background: var(--amber); }
+  .dot-untested { background: var(--border-strong); }
+  .dot-challenged { background: var(--red); }
+
+  /* ── MAIN CONTENT ── */
+  #content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── UPLOAD SCREEN ── */
+  #upload-screen {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 40px;
+  }
+  .upload-hero { text-align: center; max-width: 480px; }
+  .upload-title { font-size: 28px; font-weight: 300; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .upload-subtitle { color: var(--text-2); font-size: 14px; margin-bottom: 36px; line-height: 1.7; }
+  .drop-zone {
+    border: 1.5px dashed var(--border-strong); border-radius: 8px;
+    padding: 48px 40px; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--surface); position: relative;
+    margin-bottom: 16px;
+  }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--text); background: var(--accent-soft); }
+  .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { font-size: 32px; margin-bottom: 12px; }
+  .drop-title { font-weight: 500; margin-bottom: 4px; }
+  .drop-sub { font-size: 12px; color: var(--text-3); }
+  .or-divider { display: flex; align-items: center; gap: 12px; color: var(--text-3); font-size: 12px; margin: 12px 0; }
+  .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  textarea#paste-area {
+    width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px; font-family: var(--sans); font-size: 13px; resize: vertical;
+    min-height: 100px; background: var(--surface); color: var(--text);
+    transition: border-color 0.15s; outline: none; line-height: 1.6;
+  }
+  textarea#paste-area:focus { border-color: var(--text); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 20px; border-radius: var(--radius);
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; border: none;
+  }
+  .btn-primary { background: var(--text); color: white; }
+  .btn-primary:hover { background: #333; }
+  .btn-primary:disabled { background: var(--border-strong); cursor: not-allowed; }
+  .btn-outline { background: white; color: var(--text); border: 1px solid var(--border-strong); }
+  .btn-outline:hover { background: var(--accent-soft); }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .start-btn { width: 100%; margin-top: 16px; justify-content: center; font-size: 14px; padding: 12px; }
+  .upload-hint { font-size: 11px; color: var(--text-3); margin-top: 12px; display: flex; align-items: center; gap: 6px; justify-content: center; }
+
+  /* ── INTERVIEW SCREEN ── */
+  #interview-screen { flex: 1; display: flex; flex-direction: column; overflow: hidden; display: none; }
+  .interview-top {
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex; align-items: center; gap: 16px;
+    background: var(--surface); flex-shrink: 0;
+  }
+  .progress-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width 0.5s ease; }
+  .progress-label { font-family: var(--mono); font-size: 11px; color: var(--text-3); white-space: nowrap; }
+  .confidence-display { display: flex; align-items: center; gap: 6px; }
+  .conf-label { font-size: 11px; color: var(--text-3); }
+  .conf-bars { display: flex; gap: 2px; }
+  .conf-bar { width: 4px; height: 14px; border-radius: 1px; background: var(--border); }
+  .conf-bar.filled { background: var(--text); }
+
+  .chat-area { flex: 1; overflow-y: auto; padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; }
+  
+  .msg { display: flex; gap: 12px; max-width: 720px; }
+  .msg-ai { align-self: flex-start; }
+  .msg-user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--text); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 10px; font-weight: 500; flex-shrink: 0; margin-top: 2px;
+  }
+  .msg-user .msg-avatar { background: var(--border-strong); color: var(--text); }
+  .msg-bubble {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; font-size: 13.5px; line-height: 1.7;
+    box-shadow: var(--shadow);
+  }
+  .msg-user .msg-bubble { background: var(--accent-soft); border-color: var(--border-strong); }
+  .msg-bubble strong { font-weight: 600; }
+  .claim-tag {
+    display: inline-block; font-family: var(--mono); font-size: 10px;
+    padding: 2px 7px; border-radius: 2px; background: var(--accent-soft);
+    border: 1px solid var(--border-strong); color: var(--text-2); margin-bottom: 8px;
+  }
+  .challenge-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-family: var(--mono); letter-spacing: 0.04em;
+    padding: 2px 8px; border-radius: 2px; margin-bottom: 8px; font-weight: 500;
+  }
+  .badge-probe { background: var(--amber-bg); color: var(--amber); border: 1px solid #f0d080; }
+  .badge-skeptic { background: var(--red-bg); color: var(--red); border: 1px solid #f0b0b0; }
+  .badge-followup { background: #eef4ff; color: #3050c0; border: 1px solid #c0d0f0; }
+
+  .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-3); animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-4px)} }
+
+  .input-area {
+    border-top: 1px solid var(--border); padding: 16px 20px;
+    background: var(--surface); flex-shrink: 0;
+  }
+  .input-row { display: flex; gap: 10px; align-items: flex-end; }
+  .input-box {
+    flex: 1; border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 10px 14px; font-family: var(--sans); font-size: 13px; resize: none;
+    min-height: 44px; max-height: 120px; outline: none; line-height: 1.6;
+    transition: border-color 0.15s; background: var(--bg);
+  }
+  .input-box:focus { border-color: var(--text); background: white; }
+  .send-btn {
+    width: 40px; height: 40px; border-radius: var(--radius);
+    background: var(--text); color: white; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; transition: background 0.15s;
+  }
+  .send-btn:hover { background: #333; }
+  .send-btn:disabled { background: var(--border-strong); cursor: not-allowed; }
+  .input-hints { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .hint-chip {
+    font-size: 11px; padding: 3px 10px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface);
+    cursor: pointer; color: var(--text-2); transition: all 0.15s;
+  }
+  .hint-chip:hover { border-color: var(--text); color: var(--text); }
+
+  /* ── REPORT SCREEN ── */
+  #report-screen { flex: 1; overflow-y: auto; padding: 32px; display: none; }
+  .report-header { margin-bottom: 32px; }
+  .report-title { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .report-meta { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .score-num { font-size: 32px; font-weight: 300; letter-spacing: -0.03em; margin-bottom: 2px; }
+  .score-desc { font-size: 11px; color: var(--text-3); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
+  .section-title { font-size: 11px; font-family: var(--mono); letter-spacing: 0.1em; color: var(--text-3); text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .claim-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px; }
+  .claim-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .claim-text { font-size: 13px; font-weight: 500; flex: 1; }
+  .claim-status-badge { font-size: 10px; font-family: var(--mono); padding: 3px 9px; border-radius: 2px; white-space: nowrap; font-weight: 500; }
+  .status-defended { background: var(--green-bg); color: var(--green); }
+  .status-weak { background: var(--amber-bg); color: var(--amber); }
+  .status-challenged { background: var(--red-bg); color: var(--red); }
+  .status-untested { background: var(--accent-soft); color: var(--text-3); }
+  .claim-notes { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+  .strength-bar-wrap { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .strength-bar-bg { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
+  .strength-bar-fill { height: 100%; border-radius: 2px; }
+  .fill-good { background: var(--green); }
+  .fill-mid { background: var(--amber); }
+  .fill-low { background: var(--red); }
+  .strength-pct { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .improvement-list { list-style: none; }
+  .improvement-list li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .improvement-list li:last-child { border-bottom: none; }
+  .imp-arrow { color: var(--text-3); flex-shrink: 0; }
+  .export-bar { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 16px 0; display: flex; gap: 10px; margin-top: 24px; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 13px; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--text); color: white;
+    padding: 10px 16px; border-radius: var(--radius);
+    font-size: 13px; box-shadow: var(--shadow-md);
+    opacity: 0; transform: translateY(8px); transition: all 0.25s;
+    pointer-events: none; z-index: 1000;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  /* ── LOADING OVERLAY ── */
+  #loading-overlay {
+    position: absolute; inset: 0; background: rgba(250,250,250,0.9);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 100; display: none;
+  }
+  .spinner {
+    width: 28px; height: 28px; border: 2px solid var(--border);
+    border-top-color: var(--text); border-radius: 50%;
+    animation: spin 0.7s linear infinite; margin-bottom: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 12px; color: var(--text-3); font-family: var(--mono); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    #sidebar { display: none; }
+    .score-grid { grid-template-columns: repeat(2, 1fr); }
+    #report-screen { padding: 16px; }
+  }
+
+  .hidden { display: none !important; }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <span class="logo-dot"></span>
+      DEFEND YOUR EXPERIENCE
+    </div>
+    <div class="header-right">
+      <span class="badge" id="session-badge">RESUME · TECHNICAL</span>
+      <button class="btn btn-outline btn-sm" id="reset-btn" style="display:none" onclick="resetApp()">New Session</button>
+      <button class="btn btn-outline btn-sm" id="report-btn" style="display:none" onclick="showReport()">View Report</button>
+    </div>
+  </header>
+
+  <div id="main">
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Navigation</div>
+        <button class="nav-item active" id="nav-interview" onclick="switchNav('interview')">
+          <span class="nav-icon">💬</span> Interview
+        </button>
+        <button class="nav-item" id="nav-report" onclick="switchNav('report')" style="display:none">
+          <span class="nav-icon">📊</span> Defense Report
+        </button>
+      </div>
+      <div class="sidebar-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;padding-bottom:0">
+        <div class="sidebar-label">Claims Being Tested</div>
+        <div class="claim-list" id="claim-list">
+          <div class="empty-state" style="padding:20px 0">
+            <div class="empty-icon">📋</div>
+            <p>Upload your resume<br>to begin</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content" style="position:relative">
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-text">Analyzing your experience...</div>
+      </div>
+
+      <!-- UPLOAD SCREEN -->
+      <div id="upload-screen">
+        <div class="upload-hero">
+          <div class="upload-title">Can you defend your experience?</div>
+          <div class="upload-subtitle">Upload your resume and face a rigorous technical interviewer who will challenge every claim, probe every gap, and help you build the confidence to defend what you've actually built.</div>
+
+          <div class="drop-zone" id="drop-zone">
+            <input type="file" id="file-input" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(event)"/>
+            <div class="drop-icon">📄</div>
+            <div class="drop-title">Drop your resume here</div>
+            <div class="drop-sub">.txt, .pdf, .doc, .docx · or click to browse</div>
+          </div>
+
+          <div class="or-divider">or paste directly</div>
+
+          <textarea id="paste-area" placeholder="Paste your resume text, LinkedIn bio, project descriptions, or any experience you want to defend…" rows="5"></textarea>
+
+          <button class="btn btn-primary start-btn" id="start-btn" onclick="startSession()">
+            Begin Defense Session →
+          </button>
+          <div class="upload-hint">
+            🔒 Your data stays in this session. Nothing is stored externally.
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERVIEW SCREEN -->
+      <div id="interview-screen" style="display:none; flex-direction:column; height:100%">
+        <div class="interview-top">
+          <div class="progress-label" id="q-counter">Q 0 / 0</div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+          </div>
+          <div class="confidence-display">
+            <span class="conf-label">Confidence</span>
+            <div class="conf-bars" id="conf-bars">
+              <div class="conf-bar"></div>
+              <div class="conf-bar"></div>
+              <div class="conf-bar"></div>
+              <div class="conf-bar"></div>
+              <div class="conf-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-area" id="chat-area"></div>
+
+        <div class="input-area">
+          <div class="input-row">
+            <textarea class="input-box" id="user-input" placeholder="Type your answer…" rows="1"
+              onkeydown="handleInputKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="send-btn" onclick="sendAnswer()">↑</button>
+          </div>
+          <div class="input-hints" id="input-hints">
+            <span class="hint-chip" onclick="useHint('I need more time to think about this')">Need a moment</span>
+            <span class="hint-chip" onclick="useHint('Can you rephrase that?')">Rephrase</span>
+            <span class="hint-chip" onclick="useHint('I want to skip to my next claim')">Skip claim</span>
+            <span class="hint-chip" onclick="showReport()">See report</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORT SCREEN -->
+      <div id="report-screen" style="display:none">
+        <div class="report-header">
+          <div class="report-title">Defense Report</div>
+          <div class="report-meta" id="report-meta">Generated · 0 claims analyzed</div>
+        </div>
+        <div class="score-grid" id="score-grid"></div>
+        <div id="report-claims-section"></div>
+        <div id="report-improvements-section"></div>
+        <div class="export-bar">
+          <button class="btn btn-outline btn-sm" onclick="exportReport()">↓ Export Report</button>
+          <button class="btn btn-outline btn-sm" onclick="switchNav('interview')">← Resume Interview</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── STATE ──
+const STATE = {
+  resumeText: '',
+  claims: [],          // {id, text, status, strength, notes, questionsAsked}
+  history: [],         // {role, content}
+  currentClaimIdx: -1,
+  questionCount: 0,
+  maxQuestions: 18,
+  sessionStarted: false,
+  confidenceScore: 0,
+  answeredCount: 0,
+};
+
+// Load from sessionStorage
+function loadSession() {
+  try {
+    const saved = sessionStorage.getItem('dye_session');
+    if (saved) {
+      const data = JSON.parse(saved);
+      Object.assign(STATE, data);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+function saveSession() {
+  try { sessionStorage.setItem('dye_session', JSON.stringify(STATE)); } catch(e) {}
+}
+
+// ── UPLOAD / START ──
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file);
+});
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (file) readFile(file);
+}
+
+function readFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('paste-area').value = e.target.result;
+    showToast(`✓ "${file.name}" loaded`);
+  };
+  reader.readAsText(file);
+}
+
+async function startSession() {
+  const text = document.getElementById('paste-area').value.trim();
+  if (!text || text.length < 50) {
+    showToast('Please paste or upload your resume first');
+    return;
+  }
+  STATE.resumeText = text;
+  showLoading('Extracting claims from your experience…');
+  try {
+    await extractClaims(text);
+    hideLoading();
+    switchToInterview();
+    await kickoffInterview();
+  } catch(e) {
+    hideLoading();
+    showToast('Error analyzing resume. Please try again.');
+    console.error(e);
+  }
+}
+
+// ── CLAIM EXTRACTION ──
+async function extractClaims(resumeText) {
+  const res = await callAPI([{
+    role: 'user',
+    content: `You are an expert resume analyst. Extract every distinct, defensible claim from this resume. A claim is any statement that asserts skill, achievement, impact, experience duration, technical knowledge, or leadership. Output ONLY valid JSON with this structure:
+{"claims": [{"id": 1, "text": "brief claim description (max 60 chars)", "full": "the exact or near-exact text from resume", "category": "technical|leadership|impact|experience|education|soft-skill"}]}
+Extract 8-15 most important claims. Resume:
+---
+${resumeText.substring(0, 3000)}`
+  }], 'You are a precise JSON extraction engine. Output only valid JSON, no markdown, no explanation.');
+
+  let parsed;
+  try {
+    const clean = res.replace(/```json|```/g, '').trim();
+    parsed = JSON.parse(clean);
+  } catch(e) {
+    // fallback: create basic claims
+    parsed = { claims: [
+      { id: 1, text: "Technical experience", full: resumeText.substring(0, 100), category: "technical" }
+    ]};
+  }
+
+  STATE.claims = parsed.claims.map(c => ({
+    ...c,
+    status: 'untested',
+    strength: 0,
+    notes: '',
+    questionsAsked: 0,
+  }));
+  STATE.currentClaimIdx = 0;
+  renderClaimList();
+  saveSession();
+}
+
+// ── INTERVIEW ──
+async function kickoffInterview() {
+  const firstClaim = STATE.claims[0];
+  const systemPrompt = buildSystemPrompt();
+  
+  const openingMsg = {
+    role: 'user',
+    content: `[RESUME]: ${STATE.resumeText.substring(0, 2500)}\n\n[INSTRUCTION]: Begin the interview. Introduce yourself briefly as a senior technical interviewer. Then pick the most interesting/bold claim and challenge it with your FIRST question. Be direct and skeptical. Reference the specific claim text.`
+  };
+
+  STATE.history = [openingMsg];
+  showLoading('Preparing your interviewer…');
+  
+  const response = await callAPI(STATE.history, systemPrompt);
+  STATE.history.push({ role: 'assistant', content: response });
+  
+  hideLoading();
+  
+  const chat = document.getElementById('chat-area');
+  chat.innerHTML = '';
+  
+  addMessage('ai', response, firstClaim);
+  updateProgress();
+  saveSession();
+}
+
+function buildSystemPrompt() {
+  return `You are a senior technical interviewer at a top-tier tech company. You are conducting a behavioral and technical defense session to verify every claim on this candidate's resume.
+
+ROLE: You are rigorous, direct, occasionally skeptical, but fair. You probe vague statements, ask for specifics, challenge numbers, and look for evidence. You are NOT trying to trick — you want to know if they REALLY did what they claim.
+
+RULES:
+- Ask ONE question per turn
+- Always reference a SPECIFIC claim from their resume
+- Vary challenge types: ask for metrics, technical depth, edge cases, failures, team dynamics, decision reasoning
+- After 2-3 questions on one claim, move to the next
+- Track which claims need more probing
+- When you switch claims, say so explicitly
+- After ~15 questions, offer to generate the Defense Report
+- Use brief formatting: short paragraphs, no bullet spam
+- Categorize each question with a prefix like [PROBE], [SKEPTIC], or [FOLLOW-UP]
+- Keep messages under 180 words
+- Audience: technical interviewers at software companies`;
+}
+
+async function sendAnswer() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text || document.getElementById('send-btn').disabled) return;
+
+  input.value = '';
+  autoResize(input);
+
+  addMessage('user', text);
+  STATE.history.push({ role: 'user', content: text });
+  STATE.answeredCount++;
+
+  setBusy(true);
+  showTyping();
+
+  try {
+    const response = await callAPI(STATE.history, buildSystemPrompt());
+    hideTyping();
+    STATE.history.push({ role: 'assistant', content: response });
+
+    STATE.questionCount++;
+    addMessage('ai', response);
+    updateProgress();
+    updateClaimStatusFromConversation(text, response);
+    saveSession();
+  } catch(e) {
+    hideTyping();
+    if (e.message.includes('529') || e.message.includes('rate')) {
+      addMessage('ai', '[Rate limit reached — please wait 30 seconds and try again.]');
+    } else {
+      addMessage('ai', '[Connection error — please try again.]');
+    }
+  } finally {
+    setBusy(false);
+  }
+}
+
+function updateClaimStatusFromConversation(userAnswer, aiResponse) {
+  // Heuristic: update claim statuses based on conversation quality
+  const current = STATE.claims[STATE.currentClaimIdx];
+  if (!current) return;
+  
+  const answerLength = userAnswer.length;
+  const hasNumbers = /\d+/.test(userAnswer);
+  const hasSpecifics = userAnswer.split(' ').length > 20;
+  
+  let strength = current.strength;
+  if (answerLength > 100) strength = Math.min(100, strength + 15);
+  if (hasNumbers) strength = Math.min(100, strength + 10);
+  if (hasSpecifics) strength = Math.min(100, strength + 10);
+  
+  current.strength = strength;
+  current.questionsAsked = (current.questionsAsked || 0) + 1;
+  
+  if (strength >= 60) current.status = 'defended';
+  else if (strength >= 30) current.status = 'weak';
+  else if (current.questionsAsked > 0) current.status = 'challenged';
+  
+  // Advance to next claim after 3 questions
+  if (current.questionsAsked >= 3 && STATE.currentClaimIdx < STATE.claims.length - 1) {
+    STATE.currentClaimIdx++;
+  }
+  
+  // Update confidence score
+  const defended = STATE.claims.filter(c => c.status === 'defended').length;
+  const total = STATE.claims.length;
+  STATE.confidenceScore = Math.round((defended / total) * 100);
+  
+  renderClaimList();
+  updateConfidenceBars();
+}
+
+// ── CHAT UI ──
+function addMessage(role, text, claim) {
+  const chat = document.getElementById('chat-area');
+  const wrapper = document.createElement('div');
+  wrapper.className = `msg msg-${role === 'ai' ? 'ai' : 'user'} fade-in`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.textContent = role === 'ai' ? 'IV' : 'ME';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  
+  // Parse challenge type badges
+  let processedText = text;
+  let badgeHtml = '';
+  
+  if (text.includes('[PROBE]')) {
+    badgeHtml = '<div class="challenge-badge badge-probe">🔍 PROBE</div>';
+    processedText = processedText.replace('[PROBE]', '').trim();
+  } else if (text.includes('[SKEPTIC]')) {
+    badgeHtml = '<div class="challenge-badge badge-skeptic">⚡ SKEPTIC</div>';
+    processedText = processedText.replace('[SKEPTIC]', '').trim();
+  } else if (text.includes('[FOLLOW-UP]')) {
+    badgeHtml = '<div class="challenge-badge badge-followup">↩ FOLLOW-UP</div>';
+    processedText = processedText.replace('[FOLLOW-UP]', '').trim();
+  }
+  
+  bubble.innerHTML = badgeHtml + formatText(processedText);
+  wrapper.appendChild(avatar);
+  wrapper.appendChild(bubble);
+  chat.appendChild(wrapper);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+let typingEl = null;
+function showTyping() {
+  const chat = document.getElementById('chat-area');
+  typingEl = document.createElement('div');
+  typingEl.className = 'msg msg-ai';
+  typingEl.innerHTML = `<div class="msg-avatar">IV</div>
+    <div class="msg-bubble"><div class="typing-indicator">
+      <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+    </div></div>`;
+  chat.appendChild(typingEl);
+  chat.scrollTop = chat.scrollHeight;
+}
+function hideTyping() {
+  if (typingEl) { typingEl.remove(); typingEl = null; }
+}
+
+function formatText(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>').replace(/$/, '</p>')
+    .replace(/<p><\/p>/g, '');
+}
+
+// ── PROGRESS & CONFIDENCE ──
+function updateProgress() {
+  const count = STATE.questionCount;
+  const max = STATE.maxQuestions;
+  const pct = Math.min(100, Math.round((count / max) * 100));
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `Q ${count} / ${max}`;
+  updateConfidenceBars();
+}
+
+function updateConfidenceBars() {
+  const score = STATE.confidenceScore;
+  const bars = document.querySelectorAll('.conf-bar');
+  const filled = Math.round((score / 100) * 5);
+  bars.forEach((b, i) => {
+    b.classList.toggle('filled', i < filled);
+  });
+}
+
+// ── CLAIM LIST SIDEBAR ──
+function renderClaimList() {
+  const list = document.getElementById('claim-list');
+  list.innerHTML = '';
+  STATE.claims.forEach((claim, idx) => {
+    const pill = document.createElement('div');
+    pill.className = 'claim-pill' + (idx === STATE.currentClaimIdx ? ' active' : '');
+    pill.onclick = () => { STATE.currentClaimIdx = idx; renderClaimList(); };
+    
+    const statusMap = { defended: 'dot-defended', weak: 'dot-weak', challenged: 'dot-challenged', untested: 'dot-untested' };
+    pill.innerHTML = `<div class="status-dot ${statusMap[claim.status] || 'dot-untested'}"></div>
+      <div>${escapeHtml(claim.text)}</div>`;
+    list.appendChild(pill);
+  });
+}
+
+// ── REPORT ──
+function showReport() {
+  switchNav('report');
+  renderReport();
+}
+
+function renderReport() {
+  const defended = STATE.claims.filter(c => c.status === 'defended').length;
+  const weak = STATE.claims.filter(c => c.status === 'weak').length;
+  const challenged = STATE.claims.filter(c => c.status === 'challenged').length;
+  const untested = STATE.claims.filter(c => c.status === 'untested').length;
+  const total = STATE.claims.length;
+  const overallPct = total > 0 ? Math.round((defended / total) * 100) : 0;
+
+  document.getElementById('report-meta').textContent = 
+    `${STATE.questionCount} questions · ${total} claims · ${new Date().toLocaleDateString()}`;
+
+  document.getElementById('score-grid').innerHTML = `
+    <div class="score-card"><div class="score-num" style="color:var(--green)">${defended}</div><div class="score-desc">Defended</div></div>
+    <div class="score-card"><div class="score-num" style="color:var(--amber)">${weak}</div><div class="score-desc">Need Work</div></div>
+    <div class="score-card"><div class="score-num" style="color:var(--red)">${challenged}</div><div class="score-desc">Challenged</div></div>
+    <div class="score-card"><div class="score-num">${overallPct}%</div><div class="score-desc">Defense Score</div></div>
+  `;
+
+  const claimsHTML = STATE.claims.map(claim => {
+    const statusMap = { defended: 'status-defended', weak: 'status-weak', challenged: 'status-challenged', untested: 'status-untested' };
+    const labelMap = { defended: '✓ Defended', weak: '⚠ Needs Work', challenged: '✕ Challenged', untested: '— Untested' };
+    const fillClass = claim.strength >= 60 ? 'fill-good' : claim.strength >= 30 ? 'fill-mid' : 'fill-low';
+    return `
+      <div class="claim-card">
+        <div class="claim-card-header">
+          <div class="claim-text">${escapeHtml(claim.text)}</div>
+          <div class="claim-status-badge ${statusMap[claim.status] || 'status-untested'}">${labelMap[claim.status] || '— Untested'}</div>
+        </div>
+        ${claim.full ? `<div class="claim-notes" style="margin-bottom:8px;font-style:italic;color:var(--text-3)">"${escapeHtml(claim.full.substring(0,120))}${claim.full.length > 120 ? '…' : ''}"</div>` : ''}
+        <div class="claim-notes">${claim.questionsAsked > 0 ? `Tested across ${claim.questionsAsked} question${claim.questionsAsked !== 1 ? 's' : ''}.` : 'Not yet tested in this session.'} ${getClaimAdvice(claim)}</div>
+        <div class="strength-bar-wrap">
+          <div class="strength-bar-bg"><div class="strength-bar-fill ${fillClass}" style="width:${claim.strength}%"></div></div>
+          <div class="strength-pct">${claim.strength}%</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('report-claims-section').innerHTML = `
+    <div class="section-title" style="margin-top:24px">All Claims</div>
+    ${claimsHTML}`;
+
+  // Improvement tips
+  const needsWork = STATE.claims.filter(c => c.status !== 'defended');
+  if (needsWork.length > 0) {
+    const tips = needsWork.map(c => `<li><span class="imp-arrow">→</span><span><strong>${escapeHtml(c.text)}:</strong> ${getImprovementTip(c)}</span></li>`).join('');
+    document.getElementById('report-improvements-section').innerHTML = `
+      <div class="section-title" style="margin-top:24px">How to Strengthen Your Defense</div>
+      <div class="claim-card"><ul class="improvement-list">${tips}</ul></div>`;
+  }
+}
+
+function getClaimAdvice(claim) {
+  if (claim.status === 'defended') return 'You demonstrated this well with concrete evidence.';
+  if (claim.status === 'weak') return 'Add specific metrics, timelines, or outcomes to strengthen this.';
+  if (claim.status === 'challenged') return 'This claim was challenged. Prepare a STAR-format story with measurable results.';
+  return 'Prepare a 90-second story with context, your specific role, and measurable outcome.';
+}
+
+function getImprovementTip(claim) {
+  const tips = {
+    technical: 'Prepare to walk through your exact implementation decisions, tradeoffs, and what you would do differently.',
+    leadership: 'Have a specific example with team size, timeline, conflict handled, and outcome measured.',
+    impact: 'Always pair impact claims with numbers: percentage, scale, time saved, or revenue influenced.',
+    experience: 'Be ready to describe the hardest problem you solved in this role and your specific contribution.',
+    education: 'Connect coursework or research directly to a real project or professional application.',
+    'soft-skill': 'Back every soft skill with a concrete story. "Good communicator" needs a specific high-stakes example.',
+  };
+  return tips[claim.category] || 'Prepare a specific story using STAR format: Situation, Task, Action, Result.';
+}
+
+function exportReport() {
+  const content = `DEFENSE REPORT
+Generated: ${new Date().toLocaleDateString()}
+Questions: ${STATE.questionCount} | Claims: ${STATE.claims.length}
+
+SCORES
+------
+Defended: ${STATE.claims.filter(c=>c.status==='defended').length}
+Need Work: ${STATE.claims.filter(c=>c.status==='weak').length}
+Challenged: ${STATE.claims.filter(c=>c.status==='challenged').length}
+Defense Score: ${STATE.claims.length > 0 ? Math.round((STATE.claims.filter(c=>c.status==='defended').length / STATE.claims.length) * 100) : 0}%
+
+CLAIMS
+------
+${STATE.claims.map(c => `[${c.status.toUpperCase()}] ${c.text} (${c.strength}% strength)
+  ${getClaimAdvice(c)}`).join('\n\n')}
+
+IMPROVEMENTS
+------------
+${STATE.claims.filter(c=>c.status!=='defended').map(c => `• ${c.text}: ${getImprovementTip(c)}`).join('\n')}
+`;
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'defense-report.txt'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── NAVIGATION ──
+function switchNav(view) {
+  document.getElementById('nav-interview').classList.toggle('active', view === 'interview');
+  document.getElementById('nav-report').classList.toggle('active', view === 'report');
+  
+  const interviewEl = document.getElementById('interview-screen');
+  const reportEl = document.getElementById('report-screen');
+  
+  if (view === 'interview') {
+    interviewEl.style.display = 'flex';
+    reportEl.style.display = 'none';
+  } else {
+    interviewEl.style.display = 'none';
+    reportEl.style.display = 'block';
+    renderReport();
+  }
+}
+
+function switchToInterview() {
+  document.getElementById('upload-screen').style.display = 'none';
+  document.getElementById('interview-screen').style.display = 'flex';
+  document.getElementById('report-btn').style.display = '';
+  document.getElementById('reset-btn').style.display = '';
+  document.getElementById('nav-report').style.display = '';
+  STATE.sessionStarted = true;
+}
+
+function resetApp() {
+  if (!confirm('Start a new session? Current progress will be lost.')) return;
+  sessionStorage.removeItem('dye_session');
+  location.reload();
+}
+
+// ── HELPERS ──
+function handleInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendAnswer();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function useHint(text) {
+  document.getElementById('user-input').value = text;
+  sendAnswer();
+}
+
+function setBusy(busy) {
+  const btn = document.getElementById('send-btn');
+  const input = document.getElementById('user-input');
+  btn.disabled = busy;
+  input.disabled = busy;
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Loading…';
+  document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loading-overlay').style.display = 'none';
+}
+
+function showToast(msg, duration = 2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── ANTHROPIC API ──
+async function callAPI(messages, systemPrompt) {
+  const body = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1000,
+    system: systemPrompt || '',
+    messages: messages,
+  };
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`${res.status}: ${err}`);
+  }
+
+  const data = await res.json();
+  return data.content.map(b => b.text || '').filter(Boolean).join('\n');
+}
+
+// ── INIT ──
+(function init() {
+  if (loadSession() && STATE.sessionStarted && STATE.history.length > 0) {
+    switchToInterview();
+    // Restore chat
+    const chat = document.getElementById('chat-area');
+    chat.innerHTML = '';
+    STATE.history.forEach(msg => {
+      if (msg.role === 'user' && msg.content.startsWith('[RESUME]')) return;
+      addMessage(msg.role === 'assistant' ? 'ai' : 'user', msg.content);
+    });
+    renderClaimList();
+    updateProgress();
+    showToast('Session restored');
+  }
+})();
+</script>
+</body>
+</html>
