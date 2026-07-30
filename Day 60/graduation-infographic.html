@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AB Talks 60-Day Claude AI Challenge — Skills Journey</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    background: linear-gradient(160deg, #0d2618 0%, #1a3a26 40%, #0d1117 100%);
+    padding: 72px 48px 56px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #21362a;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(46,125,50,0.18), transparent);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #4CAF50;
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    margin-bottom: 16px;
+  }
+
+  .hero-title span { color: #66BB6A; }
+
+  .hero-subtitle {
+    font-size: 16px;
+    color: #8b949e;
+    max-width: 560px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .hero-stats {
+    display: inline-flex;
+    gap: 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .hero-stat {
+    padding: 16px 32px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .hero-stat:last-child { border-right: none; }
+
+  .hero-stat-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: #66BB6A;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .hero-stat-label {
+    font-size: 11px;
+    color: #8b949e;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ---- SECTION ---- */
+  .section { padding: 56px 48px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  .section-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #4CAF50;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .section-line { flex: 1; height: 1px; background: #21362a; }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    font-size: 14px;
+    color: #8b949e;
+    max-width: 680px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+
+  /* ---- TIMELINE PHASES ---- */
+  .phases-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+
+  .phase-card {
+    background: #161b22;
+    border: 1px solid #21362a;
+    padding: 24px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .phase-card:first-child { border-radius: 12px 0 0 12px; }
+  .phase-card:last-child { border-radius: 0 12px 12px 0; }
+
+  .phase-card:hover { border-color: #2E7D32; }
+
+  .phase-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .phase-days {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #4CAF50;
+    margin-bottom: 8px;
+  }
+
+  .phase-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .phase-skills {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .phase-skill {
+    font-size: 11.5px;
+    color: #8b949e;
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.4;
+  }
+
+  .phase-skill::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #2E7D32;
+  }
+
+  /* ---- SKILL GROWTH BARS ---- */
+  .skills-section { background: #0d1117; }
+
+  .skill-rows { display: flex; flex-direction: column; gap: 20px; }
+
+  .skill-row { display: flex; align-items: center; gap: 16px; }
+
+  .skill-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #c9d1d9;
+    width: 200px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .skill-bar-track {
+    flex: 1;
+    height: 8px;
+    background: #161b22;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid #21362a;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1B5E20, #4CAF50);
+    position: relative;
+    transition: width 1s ease;
+  }
+
+  .skill-bar-fill::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25));
+    border-radius: 999px;
+  }
+
+  .skill-pct {
+    font-size: 12px;
+    font-weight: 600;
+    color: #66BB6A;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ---- CAPSTONE SHOWCASE ---- */
+  .capstone-section {
+    background: linear-gradient(160deg, #0d2618 0%, #0d1117 100%);
+    border-top: 1px solid #21362a;
+    border-bottom: 1px solid #21362a;
+  }
+
+  .capstone-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 8px;
+  }
+
+  .capstone-card {
+    background: #161b22;
+    border: 1px solid #21362a;
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .capstone-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(46,125,50,0.15);
+    border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6edf3;
+  }
+
+  .card-sub {
+    font-size: 11px;
+    color: #8b949e;
+    margin-top: 1px;
+  }
+
+  .card-items { display: flex; flex-direction: column; gap: 8px; }
+
+  .card-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12.5px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+
+  .card-item-dot {
+    width: 5px;
+    height: 5px;
+    background: #2E7D32;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  /* ---- SDLC FLOW ---- */
+  .sdlc-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 8px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #21362a;
+  }
+
+  .sdlc-step {
+    flex: 1;
+    padding: 20px 16px;
+    text-align: center;
+    background: #161b22;
+    border-right: 1px solid #21362a;
+    position: relative;
+  }
+
+  .sdlc-step:last-child { border-right: none; }
+
+  .sdlc-step::after {
+    content: "→";
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #2E7D32;
+    font-size: 14px;
+    z-index: 2;
+    background: #161b22;
+    padding: 0 2px;
+  }
+
+  .sdlc-step:last-child::after { display: none; }
+
+  .sdlc-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #4CAF50;
+    margin-bottom: 8px;
+  }
+
+  .sdlc-icon { font-size: 20px; margin-bottom: 8px; }
+
+  .sdlc-name {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #c9d1d9;
+    line-height: 1.3;
+  }
+
+  /* ---- GRADUATION ---- */
+  .graduation-section { text-align: center; padding: 64px 48px 56px; }
+
+  .grad-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(46,125,50,0.08);
+    border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 20px;
+    padding: 40px 56px;
+    margin-bottom: 40px;
+  }
+
+  .grad-emoji { font-size: 56px; margin-bottom: 16px; }
+
+  .grad-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .grad-subtitle {
+    font-size: 14px;
+    color: #8b949e;
+    max-width: 420px;
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  .grad-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #66BB6A;
+    margin-top: 16px;
+  }
+
+  .links-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .link-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px;
+    padding: 10px 20px;
+    font-size: 12px;
+    color: #8b949e;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .link-pill:hover { border-color: #4CAF50; color: #66BB6A; }
+
+  .link-pill-dot {
+    width: 6px;
+    height: 6px;
+    background: #2E7D32;
+    border-radius: 50%;
+  }
+
+  @media print { body { background: white; color: black; } }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">AB Talks · 60-Day Claude AI Challenge · Graduation</div>
+  <h1 class="hero-title">From <span>AI Curious</span><br>to AI Builder</h1>
+  <p class="hero-subtitle">
+    A 60-day journey through AI fundamentals, prompt engineering, product thinking,
+    automation, and AI-assisted development — culminating in a fully shipped,
+    production-ready AI application.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">60</div>
+      <div class="hero-stat-label">Days</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">10</div>
+      <div class="hero-stat-label">Capstone days</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">v1.0.0</div>
+      <div class="hero-stat-label">Shipped</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">₹0</div>
+      <div class="hero-stat-label">Total cost</div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 1: THE 60-DAY JOURNEY -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">01 · The Journey</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="section-title">60 Days of Compounding Knowledge</div>
+  <p class="section-desc">
+    Each phase of the challenge built on the previous one — transforming conceptual AI
+    understanding into hands-on product delivery capability.
+  </p>
+
+  <div class="phases-grid">
+    <div class="phase-card">
+      <div class="phase-bar" style="background: linear-gradient(90deg,#1B5E20,#2E7D32);"></div>
+      <div class="phase-days">Days 1–12</div>
+      <div class="phase-name">AI Foundations</div>
+      <ul class="phase-skills">
+        <li class="phase-skill">How LLMs work</li>
+        <li class="phase-skill">Prompting fundamentals</li>
+        <li class="phase-skill">Reasoning models</li>
+        <li class="phase-skill">Context & memory</li>
+        <li class="phase-skill">AI limitations</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-bar" style="background: linear-gradient(90deg,#2E7D32,#388E3C);"></div>
+      <div class="phase-days">Days 13–24</div>
+      <div class="phase-name">Effective Prompting & Research</div>
+      <ul class="phase-skills">
+        <li class="phase-skill">Prompt engineering</li>
+        <li class="phase-skill">Chain-of-thought</li>
+        <li class="phase-skill">AI research workflows</li>
+        <li class="phase-skill">Summarisation</li>
+        <li class="phase-skill">Knowledge systems</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-bar" style="background: linear-gradient(90deg,#388E3C,#43A047);"></div>
+      <div class="phase-days">Days 25–36</div>
+      <div class="phase-name">Automation & Product Thinking</div>
+      <ul class="phase-skills">
+        <li class="phase-skill">Workflow automation</li>
+        <li class="phase-skill">AI product design</li>
+        <li class="phase-skill">Multimodal AI</li>
+        <li class="phase-skill">User personas</li>
+        <li class="phase-skill">Feature scoping</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-bar" style="background: linear-gradient(90deg,#43A047,#4CAF50);"></div>
+      <div class="phase-days">Days 37–50</div>
+      <div class="phase-name">Building AI Applications</div>
+      <ul class="phase-skills">
+        <li class="phase-skill">AI-assisted coding</li>
+        <li class="phase-skill">Agentic systems</li>
+        <li class="phase-skill">Multi-agent collab</li>
+        <li class="phase-skill">API integration</li>
+        <li class="phase-skill">Debugging with AI</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-bar" style="background: linear-gradient(90deg,#4CAF50,#66BB6A);"></div>
+      <div class="phase-days">Days 51–60</div>
+      <div class="phase-name">Capstone Sprint</div>
+      <ul class="phase-skills">
+        <li class="phase-skill">Full SDLC delivery</li>
+        <li class="phase-skill">Production deploy</li>
+        <li class="phase-skill">Release readiness</li>
+        <li class="phase-skill">v1.0.0 shipped</li>
+        <li class="phase-skill">Public launch</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 2: SKILL GROWTH -->
+<div class="section skills-section" style="border-top:1px solid #21362a;">
+  <div class="section-header">
+    <span class="section-num">02 · Skill Growth</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="section-title">Capability Built Across 60 Days</div>
+  <p class="section-desc">
+    Skills that started as concepts became tools. Tools became habits. Habits became a
+    shipped product.
+  </p>
+
+  <div class="skill-rows">
+    <div class="skill-row">
+      <div class="skill-label">AI Fundamentals</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:95%"></div></div>
+      <div class="skill-pct">95%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Prompt Engineering</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:90%"></div></div>
+      <div class="skill-pct">90%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Product Thinking</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:85%"></div></div>
+      <div class="skill-pct">85%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">AI-Assisted Development</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:88%"></div></div>
+      <div class="skill-pct">88%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">System Architecture</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:80%"></div></div>
+      <div class="skill-pct">80%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">REST API Design</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:85%"></div></div>
+      <div class="skill-pct">85%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Frontend Development (React)</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:72%"></div></div>
+      <div class="skill-pct">72%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Production Deployment</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:82%"></div></div>
+      <div class="skill-pct">82%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Testing & Debugging</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:78%"></div></div>
+      <div class="skill-pct">78%</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Technical Documentation</div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:88%"></div></div>
+      <div class="skill-pct">88%</div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 3: CAPSTONE -->
+<div class="section capstone-section">
+  <div class="section-header">
+    <span class="section-num">03 · The Capstone</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="section-title">PantryChef AI — Skills in Action</div>
+  <p class="section-desc">
+    Every skill built across 60 days was exercised in the 10-day capstone sprint.
+    Not a tutorial. Not a demo. A real, public, production-ready product.
+  </p>
+
+  <div class="capstone-grid">
+    <div class="capstone-card">
+      <div class="capstone-card-header">
+        <div class="card-icon">🧠</div>
+        <div>
+          <div class="card-title">AI Integration</div>
+          <div class="card-sub">Gemini API · Prompt Engineering</div>
+        </div>
+      </div>
+      <div class="card-items">
+        <div class="card-item"><div class="card-item-dot"></div><span>System prompt injects full pantry + preferences on every call</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>Pivoted from Claude to Gemini API on Day 5 — no lost time</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>20-message history cap prevents token overflow</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>Structured prompt rules enforce recipe formatting & missing ingredient detection</span></div>
+      </div>
+    </div>
+    <div class="capstone-card">
+      <div class="capstone-card-header">
+        <div class="card-icon">⚙️</div>
+        <div>
+          <div class="card-title">Backend Engineering</div>
+          <div class="card-sub">Java 17 · Spring Boot · PostgreSQL</div>
+        </div>
+      </div>
+      <div class="card-items">
+        <div class="card-item"><div class="card-item-dot"></div><span>Full REST API with correct HTTP verbs and status codes</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>Bean validation, GlobalExceptionHandler, structured errors</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>Upsert pattern for preferences — no duplicate rows</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>RestTemplate with 5s/30s timeouts — no hung threads</span></div>
+      </div>
+    </div>
+    <div class="capstone-card">
+      <div class="capstone-card-header">
+        <div class="card-icon">⚛️</div>
+        <div>
+          <div class="card-title">Frontend & UX</div>
+          <div class="card-sub">React 18 · Vite · Plain CSS</div>
+        </div>
+      </div>
+      <div class="card-items">
+        <div class="card-item"><div class="card-item-dot"></div><span>Custom AI text parser — renders numbered steps, bullets, bold headers</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>Skeleton shimmer loaders, per-item delete states, auto-resize textarea</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>Complete CSS design system with tokens, micro-interactions, focus rings</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>Responsive: 3-tab mobile, split-panel desktop</span></div>
+      </div>
+    </div>
+    <div class="capstone-card">
+      <div class="capstone-card-header">
+        <div class="card-icon">🚀</div>
+        <div>
+          <div class="card-title">Deployment & Release</div>
+          <div class="card-sub">Vercel · Railway · Production Readiness</div>
+        </div>
+      </div>
+      <div class="card-items">
+        <div class="card-item"><div class="card-item-dot"></div><span>Full SEO: OG tags, Twitter Cards, 1200×630 social image</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>PWA manifest — installable on Android home screen</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>MIT License, professional READMEs, GitHub repo polish</span></div>
+        <div class="card-item"><div class="card-item-dot"></div><span>7 structured test scenarios, 14 release-readiness issues fixed</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 4: SDLC -->
+<div class="section" style="border-top:1px solid #21362a;">
+  <div class="section-header">
+    <span class="section-num">04 · Full SDLC</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="section-title">Complete Software Development Lifecycle in 10 Days</div>
+  <p class="section-desc" style="margin-bottom:24px;">From a blank page to a public v1.0.0 — every phase of the SDLC completed.</p>
+
+  <div class="sdlc-flow">
+    <div class="sdlc-step">
+      <div class="sdlc-num">01</div>
+      <div class="sdlc-icon">📋</div>
+      <div class="sdlc-name">Requirements &amp; PRD</div>
+    </div>
+    <div class="sdlc-step">
+      <div class="sdlc-num">02</div>
+      <div class="sdlc-icon">🏗️</div>
+      <div class="sdlc-name">Architecture &amp; Design</div>
+    </div>
+    <div class="sdlc-step">
+      <div class="sdlc-num">03</div>
+      <div class="sdlc-icon">⚙️</div>
+      <div class="sdlc-name">Backend Development</div>
+    </div>
+    <div class="sdlc-step">
+      <div class="sdlc-num">04</div>
+      <div class="sdlc-icon">⚛️</div>
+      <div class="sdlc-name">Frontend Development</div>
+    </div>
+    <div class="sdlc-step">
+      <div class="sdlc-num">05</div>
+      <div class="sdlc-icon">🧪</div>
+      <div class="sdlc-name">Testing &amp; Bug Fixes</div>
+    </div>
+    <div class="sdlc-step">
+      <div class="sdlc-num">06</div>
+      <div class="sdlc-icon">🚀</div>
+      <div class="sdlc-name">Deploy &amp; Release</div>
+    </div>
+    <div class="sdlc-step">
+      <div class="sdlc-num">07</div>
+      <div class="sdlc-icon">📚</div>
+      <div class="sdlc-name">Documentation</div>
+    </div>
+  </div>
+</div>
+
+<!-- GRADUATION -->
+<div class="graduation-section" style="border-top:1px solid #21362a;">
+  <div class="grad-badge">
+    <div class="grad-emoji">🍽️</div>
+    <div class="grad-title">Challenge Complete</div>
+    <p class="grad-subtitle">
+      60 days of deliberate learning, culminating in a live AI product that real users
+      can open, use, and benefit from — today.
+    </p>
+    <div class="grad-name">Deepika Verma · PantryChef AI v1.0.0</div>
+  </div>
+
+  <div class="links-row">
+    <a href="https://cookwithpantrychef-ai.vercel.app" class="link-pill" target="_blank">
+      <div class="link-pill-dot"></div>
+      cookwithpantrychef-ai.vercel.app
+    </a>
+    <a href="https://www.abtalks.in/" class="link-pill" target="_blank">
+      <div class="link-pill-dot"></div>
+      abtalks.in
+    </a>
+    <a href="https://www.linkedin.com/company/abtalks-on-ai/" class="link-pill" target="_blank">
+      <div class="link-pill-dot"></div>
+      linkedin.com/company/abtalks-on-ai
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

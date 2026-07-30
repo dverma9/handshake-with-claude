@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate of Completion — PantryChef AI Capstone</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #f0ede6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .page {
+    width: 960px;
+    min-height: 680px;
+    background: #fefdf9;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 60px rgba(0,0,0,0.15), 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  /* Outer decorative border */
+  .border-outer {
+    position: absolute;
+    inset: 16px;
+    border: 1.5px solid #1B5E20;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .border-inner {
+    position: absolute;
+    inset: 22px;
+    border: 0.5px solid #A5D6A7;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Corner ornaments */
+  .corner {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    z-index: 3;
+  }
+  .corner svg { width: 48px; height: 48px; }
+  .corner-tl { top: 10px; left: 10px; }
+  .corner-tr { top: 10px; right: 10px; transform: scaleX(-1); }
+  .corner-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+  .corner-br { bottom: 10px; right: 10px; transform: scale(-1,-1); }
+
+  /* Background watermark */
+  .watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+    opacity: 0.04;
+    font-size: 180px;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Header band */
+  .header-band {
+    position: relative;
+    z-index: 1;
+    background: #1B5E20;
+    padding: 28px 60px 24px;
+    text-align: center;
+  }
+
+  .header-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #A5D6A7;
+    margin-bottom: 10px;
+  }
+
+  .header-org {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+  }
+
+  .header-tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #81C784;
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  /* Body */
+  .body {
+    position: relative;
+    z-index: 1;
+    padding: 40px 80px 36px;
+    text-align: center;
+  }
+
+  .certifies-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #2E7D32;
+    margin-bottom: 20px;
+  }
+
+  .recipient-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 54px;
+    font-weight: 600;
+    color: #1B5E20;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+
+  .recipient-rule {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #2E7D32, transparent);
+    margin: 16px auto;
+  }
+
+  .completion-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    color: #444;
+    line-height: 1.75;
+    max-width: 560px;
+    margin: 0 auto 28px;
+  }
+
+  .completion-text strong {
+    color: #1B5E20;
+    font-weight: 600;
+  }
+
+  /* Project card */
+  .project-card {
+    background: #f0f7f0;
+    border: 1px solid #C8E6C9;
+    border-radius: 10px;
+    padding: 20px 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+    text-align: left;
+  }
+
+  .project-emoji {
+    font-size: 40px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .project-info { flex: 1; }
+
+  .project-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #388E3C;
+    margin-bottom: 4px;
+  }
+
+  .project-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1B5E20;
+    margin-bottom: 3px;
+  }
+
+  .project-version {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .project-version span {
+    display: inline-block;
+    background: #1B5E20;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Competencies */
+  .competencies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+
+  .competency-pill {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: #2E7D32;
+    background: #E8F5E9;
+    border: 1px solid #C8E6C9;
+    padding: 5px 14px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Divider */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 auto 28px;
+    max-width: 480px;
+  }
+
+  .divider-line { flex: 1; height: 0.5px; background: #C8E6C9; }
+
+  .divider-diamond {
+    width: 6px;
+    height: 6px;
+    background: #2E7D32;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* Footer row */
+  .footer-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-top: 0.5px solid #C8E6C9;
+    padding-top: 22px;
+    margin-top: 4px;
+    gap: 24px;
+  }
+
+  .footer-block { flex: 1; text-align: center; }
+
+  .footer-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .footer-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    color: #1B5E20;
+    font-style: italic;
+  }
+
+  .footer-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: #aaa;
+    margin-top: 3px;
+  }
+
+  .footer-separator {
+    width: 0.5px;
+    background: #C8E6C9;
+    align-self: stretch;
+  }
+
+  .seal {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+  }
+
+  /* AI co-creator note */
+  .ai-note {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: #aaa;
+    letter-spacing: 0.5px;
+    z-index: 3;
+  }
+
+  .ai-note a { color: #2E7D32; text-decoration: none; }
+  .ai-note a:hover { text-decoration: underline; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .page { box-shadow: none; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Decorative borders -->
+  <div class="border-outer"></div>
+  <div class="border-inner"></div>
+
+  <!-- Corner ornaments -->
+  <div class="corner corner-tl">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M8 8 L8 28 M8 8 L28 8" stroke="#1B5E20" stroke-width="1.5"/>
+      <path d="M14 14 L14 22 M14 14 L22 14" stroke="#A5D6A7" stroke-width="0.8"/>
+      <circle cx="8" cy="8" r="2.5" fill="#1B5E20"/>
+      <circle cx="14" cy="14" r="1.5" fill="#A5D6A7"/>
+    </svg>
+  </div>
+  <div class="corner corner-tr">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M8 8 L8 28 M8 8 L28 8" stroke="#1B5E20" stroke-width="1.5"/>
+      <path d="M14 14 L14 22 M14 14 L22 14" stroke="#A5D6A7" stroke-width="0.8"/>
+      <circle cx="8" cy="8" r="2.5" fill="#1B5E20"/>
+      <circle cx="14" cy="14" r="1.5" fill="#A5D6A7"/>
+    </svg>
+  </div>
+  <div class="corner corner-bl">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M8 8 L8 28 M8 8 L28 8" stroke="#1B5E20" stroke-width="1.5"/>
+      <path d="M14 14 L14 22 M14 14 L22 14" stroke="#A5D6A7" stroke-width="0.8"/>
+      <circle cx="8" cy="8" r="2.5" fill="#1B5E20"/>
+      <circle cx="14" cy="14" r="1.5" fill="#A5D6A7"/>
+    </svg>
+  </div>
+  <div class="corner corner-br">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M8 8 L8 28 M8 8 L28 8" stroke="#1B5E20" stroke-width="1.5"/>
+      <path d="M14 14 L14 22 M14 14 L22 14" stroke="#A5D6A7" stroke-width="0.8"/>
+      <circle cx="8" cy="8" r="2.5" fill="#1B5E20"/>
+      <circle cx="14" cy="14" r="1.5" fill="#A5D6A7"/>
+    </svg>
+  </div>
+
+  <!-- Watermark -->
+  <div class="watermark">🍽️</div>
+
+  <!-- Header -->
+  <div class="header-band">
+    <div class="header-eyebrow">Certificate of Completion</div>
+    <div class="header-org">AB Talks 60-Day Claude AI Challenge</div>
+    <div class="header-tagline">10-Day Capstone Sprint &nbsp;·&nbsp; Production-Ready AI Application</div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+    <div class="certifies-label">This certifies that</div>
+
+    <div class="recipient-name">Deepika Verma</div>
+
+    <div class="recipient-rule"></div>
+
+    <p class="completion-text">
+      has successfully completed the <strong>AB Talks 10-Day Capstone Sprint</strong>,
+      designing, building, and shipping a production-ready AI application from
+      requirements gathering through to a live, publicly deployed Version v1.0.0 —
+      as part of the <strong>AB Talks 60-Day Claude AI Challenge</strong>.
+    </p>
+
+    <!-- Project card -->
+    <div class="project-card">
+      <div class="project-emoji">🍽️</div>
+      <div class="project-info">
+        <div class="project-label">Capstone Project</div>
+        <div class="project-name">PantryChef AI</div>
+        <div class="project-version">
+          AI-powered cooking companion
+          <span>v1.0.0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Competencies -->
+    <div class="competencies">
+      <span class="competency-pill">Requirements &amp; PRD</span>
+      <span class="competency-pill">System Architecture</span>
+      <span class="competency-pill">REST API Design</span>
+      <span class="competency-pill">Java + Spring Boot</span>
+      <span class="competency-pill">React + Vite</span>
+      <span class="competency-pill">Gemini AI Integration</span>
+      <span class="competency-pill">PostgreSQL</span>
+      <span class="competency-pill">Prompt Engineering</span>
+      <span class="competency-pill">Production Deployment</span>
+      <span class="competency-pill">UI/UX Design</span>
+      <span class="competency-pill">End-to-End Testing</span>
+      <span class="competency-pill">Release Readiness</span>
+    </div>
+
+    <div class="section-divider">
+      <div class="divider-line"></div>
+      <div class="divider-diamond"></div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- Footer row -->
+    <div class="footer-row">
+      <div class="footer-block">
+        <div class="footer-label">Completed</div>
+        <div class="footer-value">July 2025</div>
+        <div class="footer-sub">Days 1 – 10 of 60</div>
+      </div>
+
+      <div class="footer-separator"></div>
+
+      <!-- Seal -->
+      <svg class="seal" viewBox="0 0 72 72" fill="none">
+        <circle cx="36" cy="36" r="33" stroke="#1B5E20" stroke-width="1.2"/>
+        <circle cx="36" cy="36" r="28" stroke="#A5D6A7" stroke-width="0.6"/>
+        <text x="36" y="30" text-anchor="middle" font-family="Inter,sans-serif" font-size="7" font-weight="600" letter-spacing="1.5" fill="#1B5E20">CAPSTONE</text>
+        <text x="36" y="40" text-anchor="middle" font-size="18" fill="#1B5E20">🍽️</text>
+        <text x="36" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" font-weight="500" letter-spacing="1" fill="#388E3C">v1.0.0</text>
+      </svg>
+
+      <div class="footer-separator"></div>
+
+      <div class="footer-block">
+        <div class="footer-label">AI Co-Creator</div>
+        <div class="footer-value">Claude by Anthropic</div>
+        <div class="footer-sub">AI Pair Programmer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI note at bottom -->
+  <div class="ai-note">
+    <a href="https://www.abtalks.in/" target="_blank">abtalks.in</a>
+    &nbsp;&nbsp;·&nbsp;&nbsp;
+    <a href="https://www.linkedin.com/company/abtalks-on-ai/" target="_blank">linkedin.com/company/abtalks-on-ai</a>
+    &nbsp;&nbsp;·&nbsp;&nbsp;
+    <a href="https://cookwithpantrychef-ai.vercel.app" target="_blank">cookwithpantrychef-ai.vercel.app</a>
+  </div>
+
+</div>
+
+</body>
+</html>
